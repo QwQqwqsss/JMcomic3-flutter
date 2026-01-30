@@ -117,12 +117,14 @@ class _AboutState extends State<AboutScreen> {
   }
 
   InlineSpan _buildNewestVersionSpan() {
+    final versionText =
+        latestVersionName ?? "\u6ca1\u6709\u68c0\u6d4b\u5230\u65b0\u7248\u672c";
     return WidgetSpan(
       child: Container(
         padding: const EdgeInsets.only(right: 20),
         child: VersionBadged(
           child: Text(
-            "${latestVersion ?? "\u6ca1\u6709\u68c0\u6d4b\u5230\u65b0\u7248\u672c"}    ",
+            "$versionText    ",
           ),
         ),
       ),

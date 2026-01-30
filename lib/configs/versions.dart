@@ -21,6 +21,7 @@ final RegExp _versionExp = RegExp(r"^v\d+\.\d+\.\d+(\+\d+)?$");
 
 late String _version;
 String? _latestVersion;
+String? _latestVersionName;
 String? _latestVersionInfo;
 
 const _propertyName = "checkVersionPeriod";
@@ -52,6 +53,8 @@ String currentVersion() {
 }
 
 String? get latestVersion => _latestVersion;
+
+String? get latestVersionName => _latestVersionName;
 
 String? latestVersionInfo() {
   return _latestVersionInfo;
@@ -90,10 +93,12 @@ Future _versionCheck() async {
       final latestVersion = latest.toString().trim();
       final body = json["body"]?.toString() ?? "";
       if (latestVersion.isNotEmpty) {
+        _latestVersionName = latestVersion;
         _latestVersionInfo = body;
         _latestVersion = latestVersion != _version ? latestVersion : null;
       } else {
         _latestVersion = null;
+        _latestVersionName = null;
         _latestVersionInfo = null;
       }
     }
