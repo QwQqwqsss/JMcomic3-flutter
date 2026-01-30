@@ -17,7 +17,7 @@ const _releaseLatestUrl =
 const releasePageUrl = "https://github.com/$_repoOwner/$_repoName/releases/";
 
 const _versionAssets = 'lib/assets/version.txt';
-final RegExp _versionExp = RegExp(r"^v\d+\.\d+\.\d+$");
+final RegExp _versionExp = RegExp(r"^v\d+\.\d+\.\d+(\+\d+)?$");
 
 late String _version;
 String? _latestVersion;
@@ -84,9 +84,10 @@ Future _versionCheck() async {
     final latest = json["name"] ?? json["tag_name"];
     if (latest != null) {
       final latestVersion = latest.toString().trim();
-      if (latestVersion.isNotEmpty && latestVersion != _version) {
-        _latestVersion = latestVersion;
-        _latestVersionInfo = json["body"]?.toString() ?? "";
+      final body = json["body"]?.toString() ?? "";
+      if (latestVersion.isNotEmpty) {
+        _latestVersionInfo = body;
+        _latestVersion = latestVersion != _version ? latestVersion : null;
       } else {
         _latestVersion = null;
         _latestVersionInfo = null;
