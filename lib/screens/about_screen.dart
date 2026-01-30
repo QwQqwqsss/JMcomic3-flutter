@@ -26,7 +26,7 @@ class _AboutState extends State<AboutScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final info = latestVersionInfo();
       if ((info ?? "").trim().isEmpty) {
-        await manualCheckNewVersion(context);
+        await silentCheckNewVersion();
         if (mounted) setState(() {});
       }
     });

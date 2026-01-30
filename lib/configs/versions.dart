@@ -74,6 +74,10 @@ Future manualCheckNewVersion(BuildContext context) async {
   }
 }
 
+Future silentCheckNewVersion() async {
+  await _versionCheck();
+}
+
 bool dirtyVersion() {
   return !_versionExp.hasMatch(_version);
 }
