@@ -21,6 +21,18 @@ class AboutScreen extends StatefulWidget {
 
 class _AboutState extends State<AboutScreen> {
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final info = latestVersionInfo();
+      if ((info ?? "").trim().isEmpty) {
+        await manualCheckNewVersion(context);
+        if (mounted) setState(() {});
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return rightClickPop(child: buildScreen(context), context: context);
   }
