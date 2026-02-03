@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 
 import 'package:flutter/material.dart';
 
@@ -43,7 +43,7 @@ Widget authenticationSetting() {
     return StatefulBuilder(
       builder: (BuildContext context, void Function(void Function()) setState) {
         return ListTile(
-          title: const Text("进入APP时验证身份(如果系统已经录入密码或指纹)"),
+          title: const Text("进入APP时验证身份？如果系统已经录入密码或指纹"),
           subtitle: Text(_authentication ? "是" : "否"),
           onTap: () async {
             await _chooseAuthentication(context);
@@ -72,8 +72,11 @@ Widget authenticationSetting() {
 
 Future<void> _chooseAuthentication(BuildContext context) async {
   if (await methods.verifyAuthentication()) {
-    String? result = await chooseListDialog<String>(context,
-        title: "进入APP时验证身份", values: ["是", "否"]);
+    String? result = await chooseListDialog<String>(
+      context,
+      title: "进入APP时验证身份？",
+      values: ["是", "否"],
+    );
     if (result != null) {
       var target = result == "是";
       await methods.saveProperty(_propertyName, "$target");
@@ -81,3 +84,4 @@ Future<void> _chooseAuthentication(BuildContext context) async {
     }
   }
 }
+

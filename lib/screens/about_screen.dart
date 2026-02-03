@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:jasmine/basic/commons.dart';
 import 'package:jasmine/configs/android_display_mode.dart';
 import 'package:jasmine/configs/proxy.dart';
@@ -164,12 +165,14 @@ class _AboutState extends State<AboutScreen> {
 
   Widget _buildVersionText() {
     var info = latestVersionInfo();
-    if (info != null) {
-      info = "\u66f4\u65b0\u5185\u5bb9\n\n$info";
+    if (info != null && info.trim().isNotEmpty) {
+      info = "## \u66f4\u65b0\u5185\u5bb9\n\n$info";
+    } else {
+      info = "\u66f4\u65b0\u5185\u5bb9\n\n\u672a\u83b7\u53d6\u5230\u66f4\u65b0\u5185\u5bb9\uff0c\u53ef\u70b9\u51fb\"\u68c0\u67e5\u66f4\u65b0\"\u91cd\u8bd5\u3002";
     }
     return Container(
       padding: const EdgeInsets.all(20),
-      child: SelectableText(info ?? ""),
+      child: MarkdownBody(data: info ?? ""),
     );
   }
 }

@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:jasmine/basic/commons.dart';
@@ -79,7 +79,7 @@ class _InitScreenState extends State<InitScreen> {
       }
     } catch (e, st) {
       debugPrient("$e\n$st");
-      defaultToast(context, "初始化失败, 请设置网络");
+      defaultToast(context, "初始化失败，请设置网络");
       Future.delayed(Duration.zero, () {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (BuildContext context) {
@@ -130,12 +130,13 @@ class _AuthScreenState extends State<AuthScreen> {
             onPressed: () async {
               test();
             },
-            child: const Text(
-              '您在之前使用APP时开启了身份验证, 请点这段文字进行身份核查, 核查通过后将会进入APP',
-            ),
+            child: const Text('您在之前使用APP时开启了身份验证，请点击这段文字进行身份验证，验证通过后将会进入APP。'),
           ),
         ),
       ),
     );
   }
 }
+
+
+

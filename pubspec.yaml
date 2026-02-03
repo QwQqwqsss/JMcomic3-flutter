@@ -27,6 +27,7 @@ dependencies:
   window_manager: ^0.3.2
   crypto: ^3.0.3
   pointycastle: ^3.7.3
+  flutter_markdown: 0.6.14
 
 dev_dependencies:
   flutter_test:

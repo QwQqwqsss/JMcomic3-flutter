@@ -5,7 +5,7 @@ import 'package:jasmine/basic/methods.dart';
 
 late String _cdnHost;
 
-String _truncateLabel(String value, {int max = 18}) {
+String _truncateLabel(String value, {int max = 21}) {
   if (value.length <= max) return value;
   return value.substring(0, max) + "...";
 }

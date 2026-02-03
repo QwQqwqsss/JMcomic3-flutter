@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:jasmine/basic/methods.dart';
 
 const _key = "desktopAuthPassword";
@@ -132,3 +132,4 @@ class _SetPasswordState extends State<SetPassword> {
     );
   }
 }
+

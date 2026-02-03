@@ -1,5 +1,6 @@
 import 'dart:async' show Future;
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:event/event.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,15 @@ const _repoOwner = "QwQqwqsss";
 const _repoName = "JMcomic3-flutter";
 const _releaseLatestUrl =
     "https://api.github.com/repos/$_repoOwner/$_repoName/releases/latest";
+const _releaseLatestMirrorUrls = [
+  "https://ghproxy.com/https://api.github.com/repos/$_repoOwner/$_repoName/releases/latest",
+  "https://ghproxy.net/https://api.github.com/repos/$_repoOwner/$_repoName/releases/latest",
+];
+const _releaseLatestPageUrl =
+    "https://github.com/$_repoOwner/$_repoName/releases/latest";
+const _releaseLatestPageMirrorUrls = [
+  "https://r.jina.ai/http://github.com/$_repoOwner/$_repoName/releases/latest",
+];
 const releasePageUrl = "https://github.com/$_repoOwner/$_repoName/releases/";
 
 const _versionAssets = 'lib/assets/version.txt';
@@ -25,6 +35,8 @@ String? _latestVersionName;
 String? _latestVersionInfo;
 
 const _propertyName = "checkVersionPeriod";
+const _latestNameCacheKey = "latestVersionNameCache";
+const _latestInfoCacheKey = "latestVersionInfoCache";
 late int _period = -1;
 
 Future initVersion() async {
@@ -32,6 +44,17 @@ Future initVersion() async {
     _version = (await rootBundle.loadString(_versionAssets)).trim();
   } catch (e) {
     _version = "dirty";
+  }
+  _latestVersionName = await methods.loadProperty(_latestNameCacheKey);
+  if (_latestVersionName == "") {
+    _latestVersionName = null;
+  }
+  _latestVersionInfo = await methods.loadProperty(_latestInfoCacheKey);
+  if (_latestVersionInfo == "") {
+    _latestVersionInfo = null;
+  }
+  if (_latestVersionName == null && _versionExp.hasMatch(_version)) {
+    _latestVersionName = _version;
   }
   var vStr = await methods.loadProperty(_propertyName);
   if (vStr == "") {
@@ -87,24 +110,174 @@ bool dirtyVersion() {
 
 Future _versionCheck() async {
   if (_versionExp.hasMatch(_version)) {
-    final json = jsonDecode(await methods.httpGet(_releaseLatestUrl));
-    final latest = json["name"] ?? json["tag_name"];
-    if (latest != null) {
-      final latestVersion = latest.toString().trim();
-      final body = json["body"]?.toString() ?? "";
-      if (latestVersion.isNotEmpty) {
-        _latestVersionName = latestVersion;
-        _latestVersionInfo = body;
-        _latestVersion = latestVersion != _version ? latestVersion : null;
-      } else {
-        _latestVersion = null;
-        _latestVersionName = null;
-        _latestVersionInfo = null;
+    try {
+      final json = await _fetchLatestReleaseJson();
+      final latest = json["name"] ?? json["tag_name"];
+      if (latest != null) {
+        final latestVersion = latest.toString().trim();
+        final body = json["body"]?.toString() ?? "";
+        if (latestVersion.isNotEmpty) {
+          _latestVersionName = latestVersion;
+          _latestVersionInfo = body;
+          _latestVersion = latestVersion != _version ? latestVersion : null;
+          await methods.saveProperty(_latestNameCacheKey, latestVersion);
+          await methods.saveProperty(_latestInfoCacheKey, body);
+        } else {
+          _latestVersion = null;
+          _latestVersionName = null;
+          _latestVersionInfo = null;
+        }
+      }
+    } catch (e) {
+      // keep cached values when network fetch fails
+    }
+    if ((_latestVersionInfo ?? "").trim().isEmpty) {
+      final pageInfo = await _fetchLatestReleaseInfoFromPage();
+      if (pageInfo != null && pageInfo.trim().isNotEmpty) {
+        _latestVersionInfo = pageInfo;
+        await methods.saveProperty(_latestInfoCacheKey, pageInfo);
       }
     }
   }
   versionEvent.broadcast();
   debugPrient("$_latestVersion");
+}
+
+Future<Map<String, dynamic>> _fetchLatestReleaseJson() async {
+  final urls = [_releaseLatestUrl, ..._releaseLatestMirrorUrls];
+  Object? lastError;
+  for (final url in urls) {
+    try {
+      try {
+        final text = await methods.httpGet(url);
+        final decoded = jsonDecode(text);
+        if (decoded is Map && _isRateLimitError(decoded)) {
+          throw StateError("rate_limit");
+        }
+        return decoded;
+      } catch (_) {
+        final text = await _httpGetViaDart(url);
+        final decoded = jsonDecode(text);
+        if (decoded is Map && _isRateLimitError(decoded)) {
+          throw StateError("rate_limit");
+        }
+        return decoded;
+      }
+    } catch (e) {
+      lastError = e;
+    }
+  }
+  if (lastError != null) {
+    // ignore: only_throw_errors
+    throw lastError!;
+  }
+  return <String, dynamic>{};
+}
+
+Future<String> _httpGetViaDart(String url) async {
+  final client = HttpClient();
+  try {
+    final request = await client.getUrl(Uri.parse(url));
+    request.headers.set(
+      HttpHeaders.userAgentHeader,
+      "Mozilla/5.0",
+    );
+    request.headers.set(
+      HttpHeaders.acceptHeader,
+      "application/vnd.github+json",
+    );
+    final response = await request.close();
+    final body = await response.transform(utf8.decoder).join();
+    return body;
+  } finally {
+    client.close(force: true);
+  }
+}
+
+Future<String?> _fetchLatestReleaseInfoFromPage() async {
+  final urls = [_releaseLatestPageUrl, ..._releaseLatestPageMirrorUrls];
+  for (final url in urls) {
+    try {
+      final text = await _httpGetViaDart(url);
+      final parsed = _extractReleaseBodyFromPage(text);
+      if (parsed != null && parsed.trim().isNotEmpty) {
+        return parsed.trim();
+      }
+    } catch (_) {}
+  }
+  return null;
+}
+
+String? _extractReleaseBodyFromPage(String text) {
+  var body = text;
+  final repoToken = "$_repoOwner/$_repoName";
+  final hasRepoHint =
+      body.contains(repoToken) || body.contains("$_repoName/releases");
+  if (!hasRepoHint) {
+    return null;
+  }
+  final marker = "Markdown Content:";
+  final markerIndex = body.indexOf(marker);
+  if (markerIndex >= 0) {
+    body = body.substring(markerIndex + marker.length);
+  } else if (body.contains("<meta") || body.contains("<html")) {
+    final ogUrl = RegExp(r'property="og:url" content="([^"]*)"', dotAll: true)
+        .firstMatch(body)
+        ?.group(1) ??
+        "";
+    final ogDesc =
+        RegExp(r'property="og:description" content="([^"]*)"', dotAll: true)
+            .firstMatch(body)
+            ?.group(1) ??
+        "";
+    final ogLooksLikeRelease = ogUrl.contains(repoToken) &&
+        (ogUrl.contains("/releases/tag/") || ogUrl.contains("/releases/latest"));
+    if (ogLooksLikeRelease && ogDesc.trim().isNotEmpty) {
+      final desc = _decodeHtmlEntities(ogDesc);
+      if (desc.trim().isNotEmpty) {
+        return desc.trim();
+      }
+    }
+    final md = RegExp(
+      r'<div[^>]*class="[^"]*markdown-body[^"]*"[^>]*>([\s\S]*?)</div>',
+      caseSensitive: false,
+    ).firstMatch(body);
+    if (md != null) {
+      body = md.group(1) ?? "";
+      body = body
+          .replaceAll(RegExp(r'(?i)<br\\s*/?>'), "\n")
+          .replaceAll(RegExp(r'(?i)</p>'), "\n")
+          .replaceAll(RegExp(r'(?i)</li>'), "\n");
+      body = body.replaceAll(RegExp(r'<[^>]+>'), "");
+      body = _decodeHtmlEntities(body).trim();
+    }
+  }
+  body = body.trim();
+  if (body.isEmpty) return null;
+  final assetsIndex = body.indexOf("## Assets");
+  if (assetsIndex > 0) {
+    body = body.substring(0, assetsIndex).trim();
+  }
+  final lines = body.split("\n");
+  if (lines.isNotEmpty && lines.first.startsWith("#")) {
+    body = lines.skip(1).join("\n").trim();
+  }
+  return body.isEmpty ? null : body;
+}
+
+bool _isRateLimitError(Map<dynamic, dynamic> json) {
+  final message = json["message"];
+  if (message is! String) return false;
+  return message.toLowerCase().contains("rate limit");
+}
+
+String _decodeHtmlEntities(String input) {
+  return input
+      .replaceAll("&amp;", "&")
+      .replaceAll("&lt;", "<")
+      .replaceAll("&gt;", ">")
+      .replaceAll("&quot;", "\"")
+      .replaceAll("&#39;", "'");
 }
 
 String _periodText() {
