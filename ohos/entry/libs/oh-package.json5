@@ -1,6 +1,0 @@
-{
-  "name": "librust.so",
-  "version": "1.0.0",
-  "description": "Rust implementation of librust",
-  "main": "librust.so"
-}
