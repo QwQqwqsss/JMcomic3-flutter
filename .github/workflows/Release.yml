@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GH_TOKEN: ${{ secrets.GH_TOKEN != '' && secrets.GH_TOKEN || secrets.GITHUB_TOKEN }}
   RUST_TOOLCHAIN: nightly-2025-02-26
   NDK_VERSION: 27.2.12479018
   FLUTTER_CHANNEL: stable
@@ -100,6 +100,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Detect local native core
+        id: detect-native
+        shell: bash
+        run: |
+          if [ -d native/jmbackend ]; then
+            echo "use_local=true" >> "$GITHUB_OUTPUT"
+            echo "Using local native core from repository."
+          else
+            echo "use_local=false" >> "$GITHUB_OUTPUT"
+            echo "No local native core found, will checkout external core repository."
+          fi
+
       - name: Cargo cache
         uses: actions/cache@v3
         with:
@@ -115,11 +127,12 @@ jobs:
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
 
-      - name: checkout core
+      - name: Checkout core repository
+        if: steps.detect-native.outputs.use_local != 'true'
         uses: actions/checkout@v3
         with:
-          token: ${{ secrets.GH_TOKEN }}
-          repository: 'niuhuan/jasmine-rs-core'
+          token: ${{ env.GH_TOKEN }}
+          repository: ${{ vars.CORE_REPOSITORY != '' && vars.CORE_REPOSITORY || format('{0}/jasmine-rs-core', github.repository_owner) }}
           path: 'native'
 
       - name: Cache Flutter dependencies (Linux/Android)
