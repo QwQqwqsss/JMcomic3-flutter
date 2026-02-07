@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jasmine/basic/methods.dart';
 import 'package:jasmine/configs/login.dart';
-import 'package:jasmine/screens/components/comic_list.dart';
 
 import 'components/comic_comments_list.dart';
 import 'components/right_click_pop.dart';
@@ -109,9 +107,21 @@ class _SelfCommentListState extends State<SelfCommentList> {
       );
     }
     return Center(
-      child: Text(
-        "请先登录",
-        style: TextStyle(fontSize: 20, color: Colors.grey.shade600),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            "请先登录",
+            style: TextStyle(fontSize: 20, color: Colors.grey.shade600),
+          ),
+          const SizedBox(height: 10),
+          TextButton(
+            onPressed: () async {
+              await ensureJwtAccess(context, feature: "我的评论");
+            },
+            child: const Text("去登录"),
+          ),
+        ],
       ),
     );
   }

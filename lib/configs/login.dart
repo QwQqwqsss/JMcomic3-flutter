@@ -13,11 +13,14 @@ enum LoginStatus {
   logging,
   loginField,
   loginSuccess,
+  guest,
 }
 
 late SelfInfo _selfInfo;
 LoginStatus _status = LoginStatus.notSet;
 String _loginMessage = "";
+const _guestModePropertyName = "guest_mode";
+bool _guestMode = false;
 final Event _event = Event();
 
 SelfInfo get selfInfo => _selfInfo;
@@ -28,6 +31,10 @@ LoginStatus get loginStatus => _status;
 
 String get loginMessage => _loginMessage;
 
+bool get hasJwtAccess => _status == LoginStatus.loginSuccess;
+
+bool get isGuestMode => _status == LoginStatus.guest;
+
 set _loginState(LoginStatus value) {
   _status = value;
   _event.broadcast();
@@ -35,21 +42,24 @@ set _loginState(LoginStatus value) {
 
 Future initLogin(BuildContext context) async {
   try {
+    _guestMode = (await methods.loadProperty(_guestModePropertyName)) == "true";
     _loginState = LoginStatus.logging;
     final preLogin = await methods.preLogin();
     _loginMessage = preLogin.message ?? "";
     if (!preLogin.preSet) {
-      _loginState = LoginStatus.notSet;
+      _loginState = _guestMode ? LoginStatus.guest : LoginStatus.notSet;
     } else if (preLogin.preLogin) {
+      _guestMode = false;
+      await methods.saveProperty(_guestModePropertyName, "false");
       _selfInfo = preLogin.selfInfo!;
       _loginState = LoginStatus.loginSuccess;
       fav(context);
     } else {
-      _loginState = LoginStatus.loginField;
+      _loginState = _guestMode ? LoginStatus.guest : LoginStatus.loginField;
     }
   } catch (e, st) {
     debugPrient("$e\n$st");
-    _loginState = LoginStatus.loginField;
+    _loginState = _guestMode ? LoginStatus.guest : LoginStatus.loginField;
   } finally {
     reloadIsPro();
   }
@@ -61,8 +71,7 @@ Widget createFavoriteFolderItemTile(BuildContext context) {
   return ListTile(
     title: const Text("创建收藏文件夹"),
     onTap: () async {
-      if (loginStatus != LoginStatus.loginSuccess) {
-        defaultToast(context, "请先登录");
+      if (!await ensureJwtAccess(context, feature: "创建收藏夹")) {
         return;
       }
       var name = await displayTextInputDialog(context,
@@ -81,8 +90,7 @@ Widget deleteFavoriteFolderItemTile(BuildContext context) {
   return ListTile(
     title: const Text("删除收藏文件夹"),
     onTap: () async {
-      if (loginStatus != LoginStatus.loginSuccess) {
-        defaultToast(context, "请先登录");
+      if (!await ensureJwtAccess(context, feature: "删除收藏夹")) {
         return;
       }
       var j = favData.map((i) {
@@ -107,8 +115,7 @@ Widget renameFavoriteFolderItemTile(BuildContext context) {
   return ListTile(
     title: const Text("重命名收藏文件夹"),
     onTap: () async {
-      if (loginStatus != LoginStatus.loginSuccess) {
-        defaultToast(context, "请先登录");
+      if (!await ensureJwtAccess(context, feature: "重命名收藏夹")) {
         return;
       }
       var j = favData.map((i) {
@@ -147,6 +154,8 @@ Future login(String username, String password, BuildContext context) async {
   try {
     _loginState = LoginStatus.logging;
     final selfInfo = await methods.login(username, password);
+    _guestMode = false;
+    await methods.saveProperty(_guestModePropertyName, "false");
     _selfInfo = selfInfo;
     _loginState = LoginStatus.loginSuccess;
     fav(context);
@@ -155,6 +164,53 @@ Future login(String username, String password, BuildContext context) async {
     _loginState = LoginStatus.loginField;
     _loginMessage = "$e";
   }
+}
+
+Future<void> enterGuestMode() async {
+  _guestMode = true;
+  await methods.saveProperty(_guestModePropertyName, "true");
+  _loginMessage = "";
+  _loginState = LoginStatus.guest;
+}
+
+Future<bool> ensureJwtAccess(
+  BuildContext context, {
+  String feature = "该功能",
+}) async {
+  if (hasJwtAccess) {
+    return true;
+  }
+  final shouldLogin = await showDialog<bool>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text("登录提醒"),
+        content: Text(
+          isGuestMode
+              ? "当前是游客模式，$feature 需要登录后才能使用。"
+              : "$feature 需要登录后才能使用。",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(false);
+            },
+            child: const Text("取消"),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(true);
+            },
+            child: const Text("去登录"),
+          ),
+        ],
+      );
+    },
+  );
+  if (shouldLogin == true) {
+    await loginDialog(context);
+  }
+  return hasJwtAccess;
 }
 
 Future loginDialog(BuildContext context) async {
@@ -397,6 +453,17 @@ class _LoginDialogState extends State<_LoginDialog> {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                Container(
+                  margin: const EdgeInsets.all(10),
+                  child: TextButton(
+                    onPressed: () async {
+                      Navigator.of(context).pop();
+                      await enterGuestMode();
+                      await reloadIsPro();
+                    },
+                    child: const Text("游客模式"),
+                  ),
+                ),
                 Container(
                   margin: const EdgeInsets.all(10),
                   child: MaterialButton(

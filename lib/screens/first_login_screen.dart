@@ -26,6 +26,22 @@ class _FirstLoginScreenState extends State<FirstLoginScreen> {
   String _password = "";
   int _onClickVersion = 0;
 
+  Future<void> _continueAsGuest() async {
+    setState(() {
+      _logging = true;
+    });
+    await enterGuestMode();
+    await reloadIsPro();
+    if (!mounted) {
+      return;
+    }
+    Navigator.pushReplacement(context, MaterialPageRoute(
+      builder: (BuildContext context) {
+        return const AppScreen();
+      },
+    ));
+  }
+
   Widget _usernameField() {
     return ListTile(
       title: const Text("账号"),
@@ -99,6 +115,11 @@ class _FirstLoginScreenState extends State<FirstLoginScreen> {
             ? []
             : [
                 IconButton(
+                  onPressed: _continueAsGuest,
+                  tooltip: "游客模式",
+                  icon: const Icon(Icons.explore_outlined),
+                ),
+                IconButton(
                   onPressed: () {
                     setState(() {
                       _onClickVersion++;
@@ -126,6 +147,12 @@ class _FirstLoginScreenState extends State<FirstLoginScreen> {
       children: [
         _usernameField(),
         _passwordField(),
+        ListTile(
+          leading: const Icon(Icons.explore_outlined),
+          title: const Text("游客模式"),
+          subtitle: const Text("无需登录即可进入，收藏与评论等功能需登录后使用"),
+          onTap: _continueAsGuest,
+        ),
         apiHostSetting(),
         cdnHostSetting(),
         Container(

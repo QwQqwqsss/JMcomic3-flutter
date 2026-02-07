@@ -57,6 +57,11 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
 
   @override
   void initState() {
+    Future.delayed(Duration.zero, () async {
+      if (!await ensureJwtAccess(context, feature: "收藏夹") && mounted) {
+        Navigator.of(context).pop();
+      }
+    });
     for (var value in favData) {
       try {
         _folderMap[value.fid] = value.name;

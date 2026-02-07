@@ -281,6 +281,9 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> with RouteAware {
   }
 
   Future _changeFavourite(AlbumResponse data) async {
+    if (!await ensureJwtAccess(context, feature: "收藏")) {
+      return;
+    }
     setState(() {
       _favouriteLoading = true;
     });

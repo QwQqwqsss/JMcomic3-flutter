@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:jasmine/basic/commons.dart';
 import 'package:jasmine/configs/login.dart';
 import 'package:jasmine/screens/about_screen.dart';
 import 'package:jasmine/screens/comments_screen.dart';
@@ -127,6 +126,9 @@ class _UserScreenState extends State<UserScreen>
         break;
       case LoginStatus.loginSuccess:
         child = _buildSelfInfoCard();
+        break;
+      case LoginStatus.guest:
+        child = _buildGuestCard();
         break;
       case LoginStatus.loginField:
         child = Column(
@@ -279,18 +281,30 @@ class _UserScreenState extends State<UserScreen>
     );
   }
 
+  Widget _buildGuestCard() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(Icons.explore_outlined, size: 48),
+        const SizedBox(height: 10),
+        const Text("游客模式"),
+        const SizedBox(height: 8),
+        _buildLoginButton("登录账号"),
+      ],
+    );
+  }
+
   Widget _buildFavorites() {
     return ListTile(
       onTap: () async {
-        if (LoginStatus.loginSuccess == loginStatus) {
-          Navigator.of(context).push(MaterialPageRoute(
-            builder: (BuildContext context) {
-              return const FavoritesScreen();
-            },
-          ));
-        } else {
-          defaultToast(context, "登录之后才能使用收藏夹喔");
+        if (!await ensureJwtAccess(context, feature: "收藏夹")) {
+          return;
         }
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (BuildContext context) {
+            return const FavoritesScreen();
+          },
+        ));
       },
       title: const Text("收藏夹"),
     );

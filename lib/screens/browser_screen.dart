@@ -46,6 +46,7 @@ class _BrowserScreenWrapperState extends State<BrowserScreenWrapper> {
   Widget build(BuildContext context) {
     switch (loginStatus) {
       case LoginStatus.loginSuccess:
+      case LoginStatus.guest:
         return BrowserScreen(searchBarController: widget.searchBarController);
       case LoginStatus.loginField:
         return ContentError(

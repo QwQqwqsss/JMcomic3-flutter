@@ -4,6 +4,7 @@ import 'package:jasmine/basic/commons.dart';
 import 'package:jasmine/basic/log.dart';
 import 'package:jasmine/basic/methods.dart';
 import 'package:jasmine/configs/app_font_size.dart';
+import 'package:jasmine/configs/login.dart';
 import 'package:jasmine/screens/components/item_builder.dart';
 
 import '../comic_info_screen.dart';
@@ -176,6 +177,9 @@ Widget _buildPostComment(
     BuildContext context, int? parentId, int aid, Function? f) {
   return InkWell(
     onTap: () async {
+      if (!await ensureJwtAccess(context, feature: "发表评论")) {
+        return;
+      }
       String? text = await displayTextInputDialog(context, title: '请输入评论内容');
       if (text != null && text.isNotEmpty) {
         try {
