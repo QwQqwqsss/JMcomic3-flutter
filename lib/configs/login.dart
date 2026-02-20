@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:event/event.dart';
 import 'package:flutter/material.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -186,9 +184,7 @@ Future<bool> ensureJwtAccess(
       return AlertDialog(
         title: const Text("登录提醒"),
         content: Text(
-          isGuestMode
-              ? "当前是游客模式，$feature 需要登录后才能使用。"
-              : "$feature 需要登录后才能使用。",
+          isGuestMode ? "当前是游客模式，$feature 需要登录后才能使用。" : "$feature 需要登录后才能使用。",
         ),
         actions: [
           TextButton(
@@ -239,6 +235,18 @@ Future showLoginAgreementBottomSheet(BuildContext context) async {
         child: const _LoginAgreementSheet(),
       );
     },
+  );
+}
+
+Future showUserAgreementBottomSheet(BuildContext context) {
+  return showLoginAgreementBottomSheet(context);
+}
+
+Widget userAgreementSetting(BuildContext context) {
+  return ListTile(
+    onTap: () => showUserAgreementBottomSheet(context),
+    title: const Text("用户协议"),
+    subtitle: const Text("查看当前应用使用协议"),
   );
 }
 

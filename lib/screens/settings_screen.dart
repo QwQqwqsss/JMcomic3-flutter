@@ -116,6 +116,8 @@ class _SettingsState extends State<SettingsScreen> {
               title: Text('系统和应用程序'),
               children: [
                 disableRecommendContentSetting(),
+                userAgreementSetting(context),
+                const Divider(),
                 if (isPro) ...[
                   const Divider(),
                   autoUpdateCheckSetting(),

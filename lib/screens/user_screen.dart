@@ -142,13 +142,47 @@ class _UserScreenState extends State<UserScreen>
         );
         break;
     }
-    return Container(
-      height: 200,
-      color: Theme.of(context).brightness == Brightness.light
-          ? Colors.grey.shade200
-          : Colors.grey.shade800,
-      child: Center(
-        child: child,
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOutCubic,
+        height: 210,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: isLight
+                ? const [
+                    Color(0xFFF8FBFF),
+                    Color(0xFFEAF2FF),
+                    Color(0xFFF6F7FA),
+                  ]
+                : const [
+                    Color(0xFF232B3A),
+                    Color(0xFF1D2230),
+                    Color(0xFF161B26),
+                  ],
+          ),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: isLight
+                ? Colors.blueGrey.withOpacity(.16)
+                : Colors.white.withOpacity(.08),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(isLight ? .08 : .24),
+              blurRadius: 16,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Center(
+          child: child,
+        ),
       ),
     );
   }
@@ -239,44 +273,72 @@ class _UserScreenState extends State<UserScreen>
 
   Widget _buildSelfInfoCard() {
     final brightness = Theme.of(context).brightness;
-    final statusColor =
-        brightness == Brightness.light ? Colors.black54 : Colors.white70;
+    Color statusColor;
+    switch (dailySignStatus) {
+      case DailySignStatus.signed:
+        statusColor = brightness == Brightness.light
+            ? Colors.green.shade700
+            : Colors.green.shade200;
+        break;
+      case DailySignStatus.error:
+        statusColor = brightness == Brightness.light
+            ? Colors.red.shade700
+            : Colors.red.shade200;
+        break;
+      case DailySignStatus.checking:
+        statusColor = brightness == Brightness.light
+            ? Colors.orange.shade700
+            : Colors.orange.shade200;
+        break;
+      case DailySignStatus.unchecked:
+      default:
+        statusColor =
+            brightness == Brightness.light ? Colors.black54 : Colors.white70;
+        break;
+    }
     final statusStyle =
-        (Theme.of(context).textTheme.bodySmall ?? const TextStyle())
-            .copyWith(fontSize: 12, color: statusColor);
+        (Theme.of(context).textTheme.bodySmall ?? const TextStyle()).copyWith(
+      fontSize: 12,
+      color: statusColor,
+      fontWeight: FontWeight.w600,
+    );
+    final canSign = dailySignStatus != DailySignStatus.checking;
     return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Expanded(child: Container()),
         Center(
           child: Avatar(selfInfo.photo),
         ),
-        Container(height: 10),
-        Center(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                selfInfo.username,
-                style: TextStyle(
-                  color: brightness == Brightness.light
-                      ? Colors.black87
-                      : Colors.white,
-                ),
-              ),
-              const SizedBox(width: 6),
-              GestureDetector(
-                onTap: () async {
-                  await checkDailySignStatus(context, toast: true);
-                },
-                child: Text(
-                  dailySignStatusLabel(),
-                  style: statusStyle,
-                ),
-              ),
-            ],
+        const SizedBox(height: 10),
+        Text(
+          selfInfo.username,
+          style: TextStyle(
+            color:
+                brightness == Brightness.light ? Colors.black87 : Colors.white,
+            fontWeight: FontWeight.w600,
           ),
         ),
-        Expanded(child: Container()),
+        const SizedBox(height: 6),
+        Text(
+          dailySignStatusLabel(),
+          style: statusStyle,
+        ),
+        const SizedBox(height: 12),
+        ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 132, minHeight: 44),
+          child: FilledButton.icon(
+            onPressed: canSign
+                ? () async {
+                    await checkDailySignStatus(context, toast: true);
+                  }
+                : null,
+            icon: Icon(
+              canSign ? Icons.check_circle_outline : Icons.sync,
+              size: 18,
+            ),
+            label: Text(canSign ? "手动签到" : "签到中..."),
+          ),
+        ),
       ],
     );
   }

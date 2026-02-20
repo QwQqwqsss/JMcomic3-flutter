@@ -1,11 +1,11 @@
 import 'dart:async' show Future;
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:event/event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:jasmine/basic/commons.dart';
+import 'package:jasmine/basic/http_client.dart';
 import 'package:jasmine/basic/log.dart';
 import 'package:jasmine/basic/methods.dart';
 
@@ -175,23 +175,16 @@ Future<Map<String, dynamic>> _fetchLatestReleaseJson() async {
 }
 
 Future<String> _httpGetViaDart(String url) async {
-  final client = HttpClient();
-  try {
-    final request = await client.getUrl(Uri.parse(url));
-    request.headers.set(
-      HttpHeaders.userAgentHeader,
-      "Mozilla/5.0",
-    );
-    request.headers.set(
-      HttpHeaders.acceptHeader,
-      "application/vnd.github+json",
-    );
-    final response = await request.close();
-    final body = await response.transform(utf8.decoder).join();
-    return body;
-  } finally {
-    client.close(force: true);
-  }
+  return AppHttpClient.getText(
+    url,
+    headers: const {
+      "User-Agent": "Mozilla/5.0",
+      "Accept": "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
+    },
+    requestTimeout: const Duration(seconds: 12),
+    retries: 1,
+  );
 }
 
 Future<String?> _fetchLatestReleaseInfoFromPage() async {
@@ -222,16 +215,17 @@ String? _extractReleaseBodyFromPage(String text) {
     body = body.substring(markerIndex + marker.length);
   } else if (body.contains("<meta") || body.contains("<html")) {
     final ogUrl = RegExp(r'property="og:url" content="([^"]*)"', dotAll: true)
-        .firstMatch(body)
-        ?.group(1) ??
-        "";
-    final ogDesc =
-        RegExp(r'property="og:description" content="([^"]*)"', dotAll: true)
             .firstMatch(body)
             ?.group(1) ??
         "";
+    final ogDesc =
+        RegExp(r'property="og:description" content="([^"]*)"', dotAll: true)
+                .firstMatch(body)
+                ?.group(1) ??
+            "";
     final ogLooksLikeRelease = ogUrl.contains(repoToken) &&
-        (ogUrl.contains("/releases/tag/") || ogUrl.contains("/releases/latest"));
+        (ogUrl.contains("/releases/tag/") ||
+            ogUrl.contains("/releases/latest"));
     if (ogLooksLikeRelease && ogDesc.trim().isNotEmpty) {
       final desc = _decodeHtmlEntities(ogDesc);
       if (desc.trim().isNotEmpty) {

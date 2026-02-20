@@ -1,9 +1,9 @@
 import 'dart:collection';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:jasmine/basic/http_client.dart';
 import 'package:jasmine/basic/methods.dart';
 import 'package:crypto/crypto.dart';
 import 'package:pointycastle/export.dart' as pc;
@@ -15,7 +15,7 @@ const _base64List = [
   "d3d3LmNkbmh0aC5uZXQ=",
   "d3d3LmNkbmd3Yy5jYw==",
   "d3d3LmNkbmh0aC5jbHVi",
-]; 
+];
 
 const _apiDomainServerUrls = [
   "https://rup4a04-c01.tos-ap-southeast-1.bytepluses.com/newsvr-2025.txt",
@@ -124,24 +124,11 @@ Future<List<String>> _fetchApiDomainList(String url) async {
 }
 
 Future<String?> _httpGetText(String url) async {
-  final client = HttpClient();
-  client.connectionTimeout = const Duration(seconds: 10);
-  try {
-    final request = await client.getUrl(Uri.parse(url));
-    final response = await request.close();
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      return null;
-    }
-    final bytes = await response.fold<List<int>>(
-      <int>[],
-      (previous, element) => previous..addAll(element),
-    );
-    return utf8.decode(bytes, allowMalformed: true);
-  } catch (_) {
-    return null;
-  } finally {
-    client.close();
-  }
+  return AppHttpClient.getTextOrNull(
+    url,
+    requestTimeout: const Duration(seconds: 12),
+    retries: 1,
+  );
 }
 
 String _stripNonAsciiPrefix(String text) {
@@ -199,30 +186,29 @@ Future<T?> chooseApiDialog<T>(BuildContext buildContext) async {
       return SimpleDialog(
         title: const Text("API分流"),
         children: [
-          ..._apiList
-            .map(
-              (e) => SimpleDialogOption(
-                child: ApiOptionRow(
-                  e,
-                  key: Key("API:${e}"),
-                ),
-                onPressed: () {
-                  Navigator.of(context).pop(e);
-                },
+          ..._apiList.map(
+            (e) => SimpleDialogOption(
+              child: ApiOptionRow(
+                e,
+                key: Key("API:${e}"),
               ),
-            ),
-            SimpleDialogOption(
-              child: const Text("手动输入"),
-              onPressed: () async {
-                Navigator.of(context).pop(await _manualInputApiHost(context));
-              },
-            ),
-            SimpleDialogOption(
-              child: const Text("取消"),
               onPressed: () {
-                Navigator.of(context).pop(null);
+                Navigator.of(context).pop(e);
               },
             ),
+          ),
+          SimpleDialogOption(
+            child: const Text("手动输入"),
+            onPressed: () async {
+              Navigator.of(context).pop(await _manualInputApiHost(context));
+            },
+          ),
+          SimpleDialogOption(
+            child: const Text("取消"),
+            onPressed: () {
+              Navigator.of(context).pop(null);
+            },
+          ),
         ],
       );
     },

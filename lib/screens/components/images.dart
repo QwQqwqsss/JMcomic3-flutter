@@ -104,6 +104,52 @@ class PageImageProvider extends ImageProvider<PageImageProvider> {
       ')';
 }
 
+final Map<String, Future<String>> _pageImagePathFutureCache = {};
+final Map<String, Size> _pageImageTrueSizeCache = {};
+
+String _pageImageCacheKey(int id, String imageName) => "$id/$imageName";
+
+Future<String> _cachedPageImagePath(
+  int id,
+  String imageName, {
+  bool forceRefresh = false,
+}) {
+  final key = _pageImageCacheKey(id, imageName);
+  if (forceRefresh) {
+    _pageImagePathFutureCache.remove(key);
+  }
+  return _pageImagePathFutureCache.putIfAbsent(
+    key,
+    () => methods.jmPageImage(id, imageName),
+  );
+}
+
+Future<Size> _cachedPageImageTrueSize(
+  int id,
+  String imageName,
+  String path, {
+  bool forceRefresh = false,
+}) async {
+  final key = _pageImageCacheKey(id, imageName);
+  if (forceRefresh) {
+    _pageImageTrueSizeCache.remove(key);
+  }
+  final cached = _pageImageTrueSizeCache[key];
+  if (cached != null) {
+    return cached;
+  }
+  final imageSize = await methods.imageSize(path);
+  final size = Size(imageSize.w.toDouble(), imageSize.h.toDouble());
+  _pageImageTrueSizeCache[key] = size;
+  return size;
+}
+
+void _evictPageImageCache(int id, String imageName) {
+  final key = _pageImageCacheKey(id, imageName);
+  _pageImagePathFutureCache.remove(key);
+  _pageImageTrueSizeCache.remove(key);
+}
+
 // 远端图片
 class JM3x4Cover extends StatefulWidget {
   final int comicId;
@@ -257,15 +303,20 @@ class _JMPageImageState extends State<JMPageImage> {
   }
 
   Future<String> _init() async {
-    final _path = await methods.jmPageImage(widget.id, widget.imageName);
+    final _path = await _cachedPageImagePath(widget.id, widget.imageName);
     if (widget.onTrueSize != null) {
-      ImageSize size = await methods.imageSize(_path);
-      widget.onTrueSize!(Size(size.w.toDouble(), size.h.toDouble()));
+      final size = await _cachedPageImageTrueSize(
+        widget.id,
+        widget.imageName,
+        _path,
+      );
+      widget.onTrueSize!(size);
     }
     return _path;
   }
 
   void _reload() {
+    _evictPageImageCache(widget.id, widget.imageName);
     if (mounted) {
       // 先清除旧的 Future，然后创建新的
       setState(() {
