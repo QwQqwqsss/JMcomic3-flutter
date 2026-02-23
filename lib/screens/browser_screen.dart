@@ -103,7 +103,6 @@ class _BrowserScreenState extends State<BrowserScreen>
     categoriesSortEvent.subscribe(_resort);
   }
 
-
   @override
   void dispose() {
     categoriesSortEvent.unsubscribe(_resort);
@@ -126,7 +125,8 @@ class _BrowserScreenState extends State<BrowserScreen>
         actions: [
           IconButton(
             onPressed: () async {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const WeekScreen()));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const WeekScreen()));
             },
             icon: const Icon(Icons.calendar_month),
           ),
@@ -232,10 +232,12 @@ class _MTabBarState extends State<_MTabBar>
           onTap: widget.onTab,
           controller: _tabController,
           isScrollable: true,
+          tabAlignment: TabAlignment.start,
           indicatorSize: TabBarIndicatorSize.tab,
-          padding: const EdgeInsets.only(left: 10, right: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          labelPadding: const EdgeInsets.symmetric(horizontal: 10),
           indicator: BoxDecoration(
-            color: Colors.grey.shade500.withOpacity(.3),
+            color: Colors.grey.shade500.withValues(alpha: 0.3),
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(5),
               topRight: Radius.circular(5),

@@ -36,11 +36,25 @@ Map<String, String> _nameMap = {
 
 ThemeData _buildAppTheme(ColorScheme scheme, Brightness brightness) {
   final typography = Typography.material2021();
-  final textTheme =
+  final baseTextTheme =
       brightness == Brightness.light ? typography.black : typography.white;
-  final navLabelStyle = (textTheme.labelSmall ??
-          const TextStyle(fontSize: 9, fontWeight: FontWeight.w500))
-      .copyWith(fontSize: 9, fontWeight: FontWeight.w500);
+  final textTheme = _buildTextTheme(baseTextTheme, scheme);
+  final overlayStyle = brightness == Brightness.dark
+      ? const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+          statusBarBrightness: Brightness.dark,
+          systemStatusBarContrastEnforced: false,
+        )
+      : const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
+          systemStatusBarContrastEnforced: false,
+        );
+  final navLabelStyle = (textTheme.labelMedium ??
+          const TextStyle(fontSize: 11, fontWeight: FontWeight.w500))
+      .copyWith(fontSize: 11, fontWeight: FontWeight.w500);
 
   return ThemeData(
     useMaterial3: true,
@@ -51,16 +65,19 @@ ThemeData _buildAppTheme(ColorScheme scheme, Brightness brightness) {
     scaffoldBackgroundColor: scheme.background,
     dialogBackgroundColor: scheme.surface,
     appBarTheme: AppBarTheme(
-      backgroundColor: scheme.surface,
+      backgroundColor: scheme.background,
       surfaceTintColor: Colors.transparent,
       foregroundColor: scheme.onSurface,
-      elevation: 1,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      shadowColor: Colors.transparent,
+      systemOverlayStyle: overlayStyle,
       toolbarHeight: 48,
       centerTitle: false,
       titleTextStyle:
           textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
     ),
-    bottomAppBarTheme: BottomAppBarTheme(
+    bottomAppBarTheme: BottomAppBarThemeData(
       color: scheme.surface,
       elevation: 1,
     ),
@@ -80,6 +97,13 @@ ThemeData _buildAppTheme(ColorScheme scheme, Brightness brightness) {
         ),
       ),
     ),
+    tabBarTheme: TabBarThemeData(
+      labelColor: scheme.onSurface,
+      unselectedLabelColor: scheme.onSurfaceVariant,
+      labelStyle: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+      unselectedLabelStyle:
+          textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w400),
+    ),
     splashFactory: InkRipple.splashFactory,
     splashColor: scheme.primary.withOpacity(.12),
     highlightColor: scheme.primary.withOpacity(.06),
@@ -88,22 +112,22 @@ ThemeData _buildAppTheme(ColorScheme scheme, Brightness brightness) {
       foregroundColor: scheme.onPrimary,
       elevation: 4,
     ),
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       surfaceTintColor: Colors.transparent,
     ),
-    dialogTheme: DialogTheme(
+    dialogTheme: DialogThemeData(
       backgroundColor: scheme.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       titleTextStyle:
-          textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+          textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w500),
       contentTextStyle: textTheme.bodyMedium,
     ),
     snackBarTheme: SnackBarThemeData(
       backgroundColor: scheme.surfaceVariant,
       contentTextStyle: textTheme.bodyMedium
-          ?.copyWith(color: scheme.onSurface, fontWeight: FontWeight.w500),
+          ?.copyWith(color: scheme.onSurface, fontWeight: FontWeight.w400),
       behavior: SnackBarBehavior.floating,
       elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -134,8 +158,8 @@ ThemeData _buildAppTheme(ColorScheme scheme, Brightness brightness) {
           RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
         textStyle: MaterialStatePropertyAll(
-          (textTheme.labelLarge ?? const TextStyle(fontWeight: FontWeight.w600))
-              .copyWith(fontWeight: FontWeight.w600),
+          (textTheme.labelLarge ?? const TextStyle(fontWeight: FontWeight.w500))
+              .copyWith(fontWeight: FontWeight.w500),
         ),
       ),
     ),
@@ -147,8 +171,8 @@ ThemeData _buildAppTheme(ColorScheme scheme, Brightness brightness) {
           RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
         textStyle: MaterialStatePropertyAll(
-          (textTheme.labelLarge ?? const TextStyle(fontWeight: FontWeight.w600))
-              .copyWith(fontWeight: FontWeight.w600),
+          (textTheme.labelLarge ?? const TextStyle(fontWeight: FontWeight.w500))
+              .copyWith(fontWeight: FontWeight.w500),
         ),
       ),
     ),
@@ -165,7 +189,7 @@ ThemeData _buildAppTheme(ColorScheme scheme, Brightness brightness) {
       style: ButtonStyle(
         foregroundColor: MaterialStatePropertyAll(scheme.primary),
         textStyle: MaterialStatePropertyAll(
-          textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+          textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w500),
         ),
       ),
     ),
@@ -175,7 +199,7 @@ ThemeData _buildAppTheme(ColorScheme scheme, Brightness brightness) {
       secondarySelectedColor: scheme.primaryContainer,
       labelStyle: textTheme.bodyMedium,
       secondaryLabelStyle:
-          textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+          textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     ),
@@ -200,6 +224,65 @@ ThemeData _buildAppTheme(ColorScheme scheme, Brightness brightness) {
     dividerTheme: DividerThemeData(
       color: scheme.outlineVariant,
       thickness: 0.8,
+    ),
+  );
+}
+
+TextTheme _buildTextTheme(TextTheme base, ColorScheme scheme) {
+  return base.copyWith(
+    titleLarge: (base.titleLarge ?? const TextStyle()).copyWith(
+      fontSize: 21,
+      fontWeight: FontWeight.w600,
+      height: 1.2,
+      color: scheme.onSurface,
+    ),
+    titleMedium: (base.titleMedium ?? const TextStyle()).copyWith(
+      fontSize: 17,
+      fontWeight: FontWeight.w500,
+      height: 1.25,
+      color: scheme.onSurface,
+    ),
+    titleSmall: (base.titleSmall ?? const TextStyle()).copyWith(
+      fontSize: 15,
+      fontWeight: FontWeight.w500,
+      height: 1.3,
+      color: scheme.onSurface,
+    ),
+    bodyLarge: (base.bodyLarge ?? const TextStyle()).copyWith(
+      fontSize: 16,
+      fontWeight: FontWeight.w400,
+      height: 1.45,
+      color: scheme.onSurface,
+    ),
+    bodyMedium: (base.bodyMedium ?? const TextStyle()).copyWith(
+      fontSize: 15,
+      fontWeight: FontWeight.w400,
+      height: 1.4,
+      color: scheme.onSurface,
+    ),
+    bodySmall: (base.bodySmall ?? const TextStyle()).copyWith(
+      fontSize: 13,
+      fontWeight: FontWeight.w400,
+      height: 1.35,
+      color: scheme.onSurfaceVariant,
+    ),
+    labelLarge: (base.labelLarge ?? const TextStyle()).copyWith(
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+      height: 1.2,
+      color: scheme.onSurface,
+    ),
+    labelMedium: (base.labelMedium ?? const TextStyle()).copyWith(
+      fontSize: 12,
+      fontWeight: FontWeight.w500,
+      height: 1.2,
+      color: scheme.onSurfaceVariant,
+    ),
+    labelSmall: (base.labelSmall ?? const TextStyle()).copyWith(
+      fontSize: 11,
+      fontWeight: FontWeight.w500,
+      height: 1.2,
+      color: scheme.onSurfaceVariant,
     ),
   );
 }
@@ -238,55 +321,25 @@ void reloadBarColor({bool op = false}) {
 }
 
 void _reloadBarColor({bool op = false}) {
-  if (op) {
-    switch (theme) {
-      case '0':
-        SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-          systemStatusBarContrastEnforced: true,
-          systemNavigationBarContrastEnforced: true,
-        ));
-        break;
-      case '1':
-        SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-          systemNavigationBarIconBrightness: Brightness.dark,
-          systemStatusBarContrastEnforced: true,
-          systemNavigationBarContrastEnforced: true,
-        ));
-        break;
-      case '2':
-        SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-          systemNavigationBarIconBrightness: Brightness.light,
-          systemStatusBarContrastEnforced: true,
-          systemNavigationBarContrastEnforced: true,
-        ));
-        break;
-    }
-  } else {
-    switch (theme) {
-      case '0':
-        SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-          systemStatusBarContrastEnforced: true,
-          systemNavigationBarContrastEnforced: true,
-        ));
-        break;
-      case '1':
-        SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-          systemNavigationBarColor: Colors.white,
-          systemNavigationBarIconBrightness: Brightness.dark,
-          systemStatusBarContrastEnforced: true,
-          systemNavigationBarContrastEnforced: true,
-        ));
-        break;
-      case '2':
-        SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-          systemNavigationBarColor: Colors.black87,
-          systemNavigationBarIconBrightness: Brightness.light,
-          systemStatusBarContrastEnforced: true,
-          systemNavigationBarContrastEnforced: true,
-        ));
-        break;
-    }
-  }
+  final isDark = theme == "2" ||
+      (theme == "0" &&
+          WidgetsBinding.instance.platformDispatcher.platformBrightness ==
+              Brightness.dark);
+  final navigationColor = op
+      ? Colors.transparent
+      : isDark
+          ? Colors.black87
+          : Colors.white;
+  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+    statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+    systemNavigationBarColor: navigationColor,
+    systemNavigationBarIconBrightness:
+        isDark ? Brightness.light : Brightness.dark,
+    systemStatusBarContrastEnforced: false,
+    systemNavigationBarContrastEnforced: false,
+  ));
 }
 
 final themeEvent = Event();

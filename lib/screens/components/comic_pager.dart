@@ -15,6 +15,13 @@ import 'comic_list.dart';
 
 const _noProMax = 10;
 
+int _calcMaxPage(int total, int pageSize) {
+  if (total <= 0 || pageSize <= 0) {
+    return 1;
+  }
+  return (total / pageSize).ceil();
+}
+
 class ComicPager extends StatefulWidget {
   final Future<InnerComicPage> Function(int page) onPage;
   final List<ComicLongPressMenuItem>? longPressMenuItems;
@@ -34,8 +41,8 @@ class ComicPager extends StatefulWidget {
 class _ComicPagerState extends State<ComicPager> {
   @override
   void initState() {
-    currentPagerControllerModeEvent.subscribe(_setState);
     super.initState();
+    currentPagerControllerModeEvent.subscribe(_setState);
   }
 
   @override
@@ -88,34 +95,48 @@ class _StreamPagerState extends State<_StreamPager> {
 
   bool get _noPro => !isPro && _nextPage > _noProMax;
 
-  var _joining = false;
-  var _joinSuccess = true;
+  bool _joining = false;
+  bool _joinSuccess = true;
 
-  Future _join() async {
+  Future<void> _join() async {
+    if (_joining || _nextPage > _maxPage || _noPro) {
+      return;
+    }
     try {
+      if (!mounted) {
+        return;
+      }
       setState(() {
         _joining = true;
       });
-      var response = await widget.onPage(_nextPage);
+      final response = await widget.onPage(_nextPage);
+      if (!mounted) {
+        return;
+      }
       if (_nextPage == 1) {
         if (_redirectAid(response.redirectAid, context)) {
+          setState(() {
+            _joining = false;
+          });
           return;
         }
-        if (response.total == 0) {
-          _maxPage = 1;
-        } else {
-          _maxPage = (response.total / response.list.length).ceil();
-        }
+        _maxPage = _calcMaxPage(response.total, response.list.length);
         _total = response.total;
       }
       _nextPage++;
       _data.addAll(response.list);
+      if (!mounted) {
+        return;
+      }
       setState(() {
         _joinSuccess = true;
         _joining = false;
       });
     } catch (e, st) {
       debugPrient("$e\n$st");
+      if (!mounted) {
+        return;
+      }
       setState(() {
         _joinSuccess = false;
         _joining = false;
@@ -184,21 +205,26 @@ class _StreamPagerState extends State<_StreamPager> {
 
   @override
   void initState() {
+    super.initState();
     proEvent.subscribe(_setState);
     _controller = ScrollController();
+    _controller.addListener(_onScroll);
     _join();
-    super.initState();
   }
 
   @override
   void dispose() {
     proEvent.unsubscribe(_setState);
     _textEditController.dispose();
+    _controller.removeListener(_onScroll);
     _controller.dispose();
     super.dispose();
   }
 
   void _onScroll() {
+    if (!_controller.hasClients) {
+      return;
+    }
     if (_joining || _nextPage > _maxPage || _noPro) {
       return;
     }
@@ -263,17 +289,17 @@ class _StreamPagerState extends State<_StreamPager> {
 
   @override
   Widget build(BuildContext context) {
+    final loadingCard = _buildLoadingCard();
     return Column(
       children: [
         _buildPagerBar(),
         Expanded(
           child: ComicList(
             controller: _controller,
-            onScroll: _onScroll,
             data: _data,
-            appendList: _buildLoadingCard() != null
+            appendList: loadingCard != null
                 ? [
-                    _buildLoadingCard()!,
+                    loadingCard,
                     ...(widget.appendList ?? []),
                   ]
                 : widget.appendList,
@@ -344,25 +370,22 @@ class _PagerPagerState extends State<_PagerPager> {
   late int _currentPage = 1;
   late int _maxPage = 1;
   late final List<ComicSimple> _data = [];
-  late Future _pageFuture = _load();
-  late Key _pageKey = UniqueKey();
+  late Future<void> _pageFuture = _load();
 
-  Future<dynamic> _load() async {
-    var response = await widget.onPage(_currentPage);
-    setState(() {
-      if (_currentPage == 1) {
-        if (_redirectAid(response.redirectAid, context)) {
-          return;
-        }
-        if (response.total == 0) {
-          _maxPage = 1;
-        } else {
-          _maxPage = (response.total / response.list.length).ceil();
-        }
+  Future<void> _load() async {
+    final response = await widget.onPage(_currentPage);
+    if (!mounted) {
+      return;
+    }
+    if (_currentPage == 1) {
+      if (_redirectAid(response.redirectAid, context)) {
+        return;
       }
-      _data.clear();
-      _data.addAll(response.list);
-    });
+      _maxPage = _calcMaxPage(response.total, response.list.length);
+    }
+    _data
+      ..clear()
+      ..addAll(response.list);
   }
 
   @override
@@ -379,12 +402,10 @@ class _PagerPagerState extends State<_PagerPager> {
   @override
   Widget build(BuildContext context) {
     return ContentBuilder(
-      key: _pageKey,
       future: _pageFuture,
       onRefresh: () async {
         setState(() {
           _pageFuture = _load();
-          _pageKey = UniqueKey();
         });
       },
       successBuilder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
@@ -463,7 +484,6 @@ class _PagerPagerState extends State<_PagerPager> {
                               setState(() {
                                 _currentPage = num;
                                 _pageFuture = _load();
-                                _pageKey = UniqueKey();
                               });
                             },
                             child: const Text('确定'),
@@ -488,7 +508,6 @@ class _PagerPagerState extends State<_PagerPager> {
                         setState(() {
                           _currentPage = _currentPage - 1;
                           _pageFuture = _load();
-                          _pageKey = UniqueKey();
                         });
                       }
                     },
@@ -505,7 +524,6 @@ class _PagerPagerState extends State<_PagerPager> {
                         setState(() {
                           _currentPage = _currentPage + 1;
                           _pageFuture = _load();
-                          _pageKey = UniqueKey();
                         });
                       }
                     },

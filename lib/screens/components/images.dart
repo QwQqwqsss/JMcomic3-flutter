@@ -5,7 +5,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:jasmine/basic/commons.dart';
 import 'package:jasmine/basic/log.dart';
 import 'dart:io';
-import 'dart:ui' as ui show Codec;
+import 'dart:ui' as ui;
 
 import 'package:jasmine/basic/methods.dart';
 import 'package:jasmine/screens/components/types.dart';
@@ -20,9 +20,23 @@ class JM3x4ImageProvider extends ImageProvider<JM3x4ImageProvider> {
   JM3x4ImageProvider(this.comicId, {this.scale = 1.0});
 
   @override
-  ImageStreamCompleter load(JM3x4ImageProvider key, DecoderCallback decode) {
+  ImageStreamCompleter loadBuffer(
+    JM3x4ImageProvider key,
+    DecoderBufferCallback decode,
+  ) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key),
+      codec: _loadAsyncWithBuffer(key, decode),
+      scale: key.scale,
+    );
+  }
+
+  @override
+  ImageStreamCompleter loadImage(
+    JM3x4ImageProvider key,
+    ImageDecoderCallback decode,
+  ) {
+    return MultiFrameImageStreamCompleter(
+      codec: _loadAsyncWithImage(key, decode),
       scale: key.scale,
     );
   }
@@ -32,22 +46,35 @@ class JM3x4ImageProvider extends ImageProvider<JM3x4ImageProvider> {
     return SynchronousFuture<JM3x4ImageProvider>(this);
   }
 
-  Future<ui.Codec> _loadAsync(JM3x4ImageProvider key) async {
+  Future<ui.Codec> _loadAsyncWithBuffer(
+    JM3x4ImageProvider key,
+    DecoderBufferCallback decode,
+  ) async {
     assert(key == this);
-    return PaintingBinding.instance!.instantiateImageCodec(
-      await File(await methods.jm3x4Cover(comicId)).readAsBytes(),
-    );
+    final bytes = await File(await methods.jm3x4Cover(comicId)).readAsBytes();
+    final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+    return decode(buffer);
+  }
+
+  Future<ui.Codec> _loadAsyncWithImage(
+    JM3x4ImageProvider key,
+    ImageDecoderCallback decode,
+  ) async {
+    assert(key == this);
+    final bytes = await File(await methods.jm3x4Cover(comicId)).readAsBytes();
+    final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+    return decode(buffer);
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) return false;
-    final JM3x4ImageProvider typedOther = other;
+    final JM3x4ImageProvider typedOther = other as JM3x4ImageProvider;
     return comicId == typedOther.comicId && scale == typedOther.scale;
   }
 
   @override
-  int get hashCode => hashValues(comicId, scale);
+  int get hashCode => Object.hash(comicId, scale);
 
   @override
   String toString() => '$runtimeType('
@@ -65,9 +92,23 @@ class PageImageProvider extends ImageProvider<PageImageProvider> {
   PageImageProvider(this.id, this.imageName, {this.scale = 1.0});
 
   @override
-  ImageStreamCompleter load(PageImageProvider key, DecoderCallback decode) {
+  ImageStreamCompleter loadBuffer(
+    PageImageProvider key,
+    DecoderBufferCallback decode,
+  ) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key),
+      codec: _loadAsyncWithBuffer(key, decode),
+      scale: key.scale,
+    );
+  }
+
+  @override
+  ImageStreamCompleter loadImage(
+    PageImageProvider key,
+    ImageDecoderCallback decode,
+  ) {
+    return MultiFrameImageStreamCompleter(
+      codec: _loadAsyncWithImage(key, decode),
       scale: key.scale,
     );
   }
@@ -77,24 +118,39 @@ class PageImageProvider extends ImageProvider<PageImageProvider> {
     return SynchronousFuture<PageImageProvider>(this);
   }
 
-  Future<ui.Codec> _loadAsync(PageImageProvider key) async {
+  Future<ui.Codec> _loadAsyncWithBuffer(
+    PageImageProvider key,
+    DecoderBufferCallback decode,
+  ) async {
     assert(key == this);
-    return PaintingBinding.instance!.instantiateImageCodec(
-      await File(await methods.jmPageImage(id, imageName)).readAsBytes(),
-    );
+    final bytes =
+        await File(await methods.jmPageImage(id, imageName)).readAsBytes();
+    final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+    return decode(buffer);
+  }
+
+  Future<ui.Codec> _loadAsyncWithImage(
+    PageImageProvider key,
+    ImageDecoderCallback decode,
+  ) async {
+    assert(key == this);
+    final bytes =
+        await File(await methods.jmPageImage(id, imageName)).readAsBytes();
+    final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+    return decode(buffer);
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) return false;
-    final PageImageProvider typedOther = other;
+    final PageImageProvider typedOther = other as PageImageProvider;
     return id == typedOther.id &&
         imageName == typedOther.imageName &&
         scale == typedOther.scale;
   }
 
   @override
-  int get hashCode => hashValues(id, imageName, scale);
+  int get hashCode => Object.hash(id, imageName, scale);
 
   @override
   String toString() => '$runtimeType('

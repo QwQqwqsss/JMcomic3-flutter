@@ -10,16 +10,16 @@ class ContentBuilder<T> extends StatelessWidget {
   final String loadingLabel;
 
   const ContentBuilder({
-    required Key? key,
+    super.key,
     required this.future,
     required this.onRefresh,
     required this.successBuilder,
-    this.loadingLabel = '加载中',
-  }) : super(key: key);
+    this.loadingLabel = '加载中...',
+  });
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
+    return FutureBuilder<T>(
       future: future,
       builder: (BuildContext context, AsyncSnapshot<T> snapshot) {
         if (snapshot.hasError) {

@@ -20,7 +20,8 @@
         android:label="JMcomic3"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
-        android:requestLegacyExternalStorage="true">
+        android:requestLegacyExternalStorage="true"
+        android:enableOnBackInvokedCallback="false">
         <activity
             android:name="com.jmcomic3.yee.MainActivity"
             android:exported="true"

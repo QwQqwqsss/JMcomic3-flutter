@@ -88,16 +88,72 @@ class _AppScreenState extends State<AppScreen> {
           },
           children: _screens.map((e) => e.screen).toList(),
         ),
-        bottomNavigationBar: NavigationBar(
-          selectedIndex: _selectedIndex,
-          onDestinationSelected: _onItemTapped,
-          destinations: _screens
-              .map((e) => NavigationDestination(
-                    icon: e.icon,
-                    selectedIcon: e.activeIcon,
-                    label: e.title,
-                  ))
-              .toList(),
+        bottomNavigationBar: _buildBottomNavigationBar(context),
+      ),
+    );
+  }
+
+  Widget _buildBottomNavigationBar(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final navTheme = NavigationBarTheme.of(context);
+    final selectedColor = scheme.primary;
+    final unselectedColor = scheme.onSurfaceVariant;
+
+    return SafeArea(
+      top: false,
+      minimum: EdgeInsets.zero,
+      child: Material(
+        color: scheme.surface,
+        elevation: 0,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            border: Border(
+              top: BorderSide(
+                color: scheme.outlineVariant.withValues(alpha: .55),
+                width: .8,
+              ),
+            ),
+          ),
+          child: NavigationBarTheme(
+            data: navTheme.copyWith(
+              backgroundColor: Colors.transparent,
+              surfaceTintColor: Colors.transparent,
+              indicatorColor: selectedColor.withValues(
+                alpha: theme.brightness == Brightness.dark ? .22 : .12,
+              ),
+              elevation: 0,
+              height: 60,
+              labelBehavior:
+                  NavigationDestinationLabelBehavior.onlyShowSelected,
+              labelTextStyle: WidgetStateProperty.resolveWith((states) {
+                final selected = states.contains(WidgetState.selected);
+                return TextStyle(
+                  fontSize: 11,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  color: selected ? selectedColor : unselectedColor,
+                );
+              }),
+              iconTheme: WidgetStateProperty.resolveWith((states) {
+                final selected = states.contains(WidgetState.selected);
+                return IconThemeData(
+                  size: selected ? 23 : 21,
+                  color: selected ? selectedColor : unselectedColor,
+                );
+              }),
+            ),
+            child: NavigationBar(
+              selectedIndex: _selectedIndex,
+              onDestinationSelected: _onItemTapped,
+              destinations: _screens
+                  .map((e) => NavigationDestination(
+                        icon: e.icon,
+                        selectedIcon: e.activeIcon,
+                        label: e.title,
+                      ))
+                  .toList(),
+            ),
+          ),
         ),
       ),
     );

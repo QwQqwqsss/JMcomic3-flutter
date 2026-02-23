@@ -136,13 +136,7 @@ class _ComicListState extends State<ComicList> {
       physics: const AlwaysScrollableScrollPhysics(),
       children: widgets,
     );
-    return NotificationListener(
-      child: view,
-      onNotification: (scrollNotification) {
-        widget.onScroll?.call();
-        return true;
-      },
-    );
+    return _wrapWithScrollListener(view);
   }
 
   Widget _buildInfoMode() {
@@ -168,13 +162,7 @@ class _ComicListState extends State<ComicList> {
       padding: const EdgeInsets.only(top: 10, bottom: 10),
       children: widgets,
     );
-    return NotificationListener(
-      child: view,
-      onNotification: (scrollNotification) {
-        widget.onScroll?.call();
-        return true;
-      },
-    );
+    return _wrapWithScrollListener(view);
   }
 
   Widget _buildTitleInCoverMode() {
@@ -273,13 +261,7 @@ class _ComicListState extends State<ComicList> {
       physics: const AlwaysScrollableScrollPhysics(),
       children: widgets,
     );
-    return NotificationListener(
-      child: view,
-      onNotification: (scrollNotification) {
-        widget.onScroll?.call();
-        return true;
-      },
-    );
+    return _wrapWithScrollListener(view);
   }
 
   Widget _buildTitleAndCoverMode() {
@@ -373,19 +355,26 @@ class _ComicListState extends State<ComicList> {
       padding: const EdgeInsets.all(10.0),
       children: [wrap],
     );
-    return NotificationListener(
-      child: view,
-      onNotification: (scrollNotification) {
-        widget.onScroll?.call();
-        return true;
-      },
-    );
+    return _wrapWithScrollListener(view);
   }
 
   void _pushToComicInfo(ComicBasic data) {
     Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) {
       return ComicInfoScreen(data.id, data);
     }));
+  }
+
+  Widget _wrapWithScrollListener(Widget child) {
+    if (widget.onScroll == null) {
+      return child;
+    }
+    return NotificationListener<ScrollNotification>(
+      onNotification: (scrollNotification) {
+        widget.onScroll?.call();
+        return false;
+      },
+      child: child,
+    );
   }
 
   GestureLongPressCallback? _longPressCallback(int index) {

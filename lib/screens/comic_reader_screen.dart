@@ -669,9 +669,7 @@ abstract class _ComicReaderState extends State<_ComicReader> {
                         ),
                         Container(width: 10),
                         Expanded(
-                          child: widget.readerType != ReaderType.webToonFreeZoom
-                              ? _buildSliderBottom()
-                              : Container(),
+                          child: _buildSliderBottom(),
                         ),
                         Container(width: 10),
                         IconButton(
@@ -1432,8 +1430,13 @@ class _ComicReaderGalleryState extends _ComicReaderState {
 
 class _ListViewReaderState extends _ComicReaderState
     with SingleTickerProviderStateMixin {
+  var _controllerTime = DateTime.now().millisecondsSinceEpoch + 400;
+  var _isZoomed = false;
+  var _activePointers = 0;
   final List<Size?> _trueSizes = [];
+  final List<GlobalKey> _pageKeys = [];
   final _transformationController = TransformationController();
+  late final ScrollController _scrollController;
   late TapDownDetails _doubleTapDetails;
   late final _animationController = AnimationController(
     vsync: this,
@@ -1444,19 +1447,122 @@ class _ListViewReaderState extends _ComicReaderState
   void initState() {
     for (var _ in widget.chapter.images) {
       _trueSizes.add(null);
+      _pageKeys.add(GlobalKey());
     }
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScrollChanged);
+    _transformationController.addListener(_onTransformChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      _needJumpTo(widget.startIndex, false);
+    });
     super.initState();
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScrollChanged);
+    _scrollController.dispose();
+    _transformationController.removeListener(_onTransformChanged);
     _transformationController.dispose();
     _animationController.dispose();
     super.dispose();
   }
 
+  void _onTransformChanged() {
+    final zoomed = _transformationController.value.getMaxScaleOnAxis() > 1.001;
+    if (zoomed == _isZoomed || !mounted) {
+      return;
+    }
+    setState(() {
+      _isZoomed = zoomed;
+    });
+  }
+
+  void _onScrollChanged() {
+    if (_isZoomed || _activePointers > 1 || !_scrollController.hasClients) {
+      return;
+    }
+    final imageCount = widget.chapter.images.length;
+    if (imageCount <= 1) {
+      super._onCurrentChange(0);
+      return;
+    }
+    final maxExtent = _scrollController.position.maxScrollExtent;
+    if (maxExtent <= 0) {
+      super._onCurrentChange(0);
+      return;
+    }
+    final ratio =
+        (_scrollController.offset / maxExtent).clamp(0.0, 1.0).toDouble();
+    final index = (ratio * (imageCount - 1)).round();
+    super._onCurrentChange(index);
+  }
+
+  void _onPointerDown(PointerDownEvent event) {
+    final hadMultiTouch = _activePointers > 1;
+    _activePointers++;
+    final hasMultiTouch = _activePointers > 1;
+    if (hadMultiTouch != hasMultiTouch && mounted) {
+      setState(() {});
+    }
+  }
+
+  void _onPointerEnd(PointerEvent event) {
+    final hadMultiTouch = _activePointers > 1;
+    _activePointers = max(0, _activePointers - 1);
+    final hasMultiTouch = _activePointers > 1;
+    if (hadMultiTouch != hasMultiTouch && mounted) {
+      setState(() {});
+    }
+  }
+
   @override
-  void _needJumpTo(int index, bool animation) {}
+  void _needJumpTo(int index, bool animation) {
+    if (index < 0 || index >= widget.chapter.images.length) {
+      return;
+    }
+    if (_isZoomed) {
+      _transformationController.value = Matrix4.identity();
+    }
+    final targetContext = _pageKeys[index].currentContext;
+    if (targetContext != null) {
+      Scrollable.ensureVisible(
+        targetContext,
+        duration: animation ? const Duration(milliseconds: 400) : Duration.zero,
+        curve: Curves.ease,
+      );
+      super._onCurrentChange(index);
+      return;
+    }
+    if (!_scrollController.hasClients) {
+      return;
+    }
+    final maxExtent = _scrollController.position.maxScrollExtent;
+    if (maxExtent <= 0) {
+      return;
+    }
+    final ratio = widget.chapter.images.length <= 1
+        ? 0.0
+        : index / (widget.chapter.images.length - 1);
+    final target = (maxExtent * ratio).clamp(0.0, maxExtent).toDouble();
+    if (animation) {
+      if (DateTime.now().millisecondsSinceEpoch < _controllerTime) {
+        return;
+      }
+      _controllerTime = DateTime.now().millisecondsSinceEpoch + 400;
+      _scrollController.animateTo(
+        target,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.ease,
+      );
+    } else {
+      _scrollController.jumpTo(target);
+    }
+    super._onCurrentChange(index);
+  }
 
   @override
   Widget _buildViewer() {
@@ -1511,7 +1617,9 @@ class _ListViewReaderState extends _ComicReaderState
   Widget _buildList() {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
+        final giveTouchToViewer = _isZoomed || _activePointers > 1;
         var list = ListView.builder(
+          controller: _scrollController,
           scrollDirection: currentReaderDirection == ReaderDirection.topToBottom
               ? Axis.vertical
               : Axis.horizontal,
@@ -1519,6 +1627,9 @@ class _ListViewReaderState extends _ComicReaderState
           cacheExtent: currentReaderDirection == ReaderDirection.topToBottom
               ? constraints.maxHeight * 2
               : constraints.maxWidth * 2,
+          physics: giveTouchToViewer
+              ? const NeverScrollableScrollPhysics()
+              : const ClampingScrollPhysics(),
           padding: EdgeInsets.only(
             // Keep top spacing in all modes and directions.
             top: currentReaderDirection == ReaderDirection.topToBottom
@@ -1534,14 +1645,17 @@ class _ListViewReaderState extends _ComicReaderState
               return _buildNextEp();
             }
             final renderSize = _renderSizeFor(constraints, index);
-            return JMPageImage(
-              key: ValueKey(
-                  "fz_${widget.chapter.id}_${widget.chapter.images[index]}"),
-              widget.chapter.id,
-              widget.chapter.images[index],
-              width: renderSize.width,
-              height: renderSize.height,
-              onTrueSize: (size) => _onTrueSize(index, size),
+            return KeyedSubtree(
+              key: _pageKeys[index],
+              child: JMPageImage(
+                key: ValueKey(
+                    "fz_${widget.chapter.id}_${widget.chapter.images[index]}"),
+                widget.chapter.id,
+                widget.chapter.images[index],
+                width: renderSize.width,
+                height: renderSize.height,
+                onTrueSize: (size) => _onTrueSize(index, size),
+              ),
             );
           },
         );
@@ -1549,12 +1663,23 @@ class _ListViewReaderState extends _ComicReaderState
           transformationController: _transformationController,
           minScale: 1,
           maxScale: 2,
-          child: list,
+          boundaryMargin: const EdgeInsets.all(80),
+          scaleEnabled: true,
+          panEnabled: _isZoomed,
+          child: IgnorePointer(
+            ignoring: giveTouchToViewer,
+            child: list,
+          ),
         );
-        return GestureDetector(
-          onDoubleTap: _handleDoubleTap,
-          onDoubleTapDown: _handleDoubleTapDown,
-          child: viewer,
+        return Listener(
+          onPointerDown: _onPointerDown,
+          onPointerUp: _onPointerEnd,
+          onPointerCancel: _onPointerEnd,
+          child: GestureDetector(
+            onDoubleTap: _handleDoubleTap,
+            onDoubleTapDown: _handleDoubleTapDown,
+            child: viewer,
+          ),
         );
       },
     );
@@ -1646,7 +1771,7 @@ class _TwoPageGalleryReaderState extends _ComicReaderState {
           : Axis.horizontal,
       reverse: widget.readerDirection == ReaderDirection.rightToLeft,
       onPageChanged: _onGalleryPageChange,
-      backgroundDecoration: BoxDecoration(color: Colors.black),
+      backgroundDecoration: const BoxDecoration(color: Colors.black),
     );
   }
 

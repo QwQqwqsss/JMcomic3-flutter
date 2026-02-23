@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 class AppHttpClient {
   static final HttpClient _client = HttpClient()
@@ -18,10 +19,11 @@ class AppHttpClient {
     int retries = 1,
     bool allowMalformedUtf8 = true,
   }) async {
+    final uri = Uri.parse(url);
     Object? lastError;
     for (var attempt = 0; attempt <= retries; attempt++) {
       try {
-        final request = await _client.getUrl(Uri.parse(url)).timeout(
+        final request = await _client.getUrl(uri).timeout(
               connectTimeout,
             );
         request.followRedirects = true;
@@ -34,15 +36,18 @@ class AppHttpClient {
         if (response.statusCode < 200 || response.statusCode >= 300) {
           throw HttpException(
             "HTTP ${response.statusCode}",
-            uri: Uri.parse(url),
+            uri: uri,
           );
         }
 
-        final bytes = await response.fold<List<int>>(
-          <int>[],
-          (previous, element) => previous..addAll(element),
+        final builder = BytesBuilder(copy: false);
+        await for (final chunk in response) {
+          builder.add(chunk);
+        }
+        return utf8.decode(
+          builder.takeBytes(),
+          allowMalformed: allowMalformedUtf8,
         );
-        return utf8.decode(bytes, allowMalformed: allowMalformedUtf8);
       } on TimeoutException catch (e) {
         lastError = e;
       } on SocketException catch (e) {
