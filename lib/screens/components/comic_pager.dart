@@ -6,6 +6,7 @@ import 'package:jmcomic3/basic/commons.dart';
 import 'package:jmcomic3/basic/log.dart';
 import 'package:jmcomic3/basic/methods.dart';
 import 'package:jmcomic3/configs/pager_controller_mode.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 import 'package:jmcomic3/screens/comic_info_screen.dart';
 import 'package:jmcomic3/screens/components/content_builder.dart';
 import 'package:jmcomic3/screens/components/types.dart';
@@ -14,12 +15,36 @@ import '../../configs/is_pro.dart';
 import 'comic_list.dart';
 
 const _noProMax = 10;
+const _pagerDividerColor = Color(0xFFEEEEEE);
+const _pagerPageCacheLimit = 6;
+final RegExp _digitsOnlyRegExp = RegExp(r'\d+');
+const _badStatePrefix = 'Bad state:';
 
 int _calcMaxPage(int total, int pageSize) {
   if (total <= 0 || pageSize <= 0) {
     return 1;
   }
   return (total / pageSize).ceil();
+}
+
+String _extractErrorMessage(Object error) {
+  var message = error.toString().trim();
+  if (message.startsWith(_badStatePrefix)) {
+    message = message.substring(_badStatePrefix.length).trim();
+  }
+  return message;
+}
+
+bool _isProRequiredMessage(String message) {
+  if (message.isEmpty) {
+    return false;
+  }
+  final lower = message.toLowerCase();
+  return lower.contains('发电') ||
+      lower.contains('pro is required') ||
+      lower.contains('activate pro') ||
+      lower.contains('need pro') ||
+      lower.contains('vip');
 }
 
 class ComicPager extends StatefulWidget {
@@ -39,25 +64,33 @@ class ComicPager extends StatefulWidget {
 }
 
 class _ComicPagerState extends State<ComicPager> {
+  late PagerControllerMode _mode = currentPagerControllerMode;
+
   @override
   void initState() {
     super.initState();
-    currentPagerControllerModeEvent.subscribe(_setState);
+    currentPagerControllerModeEvent.subscribe(_onPagerModeChanged);
   }
 
   @override
   void dispose() {
-    currentPagerControllerModeEvent.unsubscribe(_setState);
+    currentPagerControllerModeEvent.unsubscribe(_onPagerModeChanged);
     super.dispose();
   }
 
-  _setState(_) {
-    setState(() {});
+  void _onPagerModeChanged(_) {
+    final latestMode = currentPagerControllerMode;
+    if (!mounted || latestMode == _mode) {
+      return;
+    }
+    setState(() {
+      _mode = latestMode;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    switch (currentPagerControllerMode) {
+    switch (_mode) {
       case PagerControllerMode.stream:
         return _StreamPager(
             onPage: widget.onPage,
@@ -93,13 +126,15 @@ class _StreamPagerState extends State<_StreamPager> {
   int _nextPage = 1;
   int _total = 0;
 
-  bool get _noPro => !isPro && _nextPage > _noProMax;
+  bool get _noPro => !hasProAccess && _nextPage > _noProMax;
 
   bool _joining = false;
   bool _joinSuccess = true;
+  bool _joinBlockedByPro = false;
+  String _joinErrorMessage = '';
 
   Future<void> _join() async {
-    if (_joining || _nextPage > _maxPage || _noPro) {
+    if (_joining || _nextPage > _maxPage || _noPro || _joinBlockedByPro) {
       return;
     }
     try {
@@ -130,17 +165,32 @@ class _StreamPagerState extends State<_StreamPager> {
       }
       setState(() {
         _joinSuccess = true;
+        _joinBlockedByPro = false;
+        _joinErrorMessage = '';
         _joining = false;
       });
     } catch (e, st) {
-      debugPrient("$e\n$st");
+      final message = _extractErrorMessage(e);
+      final blockedByPro = _isProRequiredMessage(message);
+      debugPrient(
+        blockedByPro ? message : "$e\n$st",
+      );
       if (!mounted) {
         return;
       }
       setState(() {
         _joinSuccess = false;
+        _joinBlockedByPro = blockedByPro;
+        _joinErrorMessage = message;
         _joining = false;
       });
+      if (blockedByPro) {
+        defaultToast(
+          context,
+          context.l10n
+              .tr('Please activate Pro first', en: 'Please activate Pro first'),
+        );
+      }
     }
   }
 
@@ -152,8 +202,11 @@ class _StreamPagerState extends State<_StreamPager> {
     if (_total == 0) {
       return;
     }
-    if (!isPro) {
-      defaultToast(context, "发电才能跳页哦~");
+    if (!hasProAccess) {
+      defaultToast(
+        context,
+        context.l10n.tr("发电才能跳页哦~", en: "Pro is required to jump pages"),
+      );
       return;
     }
     _textEditController.clear();
@@ -164,12 +217,12 @@ class _StreamPagerState extends State<_StreamPager> {
           content: Card(
             child: TextField(
               controller: _textEditController,
-              decoration: const InputDecoration(
-                labelText: "请输入页数：",
+              decoration: InputDecoration(
+                labelText: context.l10n.tr("请输入页数：", en: "Enter page number:"),
               ),
               keyboardType: TextInputType.number,
               inputFormatters: <TextInputFormatter>[
-                FilteringTextInputFormatter.allow(RegExp(r'\d+')),
+                FilteringTextInputFormatter.allow(_digitsOnlyRegExp),
               ],
             ),
           ),
@@ -178,7 +231,7 @@ class _StreamPagerState extends State<_StreamPager> {
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: const Text('取消'),
+              child: Text(context.l10n.tr('取消', en: 'Cancel')),
             ),
             MaterialButton(
               onPressed: () {
@@ -195,7 +248,7 @@ class _StreamPagerState extends State<_StreamPager> {
                 _nextPage = num;
                 _join();
               },
-              child: const Text('确定'),
+              child: Text(context.l10n.confirm),
             ),
           ],
         );
@@ -206,7 +259,7 @@ class _StreamPagerState extends State<_StreamPager> {
   @override
   void initState() {
     super.initState();
-    proEvent.subscribe(_setState);
+    proEvent.subscribe(_onProChanged);
     _controller = ScrollController();
     _controller.addListener(_onScroll);
     _join();
@@ -214,7 +267,7 @@ class _StreamPagerState extends State<_StreamPager> {
 
   @override
   void dispose() {
-    proEvent.unsubscribe(_setState);
+    proEvent.unsubscribe(_onProChanged);
     _textEditController.dispose();
     _controller.removeListener(_onScroll);
     _controller.dispose();
@@ -225,26 +278,58 @@ class _StreamPagerState extends State<_StreamPager> {
     if (!_controller.hasClients) {
       return;
     }
-    if (_joining || _nextPage > _maxPage || _noPro) {
+    if (_joining || _nextPage > _maxPage || _noPro || _joinBlockedByPro) {
       return;
     }
-    if (_controller.position.pixels + 100 >
-        _controller.position.maxScrollExtent) {
+    if (_controller.position.extentAfter < 300) {
       _join();
     }
   }
 
   Widget? _buildLoadingCard() {
+    if (_joinBlockedByPro) {
+      final message = _joinErrorMessage.isEmpty
+          ? context.l10n
+              .tr('Please activate Pro first', en: 'Please activate Pro first')
+          : _joinErrorMessage;
+      return Card(
+        child: InkWell(
+          onTap: () {
+            setState(() {
+              _joinBlockedByPro = false;
+              _joinSuccess = true;
+            });
+            _join();
+          },
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: const Icon(Icons.power_off_outlined),
+              ),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+              ),
+              Text(context.l10n.tr('Tap to retry', en: 'Tap to retry')),
+            ],
+          ),
+        ),
+      );
+    }
     if (_noPro) {
       return Card(
         child: Column(
           children: [
             Container(
-              padding: const EdgeInsets.only(top: 10, bottom: 10),
+              padding: const EdgeInsets.symmetric(vertical: 10),
               child: const Icon(Icons.power_off_outlined),
             ),
-            const Text(
-              '$_noProMax页以上需要发电鸭',
+            Text(
+              context.l10n.tr(
+                '$_noProMax页以上需要发电鸭',
+                en: 'Pro is required beyond page $_noProMax',
+              ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -256,12 +341,12 @@ class _StreamPagerState extends State<_StreamPager> {
         child: Column(
           children: [
             Container(
-              padding: const EdgeInsets.only(top: 10, bottom: 10),
+              padding: const EdgeInsets.symmetric(vertical: 10),
               child: const CupertinoActivityIndicator(
                 radius: 14,
               ),
             ),
-            const Text('加载中'),
+            Text(context.l10n.loading),
           ],
         ),
       );
@@ -275,10 +360,21 @@ class _StreamPagerState extends State<_StreamPager> {
           child: Column(
             children: [
               Container(
-                padding: const EdgeInsets.only(top: 10, bottom: 10),
+                padding: const EdgeInsets.symmetric(vertical: 10),
                 child: const Icon(Icons.sync_problem_rounded),
               ),
-              const Text('出错, 点击重试'),
+              Text(context.l10n
+                  .tr('Error, tap to retry', en: 'Error, tap to retry')),
+              if (_joinErrorMessage.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 4, 12, 0),
+                  child: Text(
+                    _joinErrorMessage,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
             ],
           ),
         ),
@@ -314,13 +410,13 @@ class _StreamPagerState extends State<_StreamPager> {
     return PreferredSize(
       preferredSize: const Size.fromHeight(30),
       child: Container(
-        padding: const EdgeInsets.only(left: 10, right: 10),
-        decoration: BoxDecoration(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        decoration: const BoxDecoration(
           border: Border(
             bottom: BorderSide(
               width: .5,
               style: BorderStyle.solid,
-              color: Colors.grey[200]!,
+              color: _pagerDividerColor,
             ),
           ),
         ),
@@ -333,8 +429,18 @@ class _StreamPagerState extends State<_StreamPager> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text("已加载 ${_nextPage - 1} / $_maxPage 页"),
-                Text("已加载 ${_data.length} / $_total 项"),
+                Text(
+                  context.l10n.tr(
+                    "已加载 ${_nextPage - 1} / $_maxPage 页",
+                    en: "Loaded ${_nextPage - 1} / $_maxPage pages",
+                  ),
+                ),
+                Text(
+                  context.l10n.tr(
+                    "已加载 ${_data.length} / $_total 项",
+                    en: "Loaded ${_data.length} / $_total items",
+                  ),
+                ),
               ],
             ),
           ),
@@ -343,7 +449,10 @@ class _StreamPagerState extends State<_StreamPager> {
     );
   }
 
-  void _setState(EventArgs? args) {
+  void _onProChanged(EventArgs? args) {
+    if (!mounted || _nextPage <= _noProMax) {
+      return;
+    }
     setState(() {});
   }
 }
@@ -370,27 +479,66 @@ class _PagerPagerState extends State<_PagerPager> {
   late int _currentPage = 1;
   late int _maxPage = 1;
   late final List<ComicSimple> _data = [];
+  final Map<int, List<ComicSimple>> _pageCache = <int, List<ComicSimple>>{};
   late Future<void> _pageFuture = _load();
 
-  Future<void> _load() async {
-    final response = await widget.onPage(_currentPage);
-    if (!mounted) {
+  void _cachePageData(int page, List<ComicSimple> list) {
+    if (_pageCache.containsKey(page)) {
+      _pageCache.remove(page);
+    }
+    _pageCache[page] = List<ComicSimple>.unmodifiable(list);
+    while (_pageCache.length > _pagerPageCacheLimit) {
+      _pageCache.remove(_pageCache.keys.first);
+    }
+  }
+
+  Future<void> _load({bool forceRefresh = false}) async {
+    final requestedPage = _currentPage;
+    if (forceRefresh) {
+      _pageCache.remove(requestedPage);
+    }
+    final cached = _pageCache[requestedPage];
+    if (cached != null) {
+      _data
+        ..clear()
+        ..addAll(cached);
       return;
     }
-    if (_currentPage == 1) {
+
+    final response = await widget.onPage(requestedPage);
+    if (!mounted || requestedPage != _currentPage) {
+      return;
+    }
+    if (requestedPage == 1) {
       if (_redirectAid(response.redirectAid, context)) {
         return;
       }
       _maxPage = _calcMaxPage(response.total, response.list.length);
     }
+    _cachePageData(requestedPage, response.list);
     _data
       ..clear()
       ..addAll(response.list);
   }
 
-  @override
-  void initState() {
-    super.initState();
+  void _openPage(int page, {bool forceRefresh = false}) {
+    if (!hasProAccess && page > _noProMax) {
+      defaultToast(
+        context,
+        context.l10n.tr(
+          "$_noProMax页以上需要发电鸭",
+          en: "Pro is required beyond page $_noProMax",
+        ),
+      );
+      return;
+    }
+    if (!forceRefresh && page == _currentPage) {
+      return;
+    }
+    setState(() {
+      _currentPage = page;
+      _pageFuture = _load(forceRefresh: forceRefresh);
+    });
   }
 
   @override
@@ -404,9 +552,8 @@ class _PagerPagerState extends State<_PagerPager> {
     return ContentBuilder(
       future: _pageFuture,
       onRefresh: () async {
-        setState(() {
-          _pageFuture = _load();
-        });
+        _pageCache.clear();
+        _openPage(_currentPage, forceRefresh: true);
       },
       successBuilder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
         return Scaffold(
@@ -425,13 +572,13 @@ class _PagerPagerState extends State<_PagerPager> {
     return PreferredSize(
       preferredSize: const Size.fromHeight(50),
       child: Container(
-        padding: const EdgeInsets.only(left: 10, right: 10),
-        decoration: BoxDecoration(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        decoration: const BoxDecoration(
           border: Border(
             bottom: BorderSide(
               width: .5,
               style: BorderStyle.solid,
-              color: Colors.grey[200]!,
+              color: _pagerDividerColor,
             ),
           ),
         ),
@@ -442,8 +589,14 @@ class _PagerPagerState extends State<_PagerPager> {
             children: [
               InkWell(
                 onTap: () {
-                  if (!isPro) {
-                    defaultToast(context, "发电才能跳页哦~");
+                  if (!hasProAccess) {
+                    defaultToast(
+                      context,
+                      context.l10n.tr(
+                        "发电才能跳页哦~",
+                        en: "Pro is required to jump pages",
+                      ),
+                    );
                     return;
                   }
                   _textEditController.clear();
@@ -454,12 +607,17 @@ class _PagerPagerState extends State<_PagerPager> {
                         content: Card(
                           child: TextField(
                             controller: _textEditController,
-                            decoration: const InputDecoration(
-                              labelText: "请输入页数：",
+                            decoration: InputDecoration(
+                              labelText: context.l10n.tr(
+                                "请输入页数：",
+                                en: "Enter page number:",
+                              ),
                             ),
                             keyboardType: TextInputType.number,
                             inputFormatters: <TextInputFormatter>[
-                              FilteringTextInputFormatter.allow(RegExp(r'\d+')),
+                              FilteringTextInputFormatter.allow(
+                                _digitsOnlyRegExp,
+                              ),
                             ],
                           ),
                         ),
@@ -468,7 +626,7 @@ class _PagerPagerState extends State<_PagerPager> {
                             onPressed: () {
                               Navigator.pop(context);
                             },
-                            child: const Text('取消'),
+                            child: Text(context.l10n.tr('取消', en: 'Cancel')),
                           ),
                           MaterialButton(
                             onPressed: () {
@@ -481,12 +639,9 @@ class _PagerPagerState extends State<_PagerPager> {
                               if (num == 0 || num > _maxPage) {
                                 return;
                               }
-                              setState(() {
-                                _currentPage = num;
-                                _pageFuture = _load();
-                              });
+                              _openPage(num);
                             },
-                            child: const Text('确定'),
+                            child: Text(context.l10n.confirm),
                           ),
                         ],
                       );
@@ -495,7 +650,12 @@ class _PagerPagerState extends State<_PagerPager> {
                 },
                 child: Row(
                   children: [
-                    Text("第 $_currentPage / $_maxPage 页"),
+                    Text(
+                      context.l10n.tr(
+                        "第 $_currentPage / $_maxPage 页",
+                        en: "Page $_currentPage / $_maxPage",
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -505,29 +665,29 @@ class _PagerPagerState extends State<_PagerPager> {
                     minWidth: 0,
                     onPressed: () {
                       if (_currentPage > 1) {
-                        setState(() {
-                          _currentPage = _currentPage - 1;
-                          _pageFuture = _load();
-                        });
+                        _openPage(_currentPage - 1);
                       }
                     },
-                    child: const Text('上一页'),
+                    child: Text(context.l10n.tr('上一页', en: 'Prev')),
                   ),
                   MaterialButton(
                     minWidth: 0,
                     onPressed: () {
                       if (_currentPage < _maxPage) {
-                        if (!isPro && _currentPage + 1 > _noProMax) {
-                          defaultToast(context, "$_noProMax页以上需要发电鸭");
+                        if (!hasProAccess && _currentPage + 1 > _noProMax) {
+                          defaultToast(
+                            context,
+                            context.l10n.tr(
+                              "$_noProMax页以上需要发电鸭",
+                              en: "Pro is required beyond page $_noProMax",
+                            ),
+                          );
                           return;
                         }
-                        setState(() {
-                          _currentPage = _currentPage + 1;
-                          _pageFuture = _load();
-                        });
+                        _openPage(_currentPage + 1);
                       }
                     },
-                    child: const Text('下一页'),
+                    child: Text(context.l10n.tr('下一页', en: 'Next')),
                   )
                 ],
               ),

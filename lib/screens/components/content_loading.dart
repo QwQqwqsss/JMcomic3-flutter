@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
 class ContentLoading extends StatelessWidget {
-  final String label;
+  final String? label;
 
-  const ContentLoading({Key? key, this.label = "加载中"}) : super(key: key);
+  const ContentLoading({Key? key, this.label}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +27,10 @@ class ContentLoading extends StatelessWidget {
                 ),
               ),
               Container(height: min / 10),
-              Text(label, style: TextStyle(fontSize: min / 15)),
+              Text(
+                label ?? context.l10n.loading,
+                style: TextStyle(fontSize: min / 15),
+              ),
               Expanded(child: Container()),
             ],
           ),

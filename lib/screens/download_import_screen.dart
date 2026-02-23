@@ -3,13 +3,12 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
 import '../basic/commons.dart';
 import '../basic/methods.dart';
 import '../configs/import_notice.dart';
 import '../configs/is_pro.dart';
-import '../configs/android_version.dart';
 import 'components/content_loading.dart';
 import 'components/right_click_pop.dart';
 
@@ -37,14 +36,6 @@ class _DownloadImportScreenState extends State<DownloadImportScreen> {
     super.dispose();
   }
 
-  void _onMessageChange(event) {
-    if (event is String) {
-      setState(() {
-        _importMessage = event;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return rightClickPop(
@@ -63,7 +54,7 @@ class _DownloadImportScreenState extends State<DownloadImportScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('导入'),
+        title: Text(context.l10n.tr('导入', en: 'Import')),
       ),
       body: ListView(
         children: [
@@ -88,13 +79,26 @@ class _DownloadImportScreenState extends State<DownloadImportScreen> {
     return MaterialButton(
       height: 80,
       onPressed: () async {
+        if (!hasProAccess) {
+          defaultToast(
+            context,
+            context.l10n.tr(
+              "发电才能使用哦~",
+              en: "Pro is required for this feature",
+            ),
+          );
+          return;
+        }
         if (!await androidMangeStorageRequest()) {
-          defaultToast(context, "申请权限被拒绝");
+          defaultToast(
+            context,
+            context.l10n.tr("申请权限被拒绝", en: "Permission denied"),
+          );
         }
         String? path;
         if (Platform.isAndroid) {
           path = await FilesystemPicker.open(
-            title: 'Open file',
+            title: context.l10n.tr('选择文件', en: 'Select file'),
             context: context,
             rootDirectory: Directory("/storage/emulated/0"),
             fsType: FilesystemType.file,
@@ -104,7 +108,8 @@ class _DownloadImportScreenState extends State<DownloadImportScreen> {
           );
         } else {
           var ls = await FilePicker.platform.pickFiles(
-            dialogTitle: '选择要导入的文件',
+            dialogTitle:
+                context.l10n.tr('选择要导入的文件', en: 'Choose file to import'),
             allowMultiple: false,
             type: FileType.custom,
             allowedExtensions: ['zip', 'jmi'],
@@ -124,11 +129,13 @@ class _DownloadImportScreenState extends State<DownloadImportScreen> {
                 await methods.import_jm_jmi(path);
               }
               setState(() {
-                _importMessage = "导入成功";
+                _importMessage =
+                    context.l10n.tr("导入成功", en: "Import succeeded");
               });
             } catch (e) {
               setState(() {
-                _importMessage = "导入失败 $e";
+                _importMessage =
+                    context.l10n.tr("导入失败", en: "Import failed") + " $e";
               });
             } finally {
               setState(() {
@@ -136,14 +143,26 @@ class _DownloadImportScreenState extends State<DownloadImportScreen> {
               });
             }
           } else if (path.endsWith(".jm.zip")) {
-            defaultToast(context, "只能导入.jm.zip的zip压缩包");
+            defaultToast(
+              context,
+              context.l10n.tr(
+                "只能导入 .jm.zip 压缩包",
+                en: "Only .jm.zip archives are supported",
+              ),
+            );
           }
         }
       },
       child: Text(
-        '选择.jm.zip文件进行导入\n选择jmi文件进行导入' + (!isPro ? "\n(发电后使用)" : ""),
+        context.l10n.tr(
+              '选择 .jm.zip 文件进行导入\n选择 jmi 文件进行导入',
+              en: 'Import a .jm.zip file\nImport a .jmi file',
+            ) +
+            (!hasProAccess
+                ? "\n${context.l10n.tr("(发电后使用)", en: "(Pro required)")}"
+                : ""),
         style: TextStyle(
-          color: !isPro ? Colors.grey : null,
+          color: !hasProAccess ? Colors.grey : null,
         ),
         textAlign: TextAlign.center,
       ),
@@ -154,8 +173,18 @@ class _DownloadImportScreenState extends State<DownloadImportScreen> {
     return MaterialButton(
       height: 80,
       onPressed: () async {
+        if (!hasProAccess) {
+          defaultToast(
+            context,
+            context.l10n.tr(
+              "发电才能使用哦~",
+              en: "Pro is required for this feature",
+            ),
+          );
+          return;
+        }
         if (!await androidMangeStorageRequest()) {
-          throw Exception("申请权限被拒绝");
+          throw Exception(context.l10n.tr("申请权限被拒绝", en: "Permission denied"));
         }
         late String? path;
         try {
@@ -171,11 +200,12 @@ class _DownloadImportScreenState extends State<DownloadImportScreen> {
             });
             await methods.import_jm_dir(path);
             setState(() {
-              _importMessage = "导入成功";
+              _importMessage = context.l10n.tr("导入成功", en: "Import succeeded");
             });
           } catch (e) {
             setState(() {
-              _importMessage = "导入失败 $e";
+              _importMessage =
+                  context.l10n.tr("导入失败", en: "Import failed") + " $e";
             });
           } finally {
             setState(() {
@@ -185,9 +215,15 @@ class _DownloadImportScreenState extends State<DownloadImportScreen> {
         }
       },
       child: Text(
-        '选择文件夹\n(导入里面所有的zip/jmi)' + (!isPro ? "\n(发电后使用)" : ""),
+        context.l10n.tr(
+              '选择文件夹\n(导入里面所有的 zip/jmi)',
+              en: 'Choose a folder\n(Import all zip/jmi files inside)',
+            ) +
+            (!hasProAccess
+                ? "\n${context.l10n.tr("(发电后使用)", en: "(Pro required)")}"
+                : ""),
         style: TextStyle(
-          color: !isPro ? Colors.grey : null,
+          color: !hasProAccess ? Colors.grey : null,
         ),
         textAlign: TextAlign.center,
       ),

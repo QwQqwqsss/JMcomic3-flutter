@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jmcomic3/basic/commons.dart';
 import 'package:jmcomic3/basic/methods.dart';
 import 'package:jmcomic3/configs/download_thread_count.dart';
-import 'package:jmcomic3/screens/components/content_builder.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 import 'package:jmcomic3/screens/components/content_loading.dart';
 import 'package:jmcomic3/screens/download_import_screen.dart';
 
@@ -22,6 +22,12 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
   bool _loading = true;
   List<DownloadAlbum> _downloads = [];
 
+  void _setState(_) {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
   _load() async {
     setState(() {
       _loading = true;
@@ -39,8 +45,15 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
 
   @override
   void initState() {
-    _load();
     super.initState();
+    downloadThreadCountEvent.subscribe(_setState);
+    _load();
+  }
+
+  @override
+  void dispose() {
+    downloadThreadCountEvent.unsubscribe(_setState);
+    super.dispose();
   }
 
   @override
@@ -49,9 +62,10 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
   }
 
   Widget buildScreen(BuildContext context) {
+    final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(
-        title: const Text("下载"),
+        title: Text(l10n.downloads),
         actions: [
           threadCountButton(),
           exportButton(),
@@ -73,7 +87,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
 
   Widget _body() {
     if (_loading && _downloads.isEmpty) {
-      return const ContentLoading(label: "加载中");
+      return ContentLoading(label: context.l10n.loading);
     }
     // if (_loading) 可以加个浮层, 极为短暂, 性价比比较低
     return _listView();
@@ -96,8 +110,9 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
                 },
                 onLongPress: () async {
                   String? action = await chooseListDialog(context,
-                      values: ["删除"], title: "请选择");
-                  if (action != null && action == "删除") {
+                      values: [context.l10n.delete],
+                      title: context.l10n.choose);
+                  if (action != null && action == context.l10n.delete) {
                     await methods.deleteDownload(e.id);
                     _load();
                   }
@@ -146,11 +161,10 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
     return MaterialButton(
       onPressed: () async {
         await chooseDownloadThread(context);
-        setState(() {});
       },
       minWidth: 0,
       child: Text(
-        "$downloadThreadCount线程",
+        "$downloadThreadCount${context.l10n.threadSuffix}",
       ),
     );
   }

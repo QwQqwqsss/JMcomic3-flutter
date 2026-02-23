@@ -3,6 +3,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
 import '../basic/commons.dart';
 import '../basic/methods.dart';
@@ -19,10 +20,12 @@ bool currentVolumeKeyControl() {
 }
 
 Future<void> _chooseVolumeKeyControl(BuildContext context) async {
+  final l10n = context.l10n;
   String? result = await chooseListDialog<String>(context,
-      title: "鼠标右键返回上一页", values: ["是", "否"]);
+      title: l10n.tr("音量键翻页", en: "Volume keys for page turn"),
+      values: [l10n.yes, l10n.no]);
   if (result != null) {
-    var target = result == "是";
+    var target = result == l10n.yes;
     await methods.saveProperty(_propertyName, "$target");
     _volumeKeyControl = target;
   }
@@ -35,8 +38,8 @@ Widget volumeKeyControlSetting() {
   return StatefulBuilder(
     builder: (BuildContext context, void Function(void Function()) setState) {
       return ListTile(
-        title: const Text("音量键翻页"),
-        subtitle: Text(_volumeKeyControl ? "是" : "否"),
+        title: Text(context.l10n.tr("音量键翻页", en: "Volume keys for page turn")),
+        subtitle: Text(context.l10n.boolLabel(_volumeKeyControl)),
         onTap: () async {
           await _chooseVolumeKeyControl(context);
           setState(() {});

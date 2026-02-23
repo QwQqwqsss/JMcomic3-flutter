@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:jmcomic3/basic/commons.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 import 'package:jmcomic3/screens/components/comic_pager.dart';
 import 'package:jmcomic3/screens/components/content_builder.dart';
 
@@ -47,7 +48,7 @@ class _WeekScreenState extends State<WeekScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('每周必看'),
+        title: Text(context.l10n.weekMustSee),
         actions: [
           if (_categories.isNotEmpty && _categoryId != null)
             _buildCategorySelector(context),
@@ -329,8 +330,8 @@ class _WeekContentState extends State<WeekContent>
   @override
   Widget build(BuildContext context) {
     if (widget.data.categories.isEmpty || _displayTypes.isEmpty) {
-      return const Center(
-        child: Text('暂无可用内容'),
+      return Center(
+        child: Text(context.l10n.noContentAvailable),
       );
     }
     return Column(
@@ -394,13 +395,13 @@ class _WeekContentState extends State<WeekContent>
     return Card(
       child: InkWell(
         onTap: _switchToNextCategory,
-        child: const Column(
+        child: Column(
           children: [
-            Padding(
+            const Padding(
               padding: EdgeInsets.only(top: 10, bottom: 10),
               child: Icon(Icons.next_plan_rounded),
             ),
-            Text('下一期'),
+            Text(context.l10n.nextIssue),
           ],
         ),
       ),
@@ -411,7 +412,7 @@ class _WeekContentState extends State<WeekContent>
     final currentIndex =
         widget.data.categories.indexWhere((item) => item.id == _categoryId);
     if (currentIndex < 0 || currentIndex + 1 >= widget.data.categories.length) {
-      defaultToast(context, '没有更多期数了');
+      defaultToast(context, context.l10n.noMoreIssue);
       return;
     }
     final nextId = widget.data.categories[currentIndex + 1].id;
@@ -421,7 +422,7 @@ class _WeekContentState extends State<WeekContent>
     _filterCache.clear();
     widget.categoryNotifier.value = nextId;
     widget.onCategoryChanged(nextId);
-    defaultToast(context, '已切换到下一期');
+    defaultToast(context, context.l10n.switchedToNextIssue);
   }
 
   void _onCategoryChangedFromAppBar() {

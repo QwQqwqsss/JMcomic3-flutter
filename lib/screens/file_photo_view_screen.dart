@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:jmcomic3/basic/commons.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 import 'package:photo_view/photo_view.dart';
 
 import 'components/right_click_pop.dart';
@@ -22,25 +23,24 @@ class FilePhotoViewScreen extends StatelessWidget {
           children: [
             GestureDetector(
               onLongPress: () async {
+                final saveToGallery = context.l10n.tr('保存图片到相册', en: 'Save image to gallery');
+                final saveToFile = context.l10n.tr('保存图片到文件', en: 'Save image to file');
                 String? choose = await chooseListDialog(
                   context,
-                  title: '请选择',
+                  title: context.l10n.choose,
                   values: [
                     ...Platform.isAndroid || Platform.isIOS
                         ? [
-                            '保存图片到相册',
+                            saveToGallery,
                           ]
                         : [],
-                    '保存图片到文件',
+                    saveToFile,
                   ],
                 );
-                switch (choose) {
-                  case '保存图片到相册':
-                    saveImageFileToGallery(context, filePath);
-                    break;
-                  case '保存图片到文件':
-                    saveImageFileToFile(context, filePath);
-                    break;
+                if (choose == saveToGallery) {
+                  saveImageFileToGallery(context, filePath);
+                } else if (choose == saveToFile) {
+                  saveImageFileToFile(context, filePath);
                 }
               },
               child: PhotoView(

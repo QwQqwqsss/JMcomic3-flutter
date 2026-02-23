@@ -7,6 +7,7 @@ import 'package:jmcomic3/basic/methods.dart';
 import 'package:jmcomic3/configs/Authentication.dart';
 import 'package:jmcomic3/configs/configs.dart';
 import 'package:jmcomic3/configs/login.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
 import '../basic/web_dav_sync.dart';
 import '../configs/passed.dart';
@@ -33,8 +34,8 @@ class _InitScreenState extends State<InitScreen> {
     return Scaffold(
       body: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
-          return const Center(
-            child: Text("initializing..."),
+          return Center(
+            child: Text(context.l10n.initializing),
           );
         },
       ),
@@ -79,7 +80,7 @@ class _InitScreenState extends State<InitScreen> {
       }
     } catch (e, st) {
       debugPrient("$e\n$st");
-      defaultToast(context, "初始化失败，请设置网络");
+      defaultToast(context, context.l10n.initFailedSetNetwork);
       Future.delayed(Duration.zero, () {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (BuildContext context) {
@@ -121,7 +122,7 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("身份验证"),
+        title: Text(context.l10n.authTitle),
       ),
       body: Center(
         child: Container(
@@ -130,7 +131,7 @@ class _AuthScreenState extends State<AuthScreen> {
             onPressed: () async {
               test();
             },
-            child: const Text('您在之前使用APP时开启了身份验证，请点击这段文字进行身份验证，验证通过后将会进入APP。'),
+            child: Text(context.l10n.authPrompt),
           ),
         ),
       ),

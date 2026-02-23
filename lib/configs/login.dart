@@ -5,6 +5,7 @@ import 'package:jmcomic3/basic/commons.dart';
 import 'package:jmcomic3/basic/log.dart';
 import 'package:jmcomic3/basic/methods.dart';
 import 'package:jmcomic3/configs/is_pro.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
 enum LoginStatus {
   notSet,
@@ -67,43 +68,54 @@ List<FavoriteFolderItem> favData = [];
 
 Widget createFavoriteFolderItemTile(BuildContext context) {
   return ListTile(
-    title: const Text("创建收藏文件夹"),
+    title: Text(context.l10n.tr("创建收藏文件夹", en: "Create favorites folder")),
     onTap: () async {
-      if (!await ensureJwtAccess(context, feature: "创建收藏夹")) {
+      if (!await ensureJwtAccess(
+        context,
+        feature: context.l10n.tr("创建收藏夹", en: "Create favorites folder"),
+      )) {
         return;
       }
-      var name = await displayTextInputDialog(context,
-          title: "创建收藏文件夹", hint: "文件夹名称");
+      var name = await displayTextInputDialog(
+        context,
+        title: context.l10n.tr("创建收藏文件夹", en: "Create favorites folder"),
+        hint: context.l10n.tr("文件夹名称", en: "Folder name"),
+      );
       if (name == null) {
         return;
       }
       await methods.createFavoriteFolder(name);
       fav(context);
-      defaultToast(context, "创建成功");
+      defaultToast(
+          context, context.l10n.tr("创建成功", en: "Created successfully"));
     },
   );
 }
 
 Widget deleteFavoriteFolderItemTile(BuildContext context) {
   return ListTile(
-    title: const Text("删除收藏文件夹"),
+    title: Text(context.l10n.tr("删除收藏文件夹", en: "Delete favorites folder")),
     onTap: () async {
-      if (!await ensureJwtAccess(context, feature: "删除收藏夹")) {
+      if (!await ensureJwtAccess(
+        context,
+        feature: context.l10n.tr("删除收藏夹", en: "Delete favorites folder"),
+      )) {
         return;
       }
       var j = favData.map((i) {
         return MapEntry(i.name, i.fid);
       }).toList();
-      j.add(const MapEntry("默认 / 不删除", 0));
+      j.add(MapEntry(context.l10n.tr("默认 / 不删除", en: "Default / Keep"), 0));
       var v = await chooseMapDialog<int>(
         context,
-        title: "删除资料夹",
+        title: context.l10n.tr("删除资料夹", en: "Delete folder"),
         values: Map.fromEntries(j),
       );
       if (v != null && v != 0) {
         await methods.deleteFavoriteFolder(v);
         fav(context);
-        defaultToast(context, "删除成功");
+        defaultToast(
+            context, context.l10n.tr("删除成功", en: "Deleted successfully"));
       }
     },
   );
@@ -111,29 +123,36 @@ Widget deleteFavoriteFolderItemTile(BuildContext context) {
 
 Widget renameFavoriteFolderItemTile(BuildContext context) {
   return ListTile(
-    title: const Text("重命名收藏文件夹"),
+    title: Text(context.l10n.tr("重命名收藏文件夹", en: "Rename favorites folder")),
     onTap: () async {
-      if (!await ensureJwtAccess(context, feature: "重命名收藏夹")) {
+      if (!await ensureJwtAccess(
+        context,
+        feature: context.l10n.tr("重命名收藏夹", en: "Rename favorites folder"),
+      )) {
         return;
       }
       var j = favData.map((i) {
         return MapEntry(i.name, i.fid);
       }).toList();
-      j.add(const MapEntry("默认 / 不重命名", 0));
+      j.add(MapEntry(context.l10n.tr("默认 / 不重命名", en: "Default / Keep"), 0));
       var v = await chooseMapDialog<int>(
         context,
-        title: "重命名资料夹",
+        title: context.l10n.tr("重命名资料夹", en: "Rename folder"),
         values: Map.fromEntries(j),
       );
       if (v != null && v != 0) {
-        var name = await displayTextInputDialog(context,
-            title: "重命名收藏文件夹", hint: "文件夹名称");
+        var name = await displayTextInputDialog(
+          context,
+          title: context.l10n.tr("重命名收藏文件夹", en: "Rename favorites folder"),
+          hint: context.l10n.tr("文件夹名称", en: "Folder name"),
+        );
         if (name == null) {
           return;
         }
         await methods.renameFavoriteFolder(v, name);
         fav(context);
-        defaultToast(context, "重命名成功");
+        defaultToast(
+            context, context.l10n.tr("重命名成功", en: "Renamed successfully"));
       }
     },
   );
@@ -173,7 +192,7 @@ Future<void> enterGuestMode() async {
 
 Future<bool> ensureJwtAccess(
   BuildContext context, {
-  String feature = "该功能",
+  String? feature,
 }) async {
   if (hasJwtAccess) {
     return true;
@@ -181,23 +200,29 @@ Future<bool> ensureJwtAccess(
   final shouldLogin = await showDialog<bool>(
     context: context,
     builder: (BuildContext context) {
+      final l10n = context.l10n;
+      final targetFeature = feature ?? l10n.tr("该功能", en: "This feature");
       return AlertDialog(
-        title: const Text("登录提醒"),
+        title: Text(l10n.tr("登录提醒", en: "Login required")),
         content: Text(
-          isGuestMode ? "当前是游客模式，$feature 需要登录后才能使用。" : "$feature 需要登录后才能使用。",
+          isGuestMode
+              ? l10n.tr("当前是游客模式，$targetFeature 需要登录后才能使用。",
+                  en: "Guest mode is active. $targetFeature requires login.")
+              : l10n.tr("$targetFeature 需要登录后才能使用。",
+                  en: "$targetFeature requires login."),
         ),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(context).pop(false);
             },
-            child: const Text("取消"),
+            child: Text(l10n.tr("取消", en: "Cancel")),
           ),
           TextButton(
             onPressed: () {
               Navigator.of(context).pop(true);
             },
-            child: const Text("去登录"),
+            child: Text(l10n.tr("去登录", en: "Go login")),
           ),
         ],
       );
@@ -245,8 +270,9 @@ Future showUserAgreementBottomSheet(BuildContext context) {
 Widget userAgreementSetting(BuildContext context) {
   return ListTile(
     onTap: () => showUserAgreementBottomSheet(context),
-    title: const Text("用户协议"),
-    subtitle: const Text("查看当前应用使用协议"),
+    title: Text(context.l10n.tr("用户协议", en: "User agreement")),
+    subtitle:
+        Text(context.l10n.tr("查看当前应用使用协议", en: "View current app agreement")),
   );
 }
 
@@ -273,10 +299,12 @@ class LoginAgreementHint extends StatelessWidget {
       child: Wrap(
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          Text("登录即为同意 ", style: agreeStyle),
+          Text(context.l10n.tr("登录即为同意 ", en: "By logging in you agree to "),
+              style: agreeStyle),
           InkWell(
             onTap: () => showLoginAgreementBottomSheet(context),
-            child: Text("使用协议", style: agreeLinkStyle),
+            child: Text(context.l10n.tr("使用协议", en: "Terms of use"),
+                style: agreeLinkStyle),
           ),
         ],
       ),
@@ -291,7 +319,6 @@ class _LoginAgreementSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final bodyStyle = textTheme.bodyMedium;
-    final captionStyle = textTheme.bodySmall?.copyWith(color: Colors.grey);
     return Material(
       color: Theme.of(context).scaffoldBackgroundColor,
       child: SafeArea(
@@ -306,7 +333,7 @@ class _LoginAgreementSheet extends StatelessWidget {
                 ),
                 Expanded(
                   child: Text(
-                    "使用协议",
+                    context.l10n.tr("使用协议", en: "Terms of use"),
                     style: textTheme.titleMedium,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -321,32 +348,50 @@ class _LoginAgreementSheet extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
                 children: [
                   Text(
-                    "继续登录/使用即表示您已阅读并同意以下内容：",
+                    context.l10n.tr(
+                      "继续登录/使用即表示您已阅读并同意以下内容：",
+                      en: "By continuing to login/use, you acknowledge and agree to:",
+                    ),
                     style: bodyStyle,
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    "1. 为保障安全与改进服务，您的登录、浏览、搜索、下载等操作记录（含必要的设备与网络信息）可能会被供应商或服务器保存与分析。",
+                    context.l10n.tr(
+                      "1. 为保障安全与改进服务，您的登录、浏览、搜索、下载等操作记录（含必要的设备与网络信息）可能会被供应商或服务器保存与分析。",
+                      en: "1. To ensure security and improve services, your login, browsing, search, and download records (including necessary device/network info) may be stored and analyzed by providers or servers.",
+                    ),
                     style: bodyStyle,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    "2. 请勿上传、传播或利用本服务从事任何违法违规行为；如涉及敏感内容，请自行审慎判断并遵守当地法律法规。；因此产生的后果由您自行承担。",
+                    context.l10n.tr(
+                      "2. 请勿上传、传播或利用本服务从事任何违法违规行为；如涉及敏感内容，请自行审慎判断并遵守当地法律法规。；因此产生的后果由您自行承担。",
+                      en: "2. Do not upload, spread, or use this service for illegal activities. For sensitive content, use your own judgment and comply with local laws and regulations. You are responsible for all consequences.",
+                    ),
                     style: bodyStyle,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    "3. 本应用展示的任何信息仅供参考与交流，不构成医疗/诊断/治疗建议；因此产生的后果（含生理、病理等）由您自行承担。",
+                    context.l10n.tr(
+                      "3. 本应用展示的任何信息仅供参考与交流，不构成医疗/诊断/治疗建议；因此产生的后果（含生理、病理等）由您自行承担。",
+                      en: "3. Any information shown in this app is for reference and communication only, and does not constitute medical/diagnostic/treatment advice. You are responsible for any resulting consequences.",
+                    ),
                     style: bodyStyle,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    "4. 我们可能在必要时更新协议内容；更新后继续使用视为您接受更新。",
+                    context.l10n.tr(
+                      "4. 我们可能在必要时更新协议内容；更新后继续使用视为您接受更新。",
+                      en: "4. We may update these terms when necessary. Continuing to use the app after updates means you accept the changes.",
+                    ),
                     style: bodyStyle,
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    "* 若您不同意上述条款，请停止登录并退出使用。",
+                    context.l10n.tr(
+                      "* 若您不同意上述条款，请停止登录并退出使用。",
+                      en: "* If you do not agree with the terms above, please stop logging in and exit the app.",
+                    ),
                     // style: captionStyle,
                   ),
                 ],
@@ -359,11 +404,11 @@ class _LoginAgreementSheet extends StatelessWidget {
                 child: MaterialButton(
                   color: Colors.orange.shade700,
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Padding(
-                    padding: EdgeInsets.all(10),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
                     child: Text(
-                      "我知道了",
-                      style: TextStyle(color: Colors.white),
+                      context.l10n.tr("我知道了", en: "Got it"),
+                      style: const TextStyle(color: Colors.white),
                     ),
                   ),
                 ),
@@ -424,14 +469,18 @@ class _LoginDialogState extends State<_LoginDialog> {
               ],
             ),
             ListTile(
-              title: Text("账号"),
-              subtitle: Text(_username == "" ? "未设置" : _username),
+              title: Text(context.l10n.account),
+              subtitle: Text(
+                _username == ""
+                    ? context.l10n.tr("未设置", en: "Not set")
+                    : _username,
+              ),
               onTap: () async {
                 String? input = await displayTextInputDialog(
                   context,
                   src: _username,
-                  title: '账号',
-                  hint: '请输入账号',
+                  title: context.l10n.account,
+                  hint: context.l10n.inputAccount,
                 );
                 if (input != null) {
                   setState(() {
@@ -441,14 +490,18 @@ class _LoginDialogState extends State<_LoginDialog> {
               },
             ),
             ListTile(
-              title: const Text("密码"),
-              subtitle: Text(_password == "" ? "未设置" : '\u2022' * 10),
+              title: Text(context.l10n.password),
+              subtitle: Text(
+                _password == ""
+                    ? context.l10n.tr("未设置", en: "Not set")
+                    : '\u2022' * 10,
+              ),
               onTap: () async {
                 String? input = await displayTextInputDialog(
                   context,
                   src: _password,
-                  title: '密码',
-                  hint: '请输入密码',
+                  title: context.l10n.password,
+                  hint: context.l10n.inputPassword,
                   isPasswd: true,
                 );
                 if (input != null) {
@@ -469,7 +522,7 @@ class _LoginDialogState extends State<_LoginDialog> {
                       await enterGuestMode();
                       await reloadIsPro();
                     },
-                    child: const Text("游客模式"),
+                    child: Text(context.l10n.guestMode),
                   ),
                 ),
                 Container(
@@ -483,8 +536,8 @@ class _LoginDialogState extends State<_LoginDialog> {
                     },
                     child: Container(
                       padding: const EdgeInsets.all(10),
-                      child: const Text(
-                        "保存",
+                      child: Text(
+                        context.l10n.tr("保存", en: "Save"),
                         style: TextStyle(color: Colors.white),
                       ),
                     ),

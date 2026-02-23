@@ -2,6 +2,7 @@ import 'package:event/event.dart';
 import 'package:flutter/material.dart';
 import 'package:jmcomic3/basic/entities.dart';
 import 'package:jmcomic3/basic/methods.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
 import '../../basic/commons.dart';
 import 'floating_search_bar.dart';
@@ -91,14 +92,17 @@ class _ComicFloatingSearchBarScreenState
     if (_histories.isEmpty) {
       return [];
     }
+    final l10n = context.l10n;
+    final yes = l10n.yes;
+    final no = l10n.no;
     final List<Widget> widgets = [];
-    widgets.add(_buildTitle("历史记录", clear: () async {
+    widgets.add(_buildTitle(l10n.tr("历史记录", en: "History"), clear: () async {
       String? choose = await chooseListDialog(
         context,
-        values: ["是", "否"],
-        title: "清除所有历史记录?",
+        values: [yes, no],
+        title: l10n.tr("清除所有历史记录?", en: "Clear all history?"),
       );
-      if ("是" == choose) {
+      if (yes == choose) {
         await methods.clearAllSearchLog();
         _histories.clear();
         _setState(null);
@@ -113,10 +117,13 @@ class _ComicFloatingSearchBarScreenState
           onLongPress: () async {
             String? choose = await chooseListDialog(
               context,
-              values: ["是", "否"],
-              title: "清除历史记录\"${e.searchQuery}\"?",
+              values: [yes, no],
+              title: l10n.tr(
+                "清除历史记录\"${e.searchQuery}\"?",
+                en: "Clear history \"${e.searchQuery}\"?",
+              ),
             );
-            if ("是" == choose) {
+            if (yes == choose) {
               await methods.clearASearchLog(e.searchQuery);
               _histories.remove(e);
               _setState(null);
@@ -161,8 +168,9 @@ class _ComicFloatingSearchBarScreenState
   }
 
   List<Widget> _buildTags() {
+    final l10n = context.l10n;
     final List<Widget> widgets = [];
-    widgets.add(_buildTitle("板块"));
+    widgets.add(_buildTitle(l10n.tr("板块", en: "Blocks")));
     for (final block in _blockStore) {
       widgets.add(_buildSubTitle(block.title));
       widgets.add(Wrap(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
 import 'content_error.dart';
 import 'content_loading.dart';
@@ -14,7 +15,7 @@ class ContentBuilder<T> extends StatelessWidget {
     required this.future,
     required this.onRefresh,
     required this.successBuilder,
-    this.loadingLabel = '加载中...',
+    this.loadingLabel = '',
   });
 
   @override
@@ -30,7 +31,11 @@ class ContentBuilder<T> extends StatelessWidget {
           );
         }
         if (snapshot.connectionState != ConnectionState.done) {
-          return ContentLoading(label: loadingLabel);
+          return ContentLoading(
+            label: loadingLabel.isEmpty
+                ? context.l10n.tr('加载中...', en: 'Loading...')
+                : loadingLabel,
+          );
         }
         return successBuilder(context, snapshot);
       },

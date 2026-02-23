@@ -1,8 +1,7 @@
 /// 自动全屏
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
 import '../basic/commons.dart';
 import '../basic/methods.dart';
@@ -23,10 +22,12 @@ bool currentDisplayJmcode() {
 }
 
 Future<void> _chooseDisplayJmcode(BuildContext context) async {
+  final l10n = context.l10n;
   String? result = await chooseListDialog<String>(context,
-      title: "显示漫画代码", values: ["是", "否"]);
+      title: l10n.tr("显示漫画代码", en: "Show comic code"),
+      values: [l10n.yes, l10n.no]);
   if (result != null) {
-    var target = result == "是";
+    var target = result == l10n.yes;
     await methods.saveProperty(_propertyName, "$target");
     _displayJmcode = target;
   }
@@ -36,8 +37,8 @@ Widget displayJmcodeSetting() {
   return StatefulBuilder(
     builder: (BuildContext context, void Function(void Function()) setState) {
       return ListTile(
-        title: const Text("显示漫画代码"),
-        subtitle: Text(_displayJmcode ? "是" : "否"),
+        title: Text(context.l10n.tr("显示漫画代码", en: "Show comic code")),
+        subtitle: Text(context.l10n.boolLabel(_displayJmcode)),
         onTap: () async {
           await _chooseDisplayJmcode(context);
           setState(() {});

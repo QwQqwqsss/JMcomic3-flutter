@@ -12,13 +12,13 @@ class SortBy {
   }
 }
 
-const sortByDefault = SortBy._("", "默认");
-const sortByNew = SortBy._("mr", "最新");
-const sortByLike = SortBy._("tf", "心");
-const sortByView = SortBy._("mv", "查看");
-const sortByViewDay = SortBy._("mv_t", "日榜");
-const sortByViewWeek = SortBy._("mv_w", "周榜");
-const sortByViewMonth = SortBy._("mv_m", "月榜");
+const sortByDefault = SortBy._("", "default");
+const sortByNew = SortBy._("mr", "newest");
+const sortByLike = SortBy._("tf", "like");
+const sortByView = SortBy._("mv", "views");
+const sortByViewDay = SortBy._("mv_t", "daily");
+const sortByViewWeek = SortBy._("mv_w", "weekly");
+const sortByViewMonth = SortBy._("mv_m", "monthly");
 
 const sorts = [
   sortByDefault,
@@ -1268,7 +1268,7 @@ ComicBasic albumToSimple(AlbumResponse album) {
     description: album.description,
     name: album.name,
     author: album.author.join(" / "),
-    image: album.images.isEmpty ? '' : album.images[0] ?? '',
+    image: album.images.isEmpty ? '' : album.images[0],
   );
 }
 

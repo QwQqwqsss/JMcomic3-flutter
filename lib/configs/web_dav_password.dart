@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
 import '../basic/commons.dart';
 import '../basic/methods.dart';
@@ -13,16 +14,18 @@ Future<String?> initWebDavPassword() async {
   return null;
 }
 
-String currentWebDavPasswordName() {
-  return _currentWebDavPassword == "" ? "未设置" : _currentWebDavPassword;
+String currentWebDavPasswordName(BuildContext context) {
+  return _currentWebDavPassword == ""
+      ? context.l10n.tr("未设置", en: "Not set")
+      : _currentWebDavPassword;
 }
 
 Future<dynamic> inputWebDavPassword(BuildContext context) async {
   String? input = await displayTextInputDialog(
     context,
     src: _currentWebDavPassword,
-    title: 'WebDAV密码',
-    hint: '请输入WebDAV密码',
+    title: context.l10n.tr('WebDAV密码', en: 'WebDAV password'),
+    hint: context.l10n.tr('请输入WebDAV密码', en: 'Enter WebDAV password'),
   );
   if (input != null) {
     await methods.saveProperty(_propertyName, input);
@@ -34,8 +37,8 @@ Widget webDavPasswordSetting() {
   return StatefulBuilder(
     builder: (BuildContext context, void Function(void Function()) setState) {
       return ListTile(
-        title: const Text("WebDAV密码"),
-        subtitle: Text(currentWebDavPasswordName()),
+        title: Text(context.l10n.tr("WebDAV密码", en: "WebDAV password")),
+        subtitle: Text(currentWebDavPasswordName(context)),
         onTap: () async {
           await inputWebDavPassword(context);
           setState(() {});

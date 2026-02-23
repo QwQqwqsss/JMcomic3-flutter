@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
@@ -16,7 +16,7 @@ class Methods {
   static const _channel = MethodChannel("methods");
   static HttpClient httpClient = HttpClient();
 
-  Future<String> _invoke(String method, dynamic params) async {
+  Future<String> _invokeRaw(String method, dynamic params) async {
     late String resp;
     // if (Platform.isLinux) {
     //   var req = await httpClient.post("127.0.0.1", 52764, "invoke");
@@ -35,8 +35,13 @@ class Methods {
             "params": params is String ? params : jsonEncode(params),
           }));
     }
+    return resp;
+  }
 
-    var response = _Response.fromJson(jsonDecode(resp));
+  Future<String> _invoke(String method, dynamic params) async {
+    final resp = await _invokeRaw(method, params);
+    final response = _Response.fromJson(jsonDecode(resp));
+
     if (response.errorMessage.isNotEmpty) {
       throw StateError(response.errorMessage);
     }
@@ -296,31 +301,23 @@ class Methods {
         .toList()
         .cast<SearchHistory>();
   }
-
-  /// 下载列表
-  Future<List<DownloadAlbum>> allDownloads() async {
+  /// Download list`r`n  Future<List<DownloadAlbum>> allDownloads() async {
     return List.of(jsonDecode(await _invoke("all_downloads", "")))
         .map((e) => DownloadAlbum.fromJson(e))
         .toList()
         .cast<DownloadAlbum>();
   }
-
-  /// 寻找下载
-  Future<DownloadCreate?> downloadById(int id) async {
+  /// Find download item`r`n  Future<DownloadCreate?> downloadById(int id) async {
     var map = jsonDecode(await _invoke("download_by_id", "$id"));
     if (map == null) {
       return map;
     }
     return DownloadCreate.fromJson(map);
   }
-
-  /// 创建下载
-  Future<dynamic> createDownload(DownloadCreate create) async {
+  /// Create download task`r`n  Future<dynamic> createDownload(DownloadCreate create) async {
     return _invoke("create_download", create);
   }
-
-  /// 下载图片列表
-  Future<List<DlImage>> dlImageByChapterId(int id) async {
+  /// Download image list`r`n  Future<List<DlImage>> dlImageByChapterId(int id) async {
     return List.of(jsonDecode(await _invoke("dl_image_by_chapter_id", "$id")))
         .map((e) => DlImage.fromJson(e))
         .toList()
@@ -334,22 +331,16 @@ class Methods {
   Future<dynamic> renewAllDownloads() async {
     return _invoke("renew_all_downloads", "");
   }
-
-  /// 获取安卓的屏幕刷新率
-  Future<List<String>> loadAndroidModes() async {
+  /// Get Android refresh modes`r`n  Future<List<String>> loadAndroidModes() async {
     return List.of(await _channel.invokeMethod("androidGetModes"))
         .map((e) => "$e")
         .toList();
   }
-
-  /// 设置安卓的屏幕刷新率
-  Future setAndroidMode(String androidDisplayMode) {
+  /// Set Android refresh mode`r`n  Future setAndroidMode(String androidDisplayMode) {
     return _channel
         .invokeMethod("androidSetMode", {"mode": androidDisplayMode});
   }
-
-  /// 获取安卓的版本
-  Future<int> androidGetVersion() async {
+  /// Get Android SDK version`r`n  Future<int> androidGetVersion() async {
     if (Platform.isAndroid) {
       return await _channel.invokeMethod("androidGetVersion", {});
     }

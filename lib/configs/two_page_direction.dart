@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jmcomic3/basic/commons.dart';
 import 'package:jmcomic3/basic/methods.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
 enum TwoPageDirection {
   leftToRight,
@@ -28,9 +29,9 @@ TwoPageDirection get currentTwoPageDirection => _twoPageDirection;
 String twoPageDirectionName(TwoPageDirection direction, BuildContext context) {
   switch (direction) {
     case TwoPageDirection.leftToRight:
-      return "从左到右";
+      return context.l10n.tr("从左到右", en: "Left to right");
     case TwoPageDirection.rightToLeft:
-      return "从右到左";
+      return context.l10n.tr("从右到左", en: "Right to left");
   }
 }
 
@@ -41,7 +42,7 @@ Future chooseTwoPageDirection(BuildContext context) async {
   }
   final newTwoPageDirection = await chooseMapDialog(
     context,
-    title: "请选择阅读器方向",
+    title: context.l10n.tr("请选择阅读器方向", en: "Choose reader direction"),
     values: map,
   );
   if (newTwoPageDirection != null) {
@@ -58,7 +59,9 @@ Widget twoGalleryDirectionSetting(BuildContext context) {
           await chooseTwoPageDirection(context);
           setState(() {});
         },
-        title: const Text("双页阅读器方向"),
+        title: Text(
+          context.l10n.tr("双页阅读器方向", en: "Two-page reader direction"),
+        ),
         subtitle: Text(twoPageDirectionName(_twoPageDirection, context)),
       );
     },

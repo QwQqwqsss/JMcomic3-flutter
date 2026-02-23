@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
-import '../basic/commons.dart';
 import '../basic/methods.dart';
 import 'is_pro.dart';
 
@@ -9,7 +9,7 @@ late bool _ignoreUpgradePop;
 
 Future<void> initIgnoreUpgradePop() async {
   _ignoreUpgradePop = (await methods.loadProperty(_propertyName)) == "true";
-  if (!isPro) {
+  if (!hasProAccess) {
     _ignoreUpgradePop = false;
   }
 }
@@ -23,20 +23,20 @@ Widget ignoreUpgradePopSetting() {
     builder: (BuildContext context, void Function(void Function()) setState) {
       return SwitchListTile(
         title: Text(
-          "是否忽略升级弹窗",
+          context.l10n.tr("是否忽略升级弹窗", en: "Ignore upgrade prompts"),
           style: TextStyle(
-            color: !isPro ? Colors.grey : null,
+            color: !hasProAccess ? Colors.grey : null,
           ),
         ),
         subtitle: Text(
-          _ignoreUpgradePop ? "是" : "否",
+          context.l10n.boolLabel(_ignoreUpgradePop),
           style: TextStyle(
-            color: !isPro ? Colors.grey : null,
+            color: !hasProAccess ? Colors.grey : null,
           ),
         ),
         value: _ignoreUpgradePop,
         onChanged: (value) async {
-          if (!isPro) {
+          if (!hasProAccess) {
             return;
           }
           await methods.saveProperty(_propertyName, "$value");

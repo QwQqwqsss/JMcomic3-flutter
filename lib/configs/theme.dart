@@ -1,6 +1,7 @@
 import 'package:event/event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
 import '../basic/commons.dart';
 import '../basic/methods.dart';
@@ -28,11 +29,13 @@ ThemeData get darkTheme => theme != "1" ? _darkTheme : _lightTheme;
 const _propertyName = "theme";
 late String theme = "0";
 
-Map<String, String> _nameMap = {
-  "0": "自动 (如果设备支持)",
-  "1": "保持亮色",
-  "2": "保持暗色",
-};
+Map<String, String> _nameMap(BuildContext context) {
+  return {
+    "0": context.l10n.tr("自动 (如果设备支持)", en: "Auto (if supported)"),
+    "1": context.l10n.tr("保持亮色", en: "Always light"),
+    "2": context.l10n.tr("保持暗色", en: "Always dark"),
+  };
+}
 
 ThemeData _buildAppTheme(ColorScheme scheme, Brightness brightness) {
   final typography = Typography.material2021();
@@ -300,14 +303,15 @@ Future initTheme() async {
   _reloadBarColor();
 }
 
-String themeName() {
-  return _nameMap[theme] ?? "-";
+String themeName(BuildContext context) {
+  return _nameMap(context)[theme] ?? "-";
 }
 
 Future chooseTheme(BuildContext context) async {
+  final nameMap = _nameMap(context);
   String? choose = await chooseMapDialog(context,
-      title: "选择主题",
-      values: _nameMap.map((key, value) => MapEntry(value, key)));
+      title: context.l10n.tr("选择主题", en: "Choose theme"),
+      values: nameMap.map((key, value) => MapEntry(value, key)));
   if (choose != null) {
     await methods.saveProperty(_propertyName, choose);
     theme = choose;
@@ -352,8 +356,8 @@ Widget themeSetting(BuildContext context) {
           await chooseTheme(context);
           setState(() => {});
         },
-        title: const Text("主题"),
-        subtitle: Text(_nameMap[theme] ?? ""),
+        title: Text(context.l10n.tr("主题", en: "Theme")),
+        subtitle: Text(themeName(context)),
       );
     },
   );

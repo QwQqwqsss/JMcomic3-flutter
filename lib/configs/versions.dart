@@ -192,7 +192,7 @@ Future<Map<String, dynamic>> _fetchLatestReleaseJson() async {
   }
   if (lastError != null) {
     // ignore: only_throw_errors
-    throw lastError!;
+    throw lastError;
   }
   return <String, dynamic>{};
 }
@@ -451,9 +451,7 @@ class TopConfirm {
         },
       );
     });
-    OverlayState? overlay = Overlay.of(context);
-    if (overlay != null) {
-      overlay.insert(overlayEntry);
-    }
+    final overlay = Overlay.of(context);
+    overlay.insert(overlayEntry);
   }
 }

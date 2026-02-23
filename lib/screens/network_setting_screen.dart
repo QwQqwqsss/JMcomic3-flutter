@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 import 'package:jmcomic3/configs/network_api_host.dart';
 import 'package:jmcomic3/configs/network_cdn_host.dart';
 import 'package:jmcomic3/configs/proxy.dart';
@@ -18,7 +19,7 @@ class NetworkSettingScreen extends StatelessWidget {
   Widget buildScreen(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("网络设置"),
+        title: Text(context.l10n.networkSettings),
         actions: [
           IconButton(
             onPressed: () {

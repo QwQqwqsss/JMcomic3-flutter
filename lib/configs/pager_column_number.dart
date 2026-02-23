@@ -2,6 +2,7 @@ import 'package:event/event.dart';
 import 'package:flutter/material.dart';
 import 'package:jmcomic3/basic/commons.dart';
 import 'package:jmcomic3/basic/methods.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
 const _propertyName = "pager_column_number";
 late int _pagerColumnNumber;
@@ -20,7 +21,7 @@ Future initPagerColumnCount() async {
 Future choosePagerColumnCount(BuildContext context) async {
   final choose = await chooseListDialog(
     context,
-    title: "分页每行漫画数",
+    title: context.l10n.tr("分页每行漫画数", en: "Comics per row"),
     values: List<int>.generate(10, (i) => i + 1),
   );
   if (choose != null) {

@@ -42,17 +42,9 @@ class _RecommendLinksPanelState extends State<RecommendLinksPanel> {
     if (links.isEmpty) {
       return const SizedBox.shrink();
     }
-    if (isPro && currentDisableRecommendContent()) {
+    if (hasProAccess && currentDisableRecommendContent()) {
       return const SizedBox.shrink();
     }
-
-    final captionStyle =
-        Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey);
-    final linkStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
-          decoration: TextDecoration.underline,
-          decorationColor: Colors.grey.shade600,
-          color: Colors.grey.shade600,
-        );
 
     final filteredLinks = links.entries.where((entry) {
       return !entry.key.contains("网络加速");

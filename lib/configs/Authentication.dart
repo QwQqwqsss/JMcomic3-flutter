@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
 import '../basic/commons.dart';
 import '../basic/methods.dart';
@@ -42,9 +43,13 @@ Widget authenticationSetting() {
   if (Platform.isIOS || androidVersion >= 29) {
     return StatefulBuilder(
       builder: (BuildContext context, void Function(void Function()) setState) {
+        final l10n = context.l10n;
         return ListTile(
-          title: const Text("进入APP时验证身份？如果系统已经录入密码或指纹"),
-          subtitle: Text(_authentication ? "是" : "否"),
+          title: Text(l10n.tr(
+            "进入APP时验证身份？如果系统已经录入密码或指纹",
+            en: "Verify identity when entering app? (if system credential exists)",
+          )),
+          subtitle: Text(l10n.boolLabel(_authentication)),
           onTap: () async {
             await _chooseAuthentication(context);
             setState(() {});
@@ -58,8 +63,9 @@ Widget authenticationSetting() {
       BuildContext context,
       void Function(void Function()) setState,
     ) {
+      final l10n = context.l10n;
       return ListTile(
-        title: const Text("设置应用程序密码"),
+        title: Text(l10n.tr("设置应用程序密码", en: "Set application password")),
         onTap: () async {
           Navigator.of(context).push(
               MaterialPageRoute(builder: (context) => const SetPassword()));
@@ -72,13 +78,14 @@ Widget authenticationSetting() {
 
 Future<void> _chooseAuthentication(BuildContext context) async {
   if (await methods.verifyAuthentication()) {
+    final l10n = context.l10n;
     String? result = await chooseListDialog<String>(
       context,
-      title: "进入APP时验证身份？",
-      values: ["是", "否"],
+      title: l10n.tr("进入APP时验证身份？", en: "Verify identity when entering app?"),
+      values: [l10n.yes, l10n.no],
     );
     if (result != null) {
-      var target = result == "是";
+      var target = result == l10n.yes;
       await methods.saveProperty(_propertyName, "$target");
       _authentication = target;
     }

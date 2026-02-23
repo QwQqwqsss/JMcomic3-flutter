@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:jmcomic3/basic/methods.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
 late String _cdnHost;
 
@@ -49,7 +50,7 @@ Widget cdnHostSetting() {
           await chooseCdnHost(context);
           setState(() {});
         },
-        title: const Text("图片分流"),
+        title: Text(context.l10n.tr("图片分流", en: "Image routing")),
         subtitle: Text(_cdnHost),
       );
     },
@@ -62,7 +63,7 @@ Future<T?> chooseCdnDialog<T>(BuildContext buildContext) async {
     builder: (BuildContext context) {
       final dialogWidth = MediaQuery.of(context).size.width * 0.86;
       return SimpleDialog(
-        title: const Text("图片分流"),
+        title: Text(context.l10n.tr("图片分流", en: "Image routing")),
         children: [
           ..._cdnList.map(
             (e) => SimpleDialogOption(
@@ -81,7 +82,7 @@ Future<T?> chooseCdnDialog<T>(BuildContext buildContext) async {
           SimpleDialogOption(
             child: SizedBox(
               width: dialogWidth,
-              child: const Text("手动输入"),
+              child: Text(context.l10n.tr("手动输入", en: "Manual input")),
             ),
             onPressed: () async {
               Navigator.of(context).pop(await _manualInputApiHost(context));
@@ -90,7 +91,7 @@ Future<T?> chooseCdnDialog<T>(BuildContext buildContext) async {
           SimpleDialogOption(
             child: SizedBox(
               width: dialogWidth,
-              child: const Text("取消"),
+              child: Text(context.l10n.tr("取消", en: "Cancel")),
             ),
             onPressed: () {
               Navigator.of(context).pop(null);
@@ -110,7 +111,7 @@ Future<String> _manualInputApiHost(BuildContext context) async {
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: const Text("手动输入CDN地址"),
+        title: Text(context.l10n.tr("手动输入CDN地址", en: "Enter CDN address manually")),
         content: TextField(
           controller: _controller,
           decoration: const InputDecoration(
@@ -122,13 +123,13 @@ Future<String> _manualInputApiHost(BuildContext context) async {
             onPressed: () {
               Navigator.of(context).pop();
             },
-            child: const Text("取消"),
+            child: Text(context.l10n.tr("取消", en: "Cancel")),
           ),
           TextButton(
             onPressed: () async {
               Navigator.of(context).pop(_controller.text);
             },
-            child: const Text("确定"),
+            child: Text(context.l10n.confirm),
           ),
         ],
       );
@@ -176,14 +177,14 @@ class _CdnOptionRowState extends State<CdnOptionRow> {
               AsyncSnapshot<int> snapshot,
             ) {
               if (snapshot.connectionState != ConnectionState.done) {
-                return const PingStatus(
-                  "\u6d4b\u901f\u4e2d",
+                return PingStatus(
+                  context.l10n.tr("测速中", en: "Testing"),
                   Colors.blue,
                 );
               }
               if (snapshot.hasError) {
-                return const PingStatus(
-                  "\u5931\u8d25",
+                return PingStatus(
+                  context.l10n.tr("失败", en: "Failed"),
                   Colors.red,
                 );
               }

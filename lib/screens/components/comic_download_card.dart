@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
 import '../../basic/methods.dart';
 import 'images.dart';
@@ -65,24 +66,34 @@ class ComicDownloadCard extends StatelessWidget {
                 ])),
                 ...(comic.dlStatus == 0)
                     ? [
-                        const Text("队列中", style: TextStyle(color: Colors.blue)),
+                        Text(
+                          context.l10n.tr("队列中", en: "Queued"),
+                          style: const TextStyle(color: Colors.blue),
+                        ),
                       ]
                     : [],
                 ...(comic.dlStatus == 1)
                     ? [
-                        const Text("已下载",
-                            style: TextStyle(color: Colors.green)),
+                        Text(
+                          context.l10n.tr("已下载", en: "Downloaded"),
+                          style: const TextStyle(color: Colors.green),
+                        ),
                       ]
                     : [],
                 ...(comic.dlStatus == 2)
                     ? [
-                        const Text("已失败", style: TextStyle(color: Colors.red)),
+                        Text(
+                          context.l10n.tr("已失败", en: "Failed"),
+                          style: const TextStyle(color: Colors.red),
+                        ),
                       ]
                     : [],
                 ...(comic.dlStatus == 3)
                     ? [
-                        const Text("删除中",
-                            style: TextStyle(color: Colors.orange)),
+                        Text(
+                          context.l10n.tr("删除中", en: "Deleting"),
+                          style: const TextStyle(color: Colors.orange),
+                        ),
                       ]
                     : [],
               ],

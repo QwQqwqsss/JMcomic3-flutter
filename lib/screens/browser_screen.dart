@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:jmcomic3/basic/methods.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 import 'package:jmcomic3/screens/components/comic_pager.dart';
 import 'package:jmcomic3/screens/components/content_builder.dart';
 import 'package:jmcomic3/screens/components/floating_search_bar.dart';
@@ -50,17 +51,17 @@ class _BrowserScreenWrapperState extends State<BrowserScreenWrapper> {
         return BrowserScreen(searchBarController: widget.searchBarController);
       case LoginStatus.loginField:
         return ContentError(
-          error: "请先登录",
+          error: context.l10n.pleaseLogin,
           stackTrace: StackTrace.current,
           onRefresh: () async {},
         );
       case LoginStatus.logging:
-        return const ContentLoading(
-          label: "登录中",
+        return ContentLoading(
+          label: context.l10n.loggingIn,
         );
       case LoginStatus.notSet:
         return ContentError(
-          error: "请先登录",
+          error: context.l10n.pleaseLogin,
           stackTrace: StackTrace.current,
           onRefresh: () async {},
         );
@@ -119,9 +120,10 @@ class _BrowserScreenState extends State<BrowserScreen>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(
-        title: const Text("浏览"),
+        title: Text(l10n.browse),
         actions: [
           IconButton(
             onPressed: () async {

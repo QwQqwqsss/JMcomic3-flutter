@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jmcomic3/basic/commons.dart';
 import 'package:jmcomic3/basic/log.dart';
 import 'package:jmcomic3/basic/methods.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
 const _propertyName = 'auto_clean';
 const _lastCleanPropertyName = 'auto_clean_last_clean_ts';
@@ -11,13 +12,13 @@ const _disabledValue = '0';
 late String autoClean;
 
 final Map<String, String> _nameMap = <String, String>{
-  _disabledValue: '关闭',
-  (3600 * 12).toString(): '12小时',
-  (3600 * 24).toString(): '1天',
-  (3600 * 24 * 3).toString(): '3天',
-  (3600 * 24 * 7).toString(): '1周',
-  (3600 * 24 * 30).toString(): '1月',
-  (3600 * 24 * 30 * 12).toString(): '1年',
+  _disabledValue: 'off',
+  (3600 * 12).toString(): '12h',
+  (3600 * 24).toString(): '1d',
+  (3600 * 24 * 3).toString(): '3d',
+  (3600 * 24 * 7).toString(): '1w',
+  (3600 * 24 * 30).toString(): '1m',
+  (3600 * 24 * 30 * 12).toString(): '1y',
 };
 
 bool _cleaning = false;
@@ -49,14 +50,47 @@ Future<void> initAutoClean() async {
 }
 
 String autoCleanName() {
-  return _nameMap[autoClean] ?? '${_autoCleanSeconds()}秒';
+  return _nameMap[autoClean] ?? '${_autoCleanSeconds()}s';
+}
+
+String autoCleanNameOf(BuildContext context) {
+  final raw = _nameMap[autoClean];
+  if (raw == null) {
+    final seconds = _autoCleanSeconds();
+    return context.l10n.tr('${seconds}秒', en: '${seconds}s');
+  }
+  return _autoCleanLabel(context, raw);
+}
+
+String _autoCleanLabel(BuildContext context, String raw) {
+  switch (raw) {
+    case 'off':
+      return context.l10n.tr('关闭', en: 'Off');
+    case '12h':
+      return context.l10n.tr('12小时', en: '12 hours');
+    case '1d':
+      return context.l10n.tr('1天', en: '1 day');
+    case '3d':
+      return context.l10n.tr('3天', en: '3 days');
+    case '1w':
+      return context.l10n.tr('1周', en: '1 week');
+    case '1m':
+      return context.l10n.tr('1月', en: '1 month');
+    case '1y':
+      return context.l10n.tr('1年', en: '1 year');
+    default:
+      return context.l10n.tr(raw);
+  }
 }
 
 Future<void> chooseAutoClean(BuildContext context) async {
+  final values = _nameMap.map(
+    (key, value) => MapEntry(_autoCleanLabel(context, value), key),
+  );
   final choose = await chooseMapDialog<String>(
     context,
-    title: '选择自动清理时间',
-    values: _nameMap.map((key, value) => MapEntry(value, key)),
+    title: context.l10n.tr('选择自动清理时间', en: 'Choose auto-clean interval'),
+    values: values,
   );
   if (choose == null || choose == autoClean) {
     return;
@@ -70,9 +104,15 @@ Future<void> chooseAutoClean(BuildContext context) async {
     await _saveLastCleanTs(_nowSeconds());
   }
   if (nowEnabled) {
-    defaultToast(context, '自动清理: ${autoCleanName()}');
+    defaultToast(
+      context,
+      context.l10n.tr(
+        '自动清理: ${autoCleanNameOf(context)}',
+        en: 'Auto clean: ${autoCleanNameOf(context)}',
+      ),
+    );
   } else {
-    defaultToast(context, '已关闭自动清理');
+    defaultToast(context, context.l10n.tr('已关闭自动清理', en: 'Auto clean disabled'));
   }
 }
 

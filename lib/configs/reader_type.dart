@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jmcomic3/basic/commons.dart';
 import 'package:jmcomic3/basic/methods.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
 enum ReaderType {
   webtoon,
@@ -32,11 +33,14 @@ String readerTypeName(ReaderType type, BuildContext context) {
     case ReaderType.webtoon:
       return "WebToon";
     case ReaderType.gallery:
-      return "相册";
+      return context.l10n.tr("相册", en: "Gallery");
     case ReaderType.webToonFreeZoom:
-      return "自由放大滚动 无法翻页";
+      return context.l10n.tr(
+        "自由放大滚动 无法翻页",
+        en: "Free zoom scroll (no page turn)",
+      );
     case ReaderType.twoPageGallery:
-      return "双页相册";
+      return context.l10n.tr("双页相册", en: "Two-page gallery");
   }
 }
 
@@ -47,7 +51,7 @@ Future chooseReaderType(BuildContext context) async {
   }
   final newReaderType = await chooseMapDialog(
     context,
-    title: "请选择阅读器类型",
+    title: context.l10n.tr("请选择阅读器类型", en: "Choose reader type"),
     values: map,
   );
   if (newReaderType != null) {

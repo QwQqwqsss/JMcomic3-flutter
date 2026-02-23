@@ -14,6 +14,7 @@ import 'package:jmcomic3/configs/reader_direction.dart';
 import 'package:jmcomic3/configs/reader_slider_position.dart';
 import 'package:jmcomic3/configs/reader_type.dart';
 import 'package:jmcomic3/configs/two_page_direction.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 import 'package:jmcomic3/screens/components/content_error.dart';
 import 'package:jmcomic3/screens/components/content_loading.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -909,7 +910,10 @@ abstract class _ComicReaderState extends State<_ComicReader> {
   void _onNextAction() {
     final nextId = _nextEpId;
     if (nextId == null) {
-      defaultToast(context, "已经到头了");
+      defaultToast(
+        context,
+        context.l10n.tr("已经到头了", en: "You have reached the end"),
+      );
       return;
     }
     widget.onChangeEp(nextId, _fullScreen);
@@ -930,8 +934,11 @@ class _EpChooserState extends State<_EpChooser> {
   @override
   Widget build(BuildContext context) {
     if (widget.chapter.series.isEmpty) {
-      return const Center(
-        child: Text("无章节可选择", style: TextStyle(color: Colors.white)),
+      return Center(
+        child: Text(
+          context.l10n.tr("无章节可选择", en: "No chapters available"),
+          style: const TextStyle(color: Colors.white),
+        ),
       );
     }
 
@@ -1003,7 +1010,7 @@ class _SettingPanelState extends State<_SettingPanel> {
             ),
             _bottomIcon(
               icon: Icons.control_camera_outlined,
-              title: currentReaderControllerTypeName(),
+              title: currentReaderControllerTypeName(context),
               onPressed: () async {
                 await chooseReaderControllerType(context);
                 setState(() {});
@@ -1011,7 +1018,7 @@ class _SettingPanelState extends State<_SettingPanel> {
             ),
             _bottomIcon(
               icon: Icons.straighten_sharp,
-              title: currentReaderSliderPositionName,
+              title: currentReaderSliderPositionName(context),
               onPressed: () async {
                 await chooseReaderSliderPosition(context);
                 setState(() {});
@@ -1229,7 +1236,11 @@ class _ComicReaderWebToonState extends _ComicReaderState {
         textColor: Colors.white,
         child: Container(
           padding: const EdgeInsets.only(top: 40, bottom: 40),
-          child: Text(super._hasNextEp() ? '下一章' : '结束阅读'),
+          child: Text(
+            super._hasNextEp()
+                ? context.l10n.tr('下一章', en: 'Next chapter')
+                : context.l10n.tr('结束阅读', en: 'Finish reading'),
+          ),
         ),
       ),
     );
@@ -1419,8 +1430,12 @@ class _ComicReaderGalleryState extends _ComicReaderState {
                 Navigator.of(context).pop();
               }
             },
-            child: Text(super._hasNextEp() ? '下一章' : '结束阅读',
-                style: const TextStyle(color: Colors.white)),
+            child: Text(
+              super._hasNextEp()
+                  ? context.l10n.tr('下一章', en: 'Next chapter')
+                  : context.l10n.tr('结束阅读', en: 'Finish reading'),
+              style: const TextStyle(color: Colors.white),
+            ),
           ),
         ),
       ),
@@ -1702,7 +1717,11 @@ class _ListViewReaderState extends _ComicReaderState
         textColor: Colors.white,
         child: Container(
           padding: const EdgeInsets.only(top: 40, bottom: 40),
-          child: Text(super._hasNextEp() ? '下一章' : '结束阅读'),
+          child: Text(
+            super._hasNextEp()
+                ? context.l10n.tr('下一章', en: 'Next chapter')
+                : context.l10n.tr('结束阅读', en: 'Finish reading'),
+          ),
         ),
       ),
     );
@@ -1993,7 +2012,9 @@ class _TwoPageGalleryReaderState extends _ComicReaderState {
               }
             },
             child: Text(
-              _hasNextEp() ? '下一章' : '结束阅读',
+              _hasNextEp()
+                  ? context.l10n.tr('下一章', en: 'Next chapter')
+                  : context.l10n.tr('结束阅读', en: 'Finish reading'),
               style: const TextStyle(color: Colors.white),
             ),
           ),

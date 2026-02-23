@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:jmcomic3/basic/http_client.dart';
 import 'package:jmcomic3/basic/methods.dart';
 import 'package:crypto/crypto.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 import 'package:pointycastle/export.dart' as pc;
 
 late String _apiHost;
@@ -184,7 +185,7 @@ Future<T?> chooseApiDialog<T>(BuildContext buildContext) async {
     context: buildContext,
     builder: (BuildContext context) {
       return SimpleDialog(
-        title: const Text("API分流"),
+        title: Text(context.l10n.tr("API分流", en: "API routing")),
         children: [
           ..._apiList.map(
             (e) => SimpleDialogOption(
@@ -198,13 +199,13 @@ Future<T?> chooseApiDialog<T>(BuildContext buildContext) async {
             ),
           ),
           SimpleDialogOption(
-            child: const Text("手动输入"),
+            child: Text(context.l10n.tr("手动输入", en: "Manual input")),
             onPressed: () async {
               Navigator.of(context).pop(await _manualInputApiHost(context));
             },
           ),
           SimpleDialogOption(
-            child: const Text("取消"),
+            child: Text(context.l10n.tr("取消", en: "Cancel")),
             onPressed: () {
               Navigator.of(context).pop(null);
             },
@@ -223,7 +224,7 @@ Future<String> _manualInputApiHost(BuildContext context) async {
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: const Text("手动输入API地址"),
+        title: Text(context.l10n.tr("手动输入API地址", en: "Enter API address manually")),
         content: TextField(
           controller: _controller,
           decoration: const InputDecoration(
@@ -235,13 +236,13 @@ Future<String> _manualInputApiHost(BuildContext context) async {
             onPressed: () {
               Navigator.of(context).pop();
             },
-            child: const Text("取消"),
+            child: Text(context.l10n.tr("取消", en: "Cancel")),
           ),
           TextButton(
             onPressed: () async {
               Navigator.of(context).pop(_controller.text);
             },
-            child: const Text("确定"),
+            child: Text(context.l10n.confirm),
           ),
         ],
       );
@@ -280,14 +281,14 @@ class _ApiOptionRowState extends State<ApiOptionRow> {
             AsyncSnapshot<int> snapshot,
           ) {
             if (snapshot.connectionState != ConnectionState.done) {
-              return const PingStatus(
-                "测速中",
+              return PingStatus(
+                context.l10n.tr("测速中", en: "Testing"),
                 Colors.blue,
               );
             }
             if (snapshot.hasError) {
-              return const PingStatus(
-                "失败",
+              return PingStatus(
+                context.l10n.tr("失败", en: "Failed"),
                 Colors.red,
               );
             }
@@ -353,7 +354,7 @@ Widget apiHostSetting() {
           await chooseApiHost(context);
           setState(() {});
         },
-        title: const Text("API分流"),
+        title: Text(context.l10n.tr("API分流", en: "API routing")),
         subtitle: Text(_apiHost),
       );
     },

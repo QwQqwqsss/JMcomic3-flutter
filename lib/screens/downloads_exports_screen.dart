@@ -1,14 +1,12 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:jmcomic3/basic/methods.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 import 'package:jmcomic3/screens/components/content_builder.dart';
-import 'package:permission_handler/permission_handler.dart';
 import '../basic/commons.dart';
 import 'components/comic_download_card.dart';
 import 'components/right_click_pop.dart';
 import 'downloads_exporting_screen.dart';
-import '../configs/android_version.dart';
+import 'downloads_export_shared.dart';
 
 class DownloadsExportScreen extends StatefulWidget {
   const DownloadsExportScreen({Key? key}) : super(key: key);
@@ -22,15 +20,7 @@ class _DownloadsExportScreenState extends State<DownloadsExportScreen> {
 
   @override
   void initState() {
-    _downloadsFuture = methods.allDownloads().then((value) {
-      List<DownloadAlbum> a = [];
-      for (var value1 in value) {
-        if (value1.dlStatus == 1) {
-          a.add(value1);
-        }
-      }
-      return a;
-    });
+    _downloadsFuture = _loadDownloads();
     super.initState();
   }
 
@@ -42,7 +32,7 @@ class _DownloadsExportScreenState extends State<DownloadsExportScreen> {
   Widget buildScreen(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("批量导出"),
+        title: Text(context.l10n.tr("批量导出", en: "Batch export")),
         actions: [
           FutureBuilder(
             future: _downloadsFuture,
@@ -66,15 +56,7 @@ class _DownloadsExportScreenState extends State<DownloadsExportScreen> {
         future: _downloadsFuture,
         onRefresh: () async {
           setState(() {
-            _downloadsFuture = methods.allDownloads().then((value) {
-              List<DownloadAlbum> a = [];
-              for (var value1 in value) {
-                if (value1.dlStatus == 1) {
-                  a.add(value1);
-                }
-              }
-              return a;
-            });
+            _downloadsFuture = _loadDownloads();
           });
         },
         successBuilder: (
@@ -117,6 +99,10 @@ class _DownloadsExportScreenState extends State<DownloadsExportScreen> {
 
   List<int> selected = [];
 
+  Future<List<DownloadAlbum>> _loadDownloads() {
+    return loadDownloadAlbums((album) => album.dlStatus == 1);
+  }
+
   Widget _selectAllButton(List<int> exportableIds) {
     return IconButton(
       onPressed: () async {
@@ -139,44 +125,29 @@ class _DownloadsExportScreenState extends State<DownloadsExportScreen> {
     return IconButton(
       onPressed: () async {
         if (selected.isEmpty) {
-          defaultToast(context, "请选择导出的内容");
+          defaultToast(
+            context,
+            context.l10n.tr("请选择导出的内容", en: "Please select content to export"),
+          );
           return;
         }
         if (!await androidMangeStorageRequest()) {
-          throw Exception("申请权限被拒绝");
+          throw Exception(context.l10n.tr("申请权限被拒绝", en: "Permission denied"));
         }
-        final exported = await Navigator.of(context).push(
+        await Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => DownloadsExportingScreen(
               idList: selected,
             ),
           ),
         );
-        _downloadsFuture = methods.allDownloads().then((value) {
-          List<DownloadAlbum> a = [];
-          for (var value1 in value) {
-            if (value1.dlStatus == 1) {
-              a.add(value1);
-            }
-          }
-          return a;
-        }).then((value) {
-          List<DownloadAlbum> a = [];
-          for (var value1 in value) {
-            a.add(value1);
-          }
-          return a;
-        });
-        var pre = selected;
+        _downloadsFuture = _loadDownloads();
+        final pre = List<int>.from(selected);
         setState(() {
           selected = [];
         });
         final result = await _downloadsFuture;
-        for (var value2 in result.map((e) => e.id)) {
-          if (pre.contains(value2)) {
-            selected.add(value2);
-          }
-        }
+        selected = restoreSelectedIds(pre, result);
         setState(() {});
       },
       icon: const Icon(

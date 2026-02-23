@@ -3,6 +3,7 @@ import 'package:jmcomic3/basic/commons.dart';
 import 'package:jmcomic3/basic/methods.dart';
 import 'package:jmcomic3/basic/navigator.dart';
 import 'package:jmcomic3/configs/login.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 import 'package:jmcomic3/screens/comic_search_screen.dart';
 import 'package:jmcomic3/screens/components/comic_info_card.dart';
 import 'package:jmcomic3/screens/components/comic_list.dart';
@@ -158,9 +159,18 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> with RouteAware {
               AlbumResponse album = snapshot.requireData;
 
               var _tabs = <Widget>[
-                Tab(text: '章节 (${album.series.length})'),
-                Tab(text: '评论 (${album.commentTotal})'),
-                Tab(text: '推荐 (${album.relatedList.length})'),
+                Tab(
+                  text:
+                      '${context.l10n.tr('章节', en: 'Chapters')} (${album.series.length})',
+                ),
+                Tab(
+                  text:
+                      '${context.l10n.tr('评论', en: 'Comments')} (${album.commentTotal})',
+                ),
+                Tab(
+                  text:
+                      '${context.l10n.tr('推荐', en: 'Recommended')} (${album.relatedList.length})',
+                ),
               ];
 
               final _views = [
@@ -281,7 +291,10 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> with RouteAware {
   }
 
   Future _changeFavourite(AlbumResponse data) async {
-    if (!await ensureJwtAccess(context, feature: "收藏")) {
+    if (!await ensureJwtAccess(
+      context,
+      feature: context.l10n.tr("收藏", en: "Favorites"),
+    )) {
       return;
     }
     setState(() {
@@ -292,21 +305,22 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> with RouteAware {
       setState(() {
         data.isFavorite = !data.isFavorite;
       });
-      defaultToast(context, "收藏成功");
+      defaultToast(context, context.l10n.tr("收藏成功", en: "Favorited"));
       if (data.isFavorite && favData.isNotEmpty) {
         var j = favData.map((i) {
           return MapEntry(i.name, i.fid);
         }).toList();
-        j.add(const MapEntry("默认 / 不移动", 0));
+        j.add(MapEntry(context.l10n.tr("默认 / 不移动", en: "Default / Keep"), 0));
         var v = await chooseMapDialog<int>(
           context,
-          title: "移动到资料夹",
+          title: context.l10n.tr("移动到资料夹", en: "Move to folder"),
           values: Map.fromEntries(j),
         );
         if (v != null && v != 0) {
           await methods.comicFavoriteFolderMove(data.id, v);
         }
-        defaultToast(context, "移动成功");
+        defaultToast(
+            context, context.l10n.tr("移动成功", en: "Moved successfully"));
       }
     } finally {
       setState(() {
@@ -345,7 +359,7 @@ class _ComicSerialsState extends State<_ComicSerials> {
 
   Widget _buildOneButton() {
     return MyFlatButton(
-      title: "开始阅读",
+      title: context.l10n.tr("开始阅读", en: "Start reading"),
       onPressed: () {
         _push(
           widget.comicSimple,
@@ -368,36 +382,6 @@ class _ComicSerialsState extends State<_ComicSerials> {
         spacing: 10,
         runSpacing: 10,
         alignment: WrapAlignment.spaceAround,
-        children: widget.album.series.map((e) {
-          return MaterialButton(
-            elevation:
-                Theme.of(context).colorScheme.brightness == Brightness.light
-                    ? 1
-                    : 0,
-            focusElevation: 0,
-            onPressed: () {
-              _push(widget.comicSimple, widget.album.series, e.id, 0);
-            },
-            color: Theme.of(context).colorScheme.brightness == Brightness.light
-                ? Colors.white
-                : Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.color
-                    ?.withOpacity(.17),
-            child: Text(
-              e.sort + (e.name == "" ? "" : (" - ${e.name}")),
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-
-  Widget _buildSeriesList() {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      child: Column(
         children: widget.album.series.map((e) {
           return MaterialButton(
             elevation:

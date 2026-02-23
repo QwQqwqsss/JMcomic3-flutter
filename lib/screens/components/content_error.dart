@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jmcomic3/basic/log.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 import 'error_types.dart';
 
 class ContentError extends StatelessWidget {
@@ -22,23 +23,32 @@ class ContentError extends StatelessWidget {
     switch (type) {
       case ERROR_TYPE_NETWORK:
         iconData = Icons.wifi_off_rounded;
-        message = "连接不上啦, 请检查网络";
+        message = context.l10n.tr(
+          "连接不上啦, 请检查网络",
+          en: "Cannot connect. Please check your network",
+        );
         break;
       case ERROR_TYPE_PERMISSION:
         iconData = Icons.highlight_off;
-        message = "没有权限或路径不可用";
+        message = context.l10n.tr(
+          "没有权限或路径不可用",
+          en: "No permission or path unavailable",
+        );
         break;
       case ERROR_TYPE_TIME:
         iconData = Icons.timer_off;
-        message = "请检查设备时间";
+        message = context.l10n.tr("请检查设备时间", en: "Please check device time");
         break;
       case ERROR_TYPE_UNDER_REVIEW:
         iconData = Icons.highlight_off;
-        message = "资源未审核或不可用";
+        message = context.l10n.tr(
+          "资源未审核或不可用",
+          en: "Resource is unavailable or under review",
+        );
         break;
       default:
         iconData = Icons.highlight_off;
-        message = "啊哦, 被玩坏了";
+        message = context.l10n.tr("啊哦, 被玩坏了", en: "Oops, something went wrong");
         break;
     }
     return LayoutBuilder(
@@ -80,7 +90,10 @@ class ContentError extends StatelessWidget {
                         textAlign: TextAlign.center,
                       ),
                     ),
-                    Text('(点击刷新)', style: TextStyle(fontSize: tipSize)),
+                    Text(
+                      context.l10n.tr('(点击刷新)', en: '(Tap to refresh)'),
+                      style: TextStyle(fontSize: tipSize),
+                    ),
                     Container(height: min / 15),
                     Text('$error', style: TextStyle(fontSize: infoSize)),
                     Expanded(child: Container()),

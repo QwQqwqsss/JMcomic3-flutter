@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jmcomic3/configs/login.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
 import 'components/comic_comments_list.dart';
 import 'components/right_click_pop.dart';
@@ -36,7 +37,7 @@ class _CommentsScreenState extends State<CommentsScreen>
   Widget buildScreen(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("讨论区"),
+        title: Text(context.l10n.discussion),
       ),
       body: _body(),
     );
@@ -52,9 +53,9 @@ class _CommentsScreenState extends State<CommentsScreen>
               _idx = v;
             });
           },
-          tabs: const [
-            Tab(text: "全部评论"),
-            Tab(text: "我的评论"),
+          tabs: [
+            Tab(text: context.l10n.allComments),
+            Tab(text: context.l10n.myComments),
           ],
         ),
         Expanded(
@@ -111,15 +112,18 @@ class _SelfCommentListState extends State<SelfCommentList> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            "请先登录",
+            context.l10n.tipLoginRequired,
             style: TextStyle(fontSize: 20, color: Colors.grey.shade600),
           ),
           const SizedBox(height: 10),
           TextButton(
             onPressed: () async {
-              await ensureJwtAccess(context, feature: "我的评论");
+              await ensureJwtAccess(
+                context,
+                feature: context.l10n.tipMyCommentsNeedLogin,
+              );
             },
-            child: const Text("去登录"),
+            child: Text(context.l10n.goLogin),
           ),
         ],
       ),

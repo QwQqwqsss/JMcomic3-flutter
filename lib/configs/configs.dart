@@ -6,6 +6,7 @@ import 'package:jmcomic3/configs/Authentication.dart';
 import 'package:jmcomic3/configs/android_display_mode.dart';
 import 'package:jmcomic3/configs/android_version.dart';
 import 'package:jmcomic3/configs/app_font_size.dart';
+import 'package:jmcomic3/configs/app_locale.dart';
 import 'package:jmcomic3/configs/app_orientation.dart';
 import 'package:jmcomic3/configs/display_jmcode.dart';
 import 'package:jmcomic3/configs/download_thread_count.dart';
@@ -65,6 +66,7 @@ Future initConfigs(BuildContext context) async {
   // Run periodic cache cleanup in background to avoid slowing startup.
   unawaited(runAutoCleanIfNeeded());
   await initTheme();
+  await initAppLocale();
   await reloadIsPro();
   await initDisableRecommendContent();
   await initRecommendLinks();

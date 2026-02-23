@@ -1,14 +1,12 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:jmcomic3/basic/methods.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 import 'package:jmcomic3/screens/components/content_builder.dart';
 import 'package:jmcomic3/screens/downloads_exporting_screen2.dart';
-import 'package:permission_handler/permission_handler.dart';
 import '../basic/commons.dart';
 import 'components/comic_download_card.dart';
 import 'components/right_click_pop.dart';
-import '../configs/android_version.dart';
+import 'downloads_export_shared.dart';
 
 class DownloadsExportScreen2 extends StatefulWidget {
   const DownloadsExportScreen2({Key? key}) : super(key: key);
@@ -22,15 +20,7 @@ class _DownloadsExportScreen2State extends State<DownloadsExportScreen2> {
 
   @override
   void initState() {
-    _downloadsFuture = methods.allDownloads().then((value) {
-      List<DownloadAlbum> a = [];
-      for (var value1 in value) {
-        if (value1.dlStatus != 3) {
-          a.add(value1);
-        }
-      }
-      return a;
-    });
+    _downloadsFuture = _loadDownloads();
     super.initState();
   }
 
@@ -42,7 +32,10 @@ class _DownloadsExportScreen2State extends State<DownloadsExportScreen2> {
   Widget buildScreen(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("批量导出(即使没有下载完)"),
+        title: Text(
+          context.l10n.tr("批量导出(即使没有下载完)",
+              en: "Batch export (including unfinished downloads)"),
+        ),
         actions: [
           FutureBuilder(
             future: _downloadsFuture,
@@ -66,15 +59,7 @@ class _DownloadsExportScreen2State extends State<DownloadsExportScreen2> {
         future: _downloadsFuture,
         onRefresh: () async {
           setState(() {
-            _downloadsFuture = methods.allDownloads().then((value) {
-              List<DownloadAlbum> a = [];
-              for (var value1 in value) {
-                if (value1.dlStatus != 3) {
-                  a.add(value1);
-                }
-              }
-              return a;
-            });
+            _downloadsFuture = _loadDownloads();
           });
         },
         successBuilder: (
@@ -117,6 +102,10 @@ class _DownloadsExportScreen2State extends State<DownloadsExportScreen2> {
 
   List<int> selected = [];
 
+  Future<List<DownloadAlbum>> _loadDownloads() {
+    return loadDownloadAlbums((album) => album.dlStatus != 3);
+  }
+
   Widget _selectAllButton(List<int> exportableIds) {
     return MaterialButton(
         minWidth: 0,
@@ -138,9 +127,9 @@ class _DownloadsExportScreen2State extends State<DownloadsExportScreen2> {
               size: 18,
               color: Colors.white,
             ),
-            const Text(
-              '全选',
-              style: TextStyle(fontSize: 14, color: Colors.white),
+            Text(
+              context.l10n.tr('全选', en: 'Select all'),
+              style: const TextStyle(fontSize: 14, color: Colors.white),
             ),
             Expanded(child: Container()),
           ],
@@ -152,38 +141,26 @@ class _DownloadsExportScreen2State extends State<DownloadsExportScreen2> {
         minWidth: 0,
         onPressed: () async {
           if (selected.isEmpty) {
-            defaultToast(context, "请选择导出的内容");
+            defaultToast(context, context.l10n.pleaseSelectExportContent);
             return;
           }
           if (!await androidMangeStorageRequest()) {
-            throw Exception("申请权限被拒绝");
+            throw Exception(context.l10n.tr("申请权限被拒绝", en: "Permission denied"));
           }
-          final exported = await Navigator.of(context).push(
+          await Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => DownloadsExportingScreen2(
                 idList: selected,
               ),
             ),
           );
-          _downloadsFuture = methods.allDownloads().then((value) {
-            List<DownloadAlbum> a = [];
-            for (var value1 in value) {
-              if (value1.dlStatus != 3) {
-                a.add(value1);
-              }
-            }
-            return a;
-          });
-          var pre = selected;
+          _downloadsFuture = _loadDownloads();
+          final pre = List<int>.from(selected);
           setState(() {
             selected = [];
           });
           final result = await _downloadsFuture;
-          for (var value2 in result.map((e) => e.id)) {
-            if (pre.contains(value2)) {
-              selected.add(value2);
-            }
-          }
+          selected = restoreSelectedIds(pre, result);
           setState(() {});
         },
         child: Column(
@@ -194,9 +171,9 @@ class _DownloadsExportScreen2State extends State<DownloadsExportScreen2> {
               size: 18,
               color: Colors.white,
             ),
-            const Text(
-              '确认',
-              style: TextStyle(fontSize: 14, color: Colors.white),
+            Text(
+              context.l10n.confirm,
+              style: const TextStyle(fontSize: 14, color: Colors.white),
             ),
             Expanded(child: Container()),
           ],

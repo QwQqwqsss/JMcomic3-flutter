@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 import '../basic/commons.dart';
 import '../configs/versions.dart';
 import 'components/content_loading.dart';
@@ -43,14 +44,15 @@ class _FirstLoginScreenState extends State<FirstLoginScreen> {
   }
 
   Widget _usernameField() {
+    final l10n = context.l10n;
     return ListTile(
-      title: const Text("账号"),
+      title: Text(l10n.account),
       subtitle: Text(_username),
       onTap: () async {
         final input = await displayTextInputDialog(
           context,
-          hint: "请输入账号",
-          title: "账号",
+          hint: l10n.inputAccount,
+          title: l10n.account,
           src: _username,
         );
         if (input != null) {
@@ -63,14 +65,15 @@ class _FirstLoginScreenState extends State<FirstLoginScreen> {
   }
 
   Widget _passwordField() {
+    final l10n = context.l10n;
     return ListTile(
-      title: const Text("密码"),
+      title: Text(l10n.password),
       subtitle: Text(_password.isEmpty ? "" : '********'),
       onTap: () async {
         final input = await displayTextInputDialog(
           context,
-          hint: "请输入密码",
-          title: "密码",
+          hint: l10n.inputPassword,
+          title: l10n.password,
           isPasswd: true,
           src: _password,
         );
@@ -108,15 +111,16 @@ class _FirstLoginScreenState extends State<FirstLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(
-        title: const Text("登录"),
+        title: Text(l10n.login),
         actions: _logging
             ? []
             : [
                 IconButton(
                   onPressed: _continueAsGuest,
-                  tooltip: "游客模式",
+                  tooltip: l10n.guestMode,
                   icon: const Icon(Icons.explore_outlined),
                 ),
                 IconButton(
@@ -149,8 +153,8 @@ class _FirstLoginScreenState extends State<FirstLoginScreen> {
         _passwordField(),
         ListTile(
           leading: const Icon(Icons.explore_outlined),
-          title: const Text("游客模式"),
-          subtitle: const Text("无需登录即可进入，收藏与评论等功能需登录后使用"),
+          title: Text(context.l10n.guestMode),
+          subtitle: Text(context.l10n.guestModeSubtitle),
           onTap: _continueAsGuest,
         ),
         apiHostSetting(),

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:jmcomic3/basic/entities.dart';
 import 'package:jmcomic3/basic/methods.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 import 'package:jmcomic3/screens/components/comic_download_card.dart';
 import 'package:jmcomic3/screens/components/item_builder.dart';
 import 'package:jmcomic3/screens/components/my_flat_button.dart';
@@ -150,23 +151,29 @@ class _DownloadAlbumScreenState extends State<DownloadAlbumScreen> {
       future: _viewFuture,
       builder: (BuildContext context, AsyncSnapshot<ViewLog?> snapshot) {
         if (snapshot.hasError) {
-          return const MyFlatButton(title: "出错了, 点击重试", onPressed: null);
+          return MyFlatButton(
+            title: context.l10n.tr("出错了, 点击重试", en: "Error, tap to retry"),
+            onPressed: null,
+          );
         }
         if (snapshot.connectionState != ConnectionState.done) {
-          return const MyFlatButton(title: "加载中", onPressed: null);
+          return MyFlatButton(
+            title: context.l10n.loading,
+            onPressed: null,
+          );
         }
         var log = snapshot.data;
         if (log != null &&
             create.chapters.map((e) => e.id).contains(log.lastViewChapterId)) {
           return MyFlatButton(
-            title: "继续阅读",
+            title: context.l10n.tr("继续阅读", en: "Continue reading"),
             onPressed: () {
               _push(create, log.lastViewChapterId, log.lastViewPage);
             },
           );
         }
         return MyFlatButton(
-          title: "从头开始",
+          title: context.l10n.tr("从头开始", en: "Start from beginning"),
           onPressed: () {
             _push(create, create.chapters[0].id, 0);
           },
@@ -178,7 +185,7 @@ class _DownloadAlbumScreenState extends State<DownloadAlbumScreen> {
   Widget _buildSeries(DownloadCreate create) {
     if (create.chapters.isEmpty) {
       return MyFlatButton(
-        title: "从头开始",
+        title: context.l10n.tr("从头开始", en: "Start from beginning"),
         onPressed: () {
           _push(create, create.album.id, 0);
         },

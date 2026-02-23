@@ -3,9 +3,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:jmcomic3/basic/methods.dart';
 import 'package:jmcomic3/configs/app_font_size.dart';
+import 'package:jmcomic3/configs/app_locale.dart';
 import 'package:jmcomic3/configs/app_orientation.dart';
 import 'package:jmcomic3/configs/network_api_host.dart';
 import 'package:jmcomic3/configs/network_cdn_host.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 import 'package:jmcomic3/screens/downloads_exports_screen2.dart';
 
 import '../basic/commons.dart';
@@ -51,16 +53,17 @@ class _SettingsState extends State<SettingsScreen> {
   }
 
   Widget buildScreen(BuildContext context) {
+    final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(
-        title: const Text("设置"),
+        title: Text(l10n.settings),
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
             ExpansionTile(
               leading: const Icon(Icons.manage_accounts),
-              title: const Text('用户和网络'),
+              title: Text(l10n.sectionUserNetwork),
               children: [
                 const Divider(),
                 apiHostSetting(),
@@ -74,19 +77,19 @@ class _SettingsState extends State<SettingsScreen> {
                 ListTile(
                   onTap: () async {
                     if (await confirmDialog(
-                        context, "清除账号信息", "您确定要清除账号信息并退出APP吗?")) {
+                        context, l10n.clearAccount, l10n.clearAccountConfirm)) {
                       await methods.logout();
                       exit(0);
                     }
                   },
-                  title: const Text("清除账号信息"),
+                  title: Text(l10n.clearAccount),
                 ),
                 const Divider(),
               ],
             ),
             ExpansionTile(
               leading: Icon(Icons.menu_book_outlined),
-              title: Text('阅读'),
+              title: Text(l10n.sectionReading),
               children: [
                 const Divider(),
                 volumeKeyControlSetting(),
@@ -98,7 +101,7 @@ class _SettingsState extends State<SettingsScreen> {
             ),
             ExpansionTile(
               leading: Icon(Icons.backup),
-              title: Text('同步'),
+              title: Text(l10n.sectionSync),
               children: [
                 const Divider(),
                 webDavSyncSwitchSetting(),
@@ -113,12 +116,12 @@ class _SettingsState extends State<SettingsScreen> {
             ),
             ExpansionTile(
               leading: Icon(Icons.ad_units),
-              title: Text('系统和应用程序'),
+              title: Text(l10n.sectionSystemApp),
               children: [
                 disableRecommendContentSetting(),
                 userAgreementSetting(context),
                 const Divider(),
-                if (isPro) ...[
+                if (hasProAccess) ...[
                   const Divider(),
                   autoUpdateCheckSetting(),
                   ignoreUpgradePopSetting(),
@@ -131,6 +134,7 @@ class _SettingsState extends State<SettingsScreen> {
                 const Divider(),
                 categoriesSortSetting(context),
                 themeSetting(context),
+                appLocaleSetting(context),
                 const Divider(),
                 androidDisplayModeSetting(),
                 const Divider(),
@@ -148,7 +152,7 @@ class _SettingsState extends State<SettingsScreen> {
                     Navigator.of(context).push(MaterialPageRoute(
                         builder: (c) => const DownloadsExportScreen2()));
                   },
-                  title: const Text("导出下载到目录(即使没有下载完)"),
+                  title: Text(l10n.exportIncomplete),
                 ),
                 const Divider(),
                 searchTitleWordsSetting(),

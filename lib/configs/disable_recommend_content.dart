@@ -1,5 +1,6 @@
 import 'package:event/event.dart';
 import 'package:flutter/material.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
 import '../basic/commons.dart';
 import '../basic/methods.dart';
@@ -12,7 +13,7 @@ final disableRecommendContentEvent = Event();
 Future<void> initDisableRecommendContent() async {
   _disableRecommendContent =
       (await methods.loadProperty(_propertyName)) == "true";
-  if (!isPro) {
+  if (!hasProAccess) {
     _disableRecommendContent = false;
   }
 }
@@ -26,14 +27,27 @@ Widget disableRecommendContentSetting() {
     builder: (BuildContext context, void Function(void Function()) setState) {
       return SwitchListTile(
         title: Text(
-          "关闭推荐内容" + (!isPro ? "\n(发电后使用)" : ""),
-          style: TextStyle(color: isPro ? null : Colors.grey),
+          context.l10n.tr("关闭推荐内容", en: "Disable recommended content") +
+              (!hasProAccess
+                  ? "\n${context.l10n.tr("(发电后使用)", en: "(Pro required)")}"
+                  : ""),
+          style: TextStyle(color: hasProAccess ? null : Colors.grey),
         ),
-        subtitle: Text(_disableRecommendContent ? "已关闭" : "已开启"),
+        subtitle: Text(
+          _disableRecommendContent
+              ? context.l10n.tr("已关闭", en: "Disabled")
+              : context.l10n.tr("已开启", en: "Enabled"),
+        ),
         value: _disableRecommendContent,
         onChanged: (value) async {
-          if (!isPro) {
-            defaultToast(context, "发电才能使用哦~");
+          if (!hasProAccess) {
+            defaultToast(
+              context,
+              context.l10n.tr(
+                "发电才能使用哦~",
+                en: "Pro is required for this feature",
+              ),
+            );
             return;
           }
           await methods.saveProperty(_propertyName, "$value");

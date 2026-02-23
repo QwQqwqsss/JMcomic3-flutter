@@ -1,10 +1,5 @@
 /// 自动全屏
 
-import 'dart:io';
-
-import 'package:flutter/material.dart';
-
-import '../basic/commons.dart';
 import '../basic/methods.dart';
 
 const _propertyName = "passed";

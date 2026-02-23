@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:jmcomic3/basic/commons.dart';
 import 'package:jmcomic3/basic/methods.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
 enum ReaderControllerType {
   touchOnce,
@@ -12,13 +13,28 @@ enum ReaderControllerType {
   threeArea,
 }
 
-Map<String, ReaderControllerType> _readerControllerTypeMap = {
-  "点击屏幕一次全屏": ReaderControllerType.touchOnce,
-  "使用控制器全屏": ReaderControllerType.controller,
-  "双击屏幕全屏": ReaderControllerType.touchDouble,
-  "双击屏幕全屏 + 单击屏幕下一页": ReaderControllerType.touchDoubleOnceNext,
-  "将屏幕划分成三个区域 (上一页, 下一页, 全屏)": ReaderControllerType.threeArea,
-};
+Map<String, ReaderControllerType> _readerControllerTypeMap(
+  BuildContext context,
+) {
+  return {
+    context.l10n.tr("点击屏幕一次全屏", en: "Single tap to toggle fullscreen"):
+        ReaderControllerType.touchOnce,
+    context.l10n.tr("使用控制器全屏", en: "Use controller for fullscreen"):
+        ReaderControllerType.controller,
+    context.l10n.tr("双击屏幕全屏", en: "Double tap to toggle fullscreen"):
+        ReaderControllerType.touchDouble,
+    context.l10n.tr(
+          "双击屏幕全屏 + 单击屏幕下一页",
+          en: "Double tap for fullscreen + single tap for next page",
+        ):
+        ReaderControllerType.touchDoubleOnceNext,
+    context.l10n.tr(
+          "将屏幕划分成三个区域 (上一页, 下一页, 全屏)",
+          en: "Three areas (prev, next, fullscreen)",
+        ):
+        ReaderControllerType.threeArea,
+  };
+}
 
 const _defaultController = ReaderControllerType.touchOnce;
 const _propertyName = "reader_controller_type";
@@ -42,8 +58,8 @@ ReaderControllerType _readerControllerTypeFromString(String string) {
   return _defaultController;
 }
 
-String currentReaderControllerTypeName() {
-  for (var e in _readerControllerTypeMap.entries) {
+String currentReaderControllerTypeName(BuildContext context) {
+  for (var e in _readerControllerTypeMap(context).entries) {
     if (e.value == _readerControllerType) {
       return e.key;
     }
@@ -52,10 +68,11 @@ String currentReaderControllerTypeName() {
 }
 
 Future<void> chooseReaderControllerType(BuildContext context) async {
+  final map = _readerControllerTypeMap(context);
   ReaderControllerType? result = await chooseMapDialog<ReaderControllerType>(
     context,
-    title: "选择操控方式",
-    values: _readerControllerTypeMap,
+    title: context.l10n.tr("选择操控方式", en: "Choose control mode"),
+    values: map,
   );
   if (result != null) {
     await methods.saveProperty(_propertyName, result.toString());

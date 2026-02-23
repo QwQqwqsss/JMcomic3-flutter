@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jmcomic3/configs/login.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 import 'package:jmcomic3/screens/about_screen.dart';
 import 'package:jmcomic3/screens/comments_screen.dart';
 import 'package:jmcomic3/screens/components/avatar.dart';
@@ -52,7 +53,7 @@ class _UserScreenState extends State<UserScreen>
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
-      appBar: AppBar(title: const Text("\u4e2a\u4eba\u4e2d\u5fc3"), actions: [
+      appBar: AppBar(title: Text(context.l10n.profile), actions: [
         if (!normalPlatform)
           IconButton(
             onPressed: () {
@@ -62,7 +63,7 @@ class _UserScreenState extends State<UserScreen>
               }));
             },
             icon: Icon(
-              isPro ? Icons.offline_bolt : Icons.offline_bolt_outlined,
+              hasProAccess ? Icons.offline_bolt : Icons.offline_bolt_outlined,
             ),
           ),
         if (normalPlatform)
@@ -74,7 +75,7 @@ class _UserScreenState extends State<UserScreen>
               }));
             },
             icon: Icon(
-              isPro ? Icons.offline_bolt : Icons.offline_bolt_outlined,
+              hasProAccess ? Icons.offline_bolt : Icons.offline_bolt_outlined,
             ),
           ),
         _buildSettingsIcon(),
@@ -116,7 +117,7 @@ class _UserScreenState extends State<UserScreen>
         child = Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildLoginButton("\u767b\u5f55 / \u6ce8\u518c"),
+            _buildLoginButton(context.l10n.loginRegister),
             const SizedBox(height: 8),
           ],
         );
@@ -134,8 +135,7 @@ class _UserScreenState extends State<UserScreen>
         child = Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildLoginButton(
-                "\u767b\u5f55\u5931\u8d25/\u70b9\u51fb\u91cd\u8bd5"),
+            _buildLoginButton(context.l10n.loginFailed),
             const SizedBox(height: 8),
             const SizedBox(height: 10),
             _buildLoginErrorButton(),
@@ -144,13 +144,16 @@ class _UserScreenState extends State<UserScreen>
         break;
     }
     final isLight = Theme.of(context).brightness == Brightness.light;
-    final cardHeight = loginStatus == LoginStatus.loginSuccess ? 320.0 : 210.0;
+    final cardMinHeight =
+        loginStatus == LoginStatus.loginSuccess ? 320.0 : 210.0;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 220),
         curve: Curves.easeOutCubic,
-        height: cardHeight,
+        constraints: BoxConstraints(minHeight: cardMinHeight),
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        alignment: Alignment.center,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -182,9 +185,7 @@ class _UserScreenState extends State<UserScreen>
             ),
           ],
         ),
-        child: Center(
-          child: child,
-        ),
+        child: child,
       ),
     );
   }
@@ -236,14 +237,14 @@ class _UserScreenState extends State<UserScreen>
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: const Text("\u767b\u5f55\u5931\u8d25"),
+              title: Text(context.l10n.loginFailed),
               content: SelectableText(loginMessage),
               actions: [
                 MaterialButton(
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: const Text("\u786e\u8ba4"),
+                  child: Text(context.l10n.confirm),
                 ),
               ],
             );
@@ -261,9 +262,9 @@ class _UserScreenState extends State<UserScreen>
           ),
           borderRadius: const BorderRadius.all(Radius.circular(4)),
         ),
-        child: const Text(
-          "\u67e5\u770b\u9519\u8bef",
-          style: TextStyle(
+        child: Text(
+          context.l10n.viewError,
+          style: const TextStyle(
             fontSize: 16,
             color: Colors.white,
             fontWeight: FontWeight.normal,
@@ -340,25 +341,25 @@ class _UserScreenState extends State<UserScreen>
             children: [
               _buildSelfInfoBadge(
                 context,
-                "\u7b49\u7ea7",
+                context.l10n.level,
                 levelText,
                 Icons.workspace_premium,
               ),
               _buildSelfInfoBadge(
                 context,
-                "\u7ecf\u9a8c",
+                context.l10n.experience,
                 expPercentText,
                 Icons.trending_up,
               ),
               _buildSelfInfoBadge(
                 context,
-                "\u91d1\u5e01",
+                context.l10n.coin,
                 "${selfInfo.coin}",
                 Icons.monetization_on,
               ),
               _buildSelfInfoBadge(
                 context,
-                "\u5fbd\u7ae0",
+                context.l10n.badges,
                 "${selfInfo.badges.length}",
                 Icons.verified_outlined,
               ),
@@ -370,7 +371,7 @@ class _UserScreenState extends State<UserScreen>
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
-              "\u90ae\u7bb1: ${selfInfo.email}",
+              "${context.l10n.email}: ${selfInfo.email}",
               style: detailStyle,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -381,7 +382,7 @@ class _UserScreenState extends State<UserScreen>
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
-            "\u6635\u79f0: $nickname  \u6027\u522b: $genderText",
+            "${context.l10n.nickname}: $nickname  ${context.l10n.gender}: $genderText",
             style: detailStyle,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -393,7 +394,7 @@ class _UserScreenState extends State<UserScreen>
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
-              "\u7b7e\u540d: $message",
+              "${context.l10n.signature}: $message",
               style: detailStyle,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -403,7 +404,7 @@ class _UserScreenState extends State<UserScreen>
         ],
         const SizedBox(height: 8),
         Text(
-          dailySignStatusLabel(),
+          dailySignStatusLabel(context),
           style: statusStyle,
         ),
         const SizedBox(height: 12),
@@ -420,7 +421,7 @@ class _UserScreenState extends State<UserScreen>
               size: 18,
             ),
             label: Text(
-              canSign ? "\u624b\u52a8\u7b7e\u5230" : "\u7b7e\u5230\u4e2d...",
+              canSign ? context.l10n.manualSign : context.l10n.signing,
             ),
           ),
         ),
@@ -478,10 +479,10 @@ class _UserScreenState extends State<UserScreen>
       return "-";
     }
     if (value == "m" || value == "male" || value == "1") {
-      return "\u7537";
+      return context.l10n.male;
     }
     if (value == "f" || value == "female" || value == "2") {
-      return "\u5973";
+      return context.l10n.female;
     }
     return value;
   }
@@ -501,9 +502,9 @@ class _UserScreenState extends State<UserScreen>
       children: [
         const Icon(Icons.explore_outlined, size: 48),
         const SizedBox(height: 10),
-        const Text("\u6e38\u5ba2\u6a21\u5f0f"),
+        Text(context.l10n.guestMode),
         const SizedBox(height: 8),
-        _buildLoginButton("\u767b\u5f55\u8d26\u53f7"),
+        _buildLoginButton(context.l10n.login),
       ],
     );
   }
@@ -511,7 +512,10 @@ class _UserScreenState extends State<UserScreen>
   Widget _buildFavorites() {
     return ListTile(
       onTap: () async {
-        if (!await ensureJwtAccess(context, feature: "\u6536\u85cf\u5939")) {
+        if (!await ensureJwtAccess(
+          context,
+          feature: context.l10n.featureFavoritesFolder,
+        )) {
           return;
         }
         Navigator.of(context).push(MaterialPageRoute(
@@ -520,7 +524,7 @@ class _UserScreenState extends State<UserScreen>
           },
         ));
       },
-      title: const Text("\u6536\u85cf\u5939"),
+      title: Text(context.l10n.favorites),
     );
   }
 
@@ -533,7 +537,7 @@ class _UserScreenState extends State<UserScreen>
           },
         ));
       },
-      title: const Text("\u6d4f\u89c8\u8bb0\u5f55"),
+      title: Text(context.l10n.viewHistory),
     );
   }
 
@@ -546,7 +550,7 @@ class _UserScreenState extends State<UserScreen>
           },
         ));
       },
-      title: const Text("\u4e0b\u8f7d\u5217\u8868"),
+      title: Text(context.l10n.downloadList),
     );
   }
 
@@ -559,7 +563,7 @@ class _UserScreenState extends State<UserScreen>
           },
         ));
       },
-      title: const Text("\u8bc4\u8bba\u533a"),
+      title: Text(context.l10n.comments),
     );
   }
 

@@ -69,7 +69,7 @@ class ContentBodyState extends State<ContentBody> {
                         color: Colors.grey,
                         splashColor: Colors.white,
                         onPressed: () {
-                          btnclick('重置');
+                          btnclick('clear');
                         },
                         child: const Text('AC',
                             style:
@@ -89,7 +89,7 @@ class ContentBodyState extends State<ContentBody> {
                         color: Colors.grey,
                         splashColor: Colors.white,
                         onPressed: () {
-                          btnclick('加/减');
+                          btnclick('sign');
                         },
                         child: const Text('+/-',
                             style:
@@ -108,7 +108,7 @@ class ContentBodyState extends State<ContentBody> {
                         color: Colors.grey,
                         splashColor: Colors.white,
                         onPressed: () {
-                          btnclick('百分号');
+                          btnclick('percent');
                         },
                         child: const Text('%',
                             style:
@@ -127,7 +127,7 @@ class ContentBodyState extends State<ContentBody> {
                         color: Color(int.parse(list[0]['bgc'])),
                         splashColor: Color(int.parse(list[0]['bgc'])),
                         onPressed: () {
-                          btnclick('除');
+                          btnclick('div');
                         },
                         child: Text('÷',
                             style: TextStyle(
@@ -212,7 +212,7 @@ class ContentBodyState extends State<ContentBody> {
                         color: Color(int.parse(list[1]['bgc'])),
                         splashColor: Color(int.parse(list[1]['bgc'])),
                         onPressed: () {
-                          btnclick('乘');
+                          btnclick('mul');
                         },
                         child: Text('×',
                             style: TextStyle(
@@ -297,7 +297,7 @@ class ContentBodyState extends State<ContentBody> {
                         color: Color(int.parse(list[2]['bgc'])),
                         splashColor: Color(int.parse(list[2]['bgc'])),
                         onPressed: () {
-                          btnclick('减');
+                          btnclick('sub');
                         },
                         child: Text('—',
                             style: TextStyle(
@@ -382,7 +382,7 @@ class ContentBodyState extends State<ContentBody> {
                         color: Color(int.parse(list[3]['bgc'])),
                         splashColor: Color(int.parse(list[3]['bgc'])),
                         onPressed: () {
-                          btnclick('加');
+                          btnclick('add');
                         },
                         child: Text('+',
                             style: TextStyle(
@@ -441,7 +441,7 @@ class ContentBodyState extends State<ContentBody> {
                       color: Colors.orange,
                       splashColor: Colors.orange,
                       onPressed: () {
-                        btnclick('等于');
+                        btnclick('equal');
                       },
                       child: const Text('=',
                           style: TextStyle(color: Colors.white, fontSize: 30)),
@@ -523,59 +523,59 @@ class ContentBodyState extends State<ContentBody> {
       element['bgc'] = '0xFFFF9800';
     }
     switch (e) {
-      case '重置':
+      case 'clear':
         setState(() {
           sums = '0';
           tag = 0;
           flag = '';
         });
         break;
-      case '加':
+      case 'add':
         setState(() {
           total = sums;
           tag = 1;
-          flag = '加';
+          flag = 'add';
           list[3]['bgc'] = '0xFFFFFFFFF';
           list[3]['color'] = '0xFFFF9800';
         });
         break;
-      case '减':
+      case 'sub':
         setState(() {
           total = sums;
           tag = 1;
-          flag = '减';
+          flag = 'sub';
           list[2]['bgc'] = '0xFFFFFFFFF';
           list[2]['color'] = '0xFFFF9800';
         });
         break;
-      case '乘':
+      case 'mul':
         setState(() {
           total = sums;
           tag = 1;
-          flag = '乘';
+          flag = 'mul';
           list[1]['bgc'] = '0xFFFFFFFFF';
           list[1]['color'] = '0xFFFF9800';
         });
         break;
-      case '除':
+      case 'div':
         setState(() {
           total = sums;
           tag = 1;
-          flag = '除';
+          flag = 'div';
           list[0]['bgc'] = '0xFFFFFFFFF';
           list[0]['color'] = '0xFFFF9800';
         });
         break;
-      case '百分号':
+      case 'percent':
         setState(() {
           total = sums;
           tag = 1;
-          flag = '百分号';
+          flag = 'percent';
           sums = (int.parse(sums) / 100).toString();
           isDouble = true;
         });
         break;
-      case '等于':
+      case 'equal':
         sumClac();
         setState(() {
           tag = 1;
@@ -587,7 +587,7 @@ class ContentBodyState extends State<ContentBody> {
 
 // 计算函数
   sumClac() {
-    if (flag == '加') {
+    if (flag == 'add') {
       if (isDouble) {
         double c = double.parse(total) + double.parse(sums);
         setState(() {
@@ -604,7 +604,7 @@ class ContentBodyState extends State<ContentBody> {
         isDouble = false;
         flag = '';
       });
-    } else if (flag == '减') {
+    } else if (flag == 'sub') {
       if (isDouble) {
         double c = double.parse(total) - double.parse(sums);
         setState(() {
@@ -621,7 +621,7 @@ class ContentBodyState extends State<ContentBody> {
         flag = '';
         isDouble = false;
       });
-    } else if (flag == '乘') {
+    } else if (flag == 'mul') {
       if (isDouble) {
         double c = double.parse(total) * double.parse(sums);
         setState(() {
@@ -638,7 +638,7 @@ class ContentBodyState extends State<ContentBody> {
         flag = '';
         isDouble = false;
       });
-    } else if (flag == '除') {
+    } else if (flag == 'div') {
       if (isDouble) {
         double c = double.parse(total) * double.parse(sums);
         setState(() {

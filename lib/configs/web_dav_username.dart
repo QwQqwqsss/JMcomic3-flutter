@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
 import '../basic/commons.dart';
 import '../basic/methods.dart';
@@ -13,16 +14,18 @@ Future<String?> initWebDavUserName() async {
   return null;
 }
 
-String currentWebDavUserNameName() {
-  return _currentWebDavUserName == "" ? "未设置" : _currentWebDavUserName;
+String currentWebDavUserNameName(BuildContext context) {
+  return _currentWebDavUserName == ""
+      ? context.l10n.tr("未设置", en: "Not set")
+      : _currentWebDavUserName;
 }
 
 Future<dynamic> inputWebDavUserName(BuildContext context) async {
   String? input = await displayTextInputDialog(
     context,
     src: _currentWebDavUserName,
-    title: 'WebDAV用户名',
-    hint: '请输入WebDAV用户名',
+    title: context.l10n.tr('WebDAV用户名', en: 'WebDAV username'),
+    hint: context.l10n.tr('请输入WebDAV用户名', en: 'Enter WebDAV username'),
   );
   if (input != null) {
     await methods.saveProperty(_propertyName, input);
@@ -34,8 +37,8 @@ Widget webDavUserNameSetting() {
   return StatefulBuilder(
     builder: (BuildContext context, void Function(void Function()) setState) {
       return ListTile(
-        title: const Text("WebDAV用户名"),
-        subtitle: Text(currentWebDavUserNameName()),
+        title: Text(context.l10n.tr("WebDAV用户名", en: "WebDAV username")),
+        subtitle: Text(currentWebDavUserNameName(context)),
         onTap: () async {
           await inputWebDavUserName(context);
           setState(() {});

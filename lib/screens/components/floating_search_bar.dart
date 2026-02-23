@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
 class FloatingSearchBarScreen extends StatefulWidget {
   final FloatingSearchBarController controller;
@@ -198,7 +199,7 @@ class _FloatingSearchBarScreenState extends State<FloatingSearchBarScreen>
       onSubmitted: widget.onSubmitted,
       decoration: InputDecoration(
         isDense: true,
-        hintText: widget.hint ?? "搜索",
+        hintText: widget.hint ?? context.l10n.tr("搜索", en: "Search"),
         // hintStyle: style.hintStyle,
         contentPadding: EdgeInsets.zero,
         border: InputBorder.none,

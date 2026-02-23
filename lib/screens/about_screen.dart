@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:jmcomic3/basic/commons.dart';
-import 'package:jmcomic3/configs/android_display_mode.dart';
-import 'package:jmcomic3/configs/proxy.dart';
 import 'package:jmcomic3/configs/versions.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 import 'package:jmcomic3/screens/components/badge.dart';
 
-import '../configs/is_pro.dart';
-import '../configs/theme.dart';
-import '../configs/using_right_click_pop.dart';
 import 'components/right_click_pop.dart';
 
 class AboutScreen extends StatefulWidget {
@@ -41,7 +37,7 @@ class _AboutState extends State<AboutScreen> {
   Widget buildScreen(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("\u5173\u4e8e"),
+        title: Text(context.l10n.about),
       ),
       body: ListView(
         children: [
@@ -100,7 +96,7 @@ class _AboutState extends State<AboutScreen> {
   Widget _buildCurrentVersion() {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
-      child: Text("\u5f53\u524d\u7248\u672c : ${currentVersion()}"),
+      child: Text(context.l10n.currentVersionLabel(currentVersion())),
     );
   }
 
@@ -109,7 +105,7 @@ class _AboutState extends State<AboutScreen> {
       padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
       child: Text.rich(TextSpan(
         children: [
-          const TextSpan(text: "\u6700\u65b0\u7248\u672c: "),
+          TextSpan(text: "${context.l10n.latestVersion}: "),
           _buildNewestVersionSpan(),
           _buildCheckButton(),
         ],
@@ -118,8 +114,7 @@ class _AboutState extends State<AboutScreen> {
   }
 
   InlineSpan _buildNewestVersionSpan() {
-    final versionText =
-        latestVersionName ?? "\u6ca1\u6709\u68c0\u6d4b\u5230\u65b0\u7248\u672c";
+    final versionText = latestVersionName ?? context.l10n.noNewVersion;
     return WidgetSpan(
       child: Container(
         padding: const EdgeInsets.only(right: 20),
@@ -135,10 +130,10 @@ class _AboutState extends State<AboutScreen> {
   InlineSpan _buildCheckButton() {
     return WidgetSpan(
       child: GestureDetector(
-        child: const Text(
-          "\u68c0\u67e5\u66f4\u65b0",
+        child: Text(
+          context.l10n.checkUpdate,
           style: TextStyle(height: 1.3, color: Colors.blue),
-          strutStyle: StrutStyle(height: 1.3),
+          strutStyle: const StrutStyle(height: 1.3),
         ),
         onTap: () async {
           await manualCheckNewVersion(context);
@@ -152,8 +147,8 @@ class _AboutState extends State<AboutScreen> {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
       child: GestureDetector(
-        child: const Text(
-          "\u524d\u5f80\u4e0b\u8f7d\u5730\u5740",
+        child: Text(
+          context.l10n.goToDownloadPage,
           style: TextStyle(color: Colors.blue),
         ),
         onTap: () async {
@@ -166,14 +161,14 @@ class _AboutState extends State<AboutScreen> {
   Widget _buildVersionText() {
     var info = latestVersionInfo();
     if (info != null && info.trim().isNotEmpty) {
-      info = "## \u66f4\u65b0\u5185\u5bb9\n\n$info";
+      info = "## ${context.l10n.updateContent}\n\n$info";
     } else {
       info =
-          "\u66f4\u65b0\u5185\u5bb9\n\n\u672a\u83b7\u53d6\u5230\u66f4\u65b0\u5185\u5bb9\uff0c\u53ef\u70b9\u51fb\"\u68c0\u67e5\u66f4\u65b0\"\u91cd\u8bd5\u3002";
+          "${context.l10n.updateContent}\n\n${context.l10n.updateContentUnavailable}";
     }
     return Container(
       padding: const EdgeInsets.all(20),
-      child: MarkdownBody(data: info ?? ""),
+      child: MarkdownBody(data: info),
     );
   }
 }

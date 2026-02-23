@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:jmcomic3/basic/commons.dart';
 import 'package:jmcomic3/configs/app_font_size.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
 class TextPreviewScreen extends StatefulWidget {
   final String text;
@@ -22,16 +24,12 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('评论全文'),
+        title: Text(context.l10n.tr('评论全文', en: 'Full comment')),
         actions: [
           IconButton(
             icon: const Icon(Icons.copy),
             onPressed: () {
-              // 复制文本到剪贴板
-              // 这里可以添加复制功能
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('已复制到剪贴板')),
-              );
+              copyToClipBoard(context, widget.text);
             },
           ),
         ],

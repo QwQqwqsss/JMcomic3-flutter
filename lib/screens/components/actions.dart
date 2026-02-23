@@ -23,7 +23,7 @@ Widget buildOrderSwitch(
           color: iconColor,
         ),
         Expanded(child: Container()),
-        Text(value.toString(), style: TextStyle(color: iconColor)),
+        Text(sortByName(context, value), style: TextStyle(color: iconColor)),
         Expanded(child: Container()),
       ],
     ),

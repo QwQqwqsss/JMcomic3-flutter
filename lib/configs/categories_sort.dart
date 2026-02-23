@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:event/event.dart';
 import 'package:flutter/material.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 import 'package:jmcomic3/screens/components/content_error.dart';
 
 import '../basic/methods.dart';
@@ -62,8 +63,8 @@ Widget categoriesSortSetting(BuildContext context) {
         },
       ));
     },
-    title: const Text(
-      "首页分类排序",
+    title: Text(
+      context.l10n.tr("首页分类排序", en: "Homepage category order"),
     ),
   );
 }
@@ -94,7 +95,7 @@ class _CategoriesSortScreenState extends State<CategoriesSortScreen> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Scaffold(
               appBar: AppBar(
-                title: const Text("分类排序"),
+                title: Text(context.l10n.tr("分类排序", en: "Category order")),
               ),
               body: const Center(
                 child: CircularProgressIndicator(),
@@ -104,7 +105,7 @@ class _CategoriesSortScreenState extends State<CategoriesSortScreen> {
           if (snapshot.hasError) {
             return Scaffold(
               appBar: AppBar(
-                title: const Text("分类排序"),
+                title: Text(context.l10n.tr("分类排序", en: "Category order")),
               ),
               body: ContentError(
                 error: snapshot.error,
@@ -181,7 +182,7 @@ class _CategoriesSortPanelState extends State<CategoriesSortPanel> {
     //
     return Scaffold(
       appBar: AppBar(
-        title: const Text('分类排序'),
+        title: Text(context.l10n.tr('分类排序', en: 'Category order')),
         actions: [
           _saveIcon(),
         ],

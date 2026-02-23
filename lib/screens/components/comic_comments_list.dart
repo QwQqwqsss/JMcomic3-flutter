@@ -5,6 +5,7 @@ import 'package:jmcomic3/basic/log.dart';
 import 'package:jmcomic3/basic/methods.dart';
 import 'package:jmcomic3/configs/app_font_size.dart';
 import 'package:jmcomic3/configs/login.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 import 'package:jmcomic3/screens/components/item_builder.dart';
 
 import '../comic_info_screen.dart';
@@ -110,8 +111,8 @@ class _ComicCommentsListState extends State<ComicCommentsList> {
         },
         child: Container(
           padding: const EdgeInsets.all(30),
-          child: const Center(
-            child: Text('上一页'),
+          child: Center(
+            child: Text(context.l10n.tr('上一页', en: 'Prev')),
           ),
         ),
       );
@@ -130,8 +131,8 @@ class _ComicCommentsListState extends State<ComicCommentsList> {
         },
         child: Container(
           padding: const EdgeInsets.all(30),
-          child: const Center(
-            child: Text('下一页'),
+          child: Center(
+            child: Text(context.l10n.tr('下一页', en: 'Next')),
           ),
         ),
       );
@@ -177,10 +178,16 @@ Widget _buildPostComment(
     BuildContext context, int? parentId, int aid, Function? f) {
   return InkWell(
     onTap: () async {
-      if (!await ensureJwtAccess(context, feature: "发表评论")) {
+      if (!await ensureJwtAccess(
+        context,
+        feature: context.l10n.tr("发表评论", en: "Post comment"),
+      )) {
         return;
       }
-      String? text = await displayTextInputDialog(context, title: '请输入评论内容');
+      String? text = await displayTextInputDialog(
+        context,
+        title: context.l10n.tr('请输入评论内容', en: 'Enter your comment'),
+      );
       if (text != null && text.isNotEmpty) {
         try {
           final data = await (parentId == null
@@ -189,12 +196,13 @@ Widget _buildPostComment(
           if (data.status == "fail") {
             defaultToast(context, data.msg);
           } else {
-            defaultToast(context, "评论成功");
+            defaultToast(
+                context, context.l10n.tr("评论成功", en: "Comment posted"));
             f?.call();
           }
         } catch (e, st) {
           debugPrient("$e\n$st");
-          defaultToast(context, "评论失败");
+          defaultToast(context, context.l10n.tr("评论失败", en: "Comment failed"));
         }
       }
     },
@@ -214,8 +222,8 @@ Widget _buildPostComment(
         ),
       ),
       padding: const EdgeInsets.all(30),
-      child: const Center(
-        child: Text('我有话要讲'),
+      child: Center(
+        child: Text(context.l10n.tr('我有话要讲', en: 'Say something')),
       ),
     ),
   );
@@ -255,8 +263,6 @@ class _ComicCommentItemState extends State<_ComicCommentItem> {
       fontSize: 12,
       color: theme.colorScheme.secondary.withOpacity(.8),
     );
-    var connectStyle =
-        TextStyle(color: theme.textTheme.bodyMedium?.color?.withOpacity(.8));
     var gotoComicStyle = TextStyle(
       color: theme.colorScheme.secondary.withOpacity(.5),
     );
@@ -395,7 +401,8 @@ class _ComicCommentItemState extends State<_ComicCommentItem> {
                               ...parseCommentBody(content.substring(0, 200)),
                               TextSpan(text: "..."),
                               TextSpan(
-                                text: "  全文",
+                                text:
+                                    context.l10n.tr("  全文", en: "  Full text"),
                                 style: TextStyle(
                                   color: theme.colorScheme.secondary
                                       .withOpacity(.5),

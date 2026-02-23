@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jmcomic3/basic/commons.dart';
 import 'package:jmcomic3/basic/methods.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
 enum ReaderDirection {
   topToBottom,
@@ -29,11 +30,11 @@ ReaderDirection get currentReaderDirection => _readerDirection;
 String readerDirectionName(ReaderDirection direction, BuildContext context) {
   switch (direction) {
     case ReaderDirection.topToBottom:
-      return "从上到下";
+      return context.l10n.tr("从上到下", en: "Top to bottom");
     case ReaderDirection.leftToRight:
-      return "从左到右";
+      return context.l10n.tr("从左到右", en: "Left to right");
     case ReaderDirection.rightToLeft:
-      return "从右到左";
+      return context.l10n.tr("从右到左", en: "Right to left");
   }
 }
 
@@ -44,7 +45,7 @@ Future chooseReaderDirection(BuildContext context) async {
   }
   final newReaderDirection = await chooseMapDialog(
     context,
-    title: "请选择阅读器方向",
+    title: context.l10n.tr("请选择阅读器方向", en: "Choose reader direction"),
     values: map,
   );
   if (newReaderDirection != null) {

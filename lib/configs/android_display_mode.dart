@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:jmcomic3/basic/methods.dart';
 import 'package:jmcomic3/configs/android_version.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
 import '../basic/commons.dart';
 
@@ -30,7 +31,7 @@ Future<void> _chooseAndroidDisplayMode(BuildContext context) async {
     list.addAll(_modes);
     String? result = await chooseListDialog<String>(
       context,
-      title: "安卓屏幕刷新率",
+      title: context.l10n.tr("安卓屏幕刷新率", en: "Android refresh rate"),
       values: list,
     );
     if (result != null) {
@@ -46,7 +47,9 @@ Widget androidDisplayModeSetting() {
     return StatefulBuilder(
       builder: (BuildContext context, void Function(void Function()) setState) {
         return ListTile(
-          title: const Text("屏幕刷新率(安卓)"),
+          title: Text(
+            context.l10n.tr("屏幕刷新率(安卓)", en: "Refresh rate (Android)"),
+          ),
           subtitle: Text(_androidDisplayMode),
           onTap: () async {
             await _chooseAndroidDisplayMode(context);

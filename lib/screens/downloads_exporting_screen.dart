@@ -1,8 +1,8 @@
 import 'dart:io';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:jmcomic3/basic/methods.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
 import '../basic/commons.dart';
 import '../configs/export_path.dart';
@@ -10,13 +10,6 @@ import '../configs/export_rename.dart';
 import '../configs/is_pro.dart';
 import 'components/content_loading.dart';
 import 'components/right_click_pop.dart';
-
-class ExportAb {
-  final int id;
-  final String name;
-
-  ExportAb(this.id, this.name);
-}
 
 class DownloadsExportingScreen extends StatefulWidget {
   final List<int> idList;
@@ -33,49 +26,44 @@ class _DownloadsExportingScreenState extends State<DownloadsExportingScreen> {
   bool exported = false;
   bool exportFail = false;
   dynamic e;
-  String exportMessage = "正在导出";
+  String exportMessage = '';
   var deleteExport = false;
 
-  @override
-  void initState() {
-    //registerEvent(_onMessageChange, "EXPORT");
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    //unregisterEvent(_onMessageChange);
-    super.dispose();
-  }
-
-  void _onMessageChange(event) {
-    setState(() {
-      exportMessage = event;
-    });
-  }
-
   Widget _body() {
+    final l10n = context.l10n;
+    final proSuffix =
+        !hasProAccess ? '\n${l10n.tr('(发电后使用)', en: '(Pro required)')}' : '';
     if (exporting) {
-      return ContentLoading(label: exportMessage);
+      return ContentLoading(
+        label: exportMessage.isEmpty
+            ? l10n.tr('正在导出', en: 'Exporting')
+            : l10n.tr(exportMessage),
+      );
     }
     if (exportFail) {
-      return Center(child: Text("导出失败\n$e\n($exportMessage)"));
+      return Center(
+        child: Text(
+          '${l10n.tr('导出失败', en: 'Export failed')}\n$e\n($exportMessage)',
+        ),
+      );
     }
     if (exported) {
-      return const Center(child: Text("导出成功"));
+      return Center(child: Text(l10n.tr('导出成功', en: 'Export succeeded')));
     }
     return ListView(
       children: [
         // Container(height: 20),
         // MaterialButton(
         //   onPressed: _exportPkz,
-        //   child: const Text("导出PKZ"),
+        //   child: const Text('导出PKZ'),
         // ),
         Container(height: 20),
         displayExportPathInfo(),
         Container(height: 20),
         SwitchListTile(
-          title: const Text("导出后删除下载的漫画"),
+          title: Text(
+            l10n.tr('导出后删除下载的漫画', en: 'Delete downloads after export'),
+          ),
           value: deleteExport,
           onChanged: (value) {
             setState(() {
@@ -86,35 +74,33 @@ class _DownloadsExportingScreenState extends State<DownloadsExportingScreen> {
         Container(height: 20),
         _buildButtonInner(
           _exportJmis,
-          "分别导出JMI" + (!isPro ? "\n(发电后使用)" : ""),
+          l10n.tr('分别导出JMI', en: 'Export JMI separately') + proSuffix,
         ),
         Container(height: 20),
         _buildButtonInner(
           _exportZips,
-          "分别导出JM.ZIP" + (!isPro ? "\n(发电后使用)" : ""),
+          l10n.tr('分别导出JM.ZIP', en: 'Export JM.ZIP separately') + proSuffix,
         ),
         Container(height: 20),
         _buildButtonInner(
           _exportJpegZips,
-          "分别导出JPEGS.ZIP" + (!isPro ? "\n(发电后使用)" : ""),
+          l10n.tr('分别导出JPEGS.ZIP', en: 'Export JPEGS.ZIP separately') +
+              proSuffix,
         ),
         Container(height: 20),
         _buildButtonInner(
           _exportCbzsZips,
-          "分别导出CBZ" + (!isPro ? "\n(发电后使用)" : ""),
+          l10n.tr('分别导出CBZ', en: 'Export CBZ separately') + proSuffix,
         ),
         Container(height: 20),
-        if (true) ...[
-          _buildButtonInner(
-            _exportPdf,
-            "分别导Pdf" + (!isPro ? "\n(发电后使用)" : ""),
-          ),
-          Container(height: 20),
-        ],
+        _buildButtonInner(
+          _exportPdf,
+          l10n.tr('分别导出PDF', en: 'Export PDF separately') + proSuffix,
+        ),
         Container(height: 20),
         _buildButtonInner(
           _exportEpubs,
-          "分别导出EPUB" + (!isPro ? "\n(发电后使用)" : ""),
+          l10n.tr('分别导出EPUB', en: 'Export EPUB separately') + proSuffix,
         ),
         Container(height: 20),
       ],
@@ -142,268 +128,157 @@ class _DownloadsExportingScreenState extends State<DownloadsExportingScreen> {
     );
   }
 
-  _exportJmis() async {
-    if (!isPro) {
-      defaultToast(context, "请先发电鸭");
+  Future<void> _runSingleExport({
+    required String confirmContent,
+    required bool allowRename,
+    required Future<void> Function(int id, String path, String? rename)
+        exporter,
+  }) async {
+    final l10n = context.l10n;
+    if (!await ensureProAccess()) {
+      defaultToast(context, l10n.tr('请先发电鸭', en: 'Please activate Pro first'));
       return;
     }
     if (Platform.isMacOS) {
       await chooseEx(context);
     }
     if (!await confirmDialog(
-        context, "导出确认", "将您所选的漫画分别导出JMI${showExportPath()}")) {
+      context,
+      l10n.tr('导出确认', en: 'Export confirmation'),
+      confirmContent + showExportPath(context),
+    )) {
       return;
     }
     try {
       setState(() {
         exporting = true;
       });
-      final path = await attachExportPath();
+      final path = await attachExportPath(context);
       for (var value in widget.idList) {
-        var ab = await methods.downloadById(value);
+        final ab = await methods.downloadById(value);
+        final albumName = ab?.album.name ?? '';
+        if (!mounted) {
+          return;
+        }
         setState(() {
-          exportMessage = "正在导出 : " + (ab?.album?.name ?? "");
+          exportMessage = l10n.tr('正在导出', en: 'Exporting') + ' : $albumName';
         });
         String? rename;
-        if (currentExportRename()) {
-          rename = await displayTextInputDialog(context,
-              title: "导出重命名", src: ab?.album?.name ?? "");
+        if (allowRename && currentExportRename()) {
+          rename = await displayTextInputDialog(
+            context,
+            title: l10n.tr('导出重命名', en: 'Export rename'),
+            src: albumName,
+          );
         }
-        await methods.export_jm_jmi_single(
-          value,
-          path,
-          rename,
-          deleteExport,
-        );
+        await exporter(value, path, rename);
       }
       exported = true;
     } catch (err) {
       e = err;
       exportFail = true;
     } finally {
-      setState(() {
-        exporting = false;
-      });
+      if (mounted) {
+        setState(() {
+          exporting = false;
+        });
+      }
     }
   }
 
-  _exportPdf() async {
-    if (!isPro) {
-      defaultToast(context, "请先发电鸭");
-      return;
-    }
-    if (Platform.isMacOS) {
-      await chooseEx(context);
-    }
-    if (!await confirmDialog(
-        context, "导出确认", "将您所选的漫画分别导出PDF${showExportPath()}")) {
-      return;
-    }
-    try {
-      setState(() {
-        exporting = true;
-      });
-      final path = await attachExportPath();
-      for (var value in widget.idList) {
-        var ab = await methods.downloadById(value);
-        setState(() {
-          exportMessage = "正在导出 : " + (ab?.album?.name ?? "");
-        });
-        await methods.export_jm_pdf(
-          value,
-          path,
-          deleteExport,
-        );
-      }
-      exported = true;
-    } catch (err) {
-      e = err;
-      exportFail = true;
-    } finally {
-      setState(() {
-        exporting = false;
-      });
-    }
+  Future<void> _exportJmis() {
+    return _runSingleExport(
+      confirmContent: context.l10n.tr(
+        '将您所选的漫画分别导出JMI',
+        en: 'Export selected comics as JMI',
+      ),
+      allowRename: true,
+      exporter: (id, path, rename) => methods.export_jm_jmi_single(
+        id,
+        path,
+        rename,
+        deleteExport,
+      ),
+    );
   }
 
-  _exportCbzsZips() async {
-    if (!isPro) {
-      defaultToast(context, "请先发电鸭");
-      return;
-    }
-    if (Platform.isMacOS) {
-      await chooseEx(context);
-    }
-    if (!await confirmDialog(
-        context, "导出确认", "将您所选的漫画分别导出cbzs.zip${showExportPath()}")) {
-      return;
-    }
-    try {
-      setState(() {
-        exporting = true;
-      });
-      final path = await attachExportPath();
-      for (var value in widget.idList) {
-        var ab = await methods.downloadById(value);
-        setState(() {
-          exportMessage = "正在导出 : " + (ab?.album?.name ?? "");
-        });
-        String? rename;
-        if (currentExportRename()) {
-          rename = await displayTextInputDialog(context,
-              title: "导出重命名", src: ab?.album?.name ?? "");
-        }
-        await methods.export_cbzs_zip_single(
-          value,
-          path,
-          rename,
-          deleteExport,
-        );
-      }
-      exported = true;
-    } catch (err) {
-      e = err;
-      exportFail = true;
-    } finally {
-      setState(() {
-        exporting = false;
-      });
-    }
+  Future<void> _exportPdf() {
+    return _runSingleExport(
+      confirmContent: context.l10n.tr(
+        '将您所选的漫画分别导出PDF',
+        en: 'Export selected comics as PDF',
+      ),
+      allowRename: false,
+      exporter: (id, path, _) => methods.export_jm_pdf(
+        id,
+        path,
+        deleteExport,
+      ),
+    );
   }
 
-  _exportZips() async {
-    if (!isPro) {
-      defaultToast(context, "请先发电鸭");
-      return;
-    }
-    if (Platform.isMacOS) {
-      await chooseEx(context);
-    }
-    if (!await confirmDialog(
-        context, "导出确认", "将您所选的漫画分别导出ZIP${showExportPath()}")) {
-      return;
-    }
-    try {
-      setState(() {
-        exporting = true;
-      });
-      final path = await attachExportPath();
-      for (var value in widget.idList) {
-        var ab = await methods.downloadById(value);
-        setState(() {
-          exportMessage = "正在导出 : " + (ab?.album?.name ?? "");
-        });
-        String? rename;
-        if (currentExportRename()) {
-          rename = await displayTextInputDialog(context,
-              title: "导出重命名", src: ab?.album?.name ?? "");
-        }
-        await methods.export_jm_zip_single(
-          value,
-          path,
-          rename,
-          deleteExport,
-        );
-      }
-      exported = true;
-    } catch (err) {
-      e = err;
-      exportFail = true;
-    } finally {
-      setState(() {
-        exporting = false;
-      });
-    }
+  Future<void> _exportCbzsZips() {
+    return _runSingleExport(
+      confirmContent: context.l10n.tr(
+        '将您所选的漫画分别导出cbzs.zip',
+        en: 'Export selected comics as cbzs.zip',
+      ),
+      allowRename: true,
+      exporter: (id, path, rename) => methods.export_cbzs_zip_single(
+        id,
+        path,
+        rename,
+        deleteExport,
+      ),
+    );
   }
 
-  _exportJpegZips() async {
-    if (!isPro) {
-      defaultToast(context, "请先发电鸭");
-      return;
-    }
-    if (Platform.isMacOS) {
-      await chooseEx(context);
-    }
-    if (!await confirmDialog(
-        context, "导出确认", "将您所选的漫画分别导出JPEGS.ZIP${showExportPath()}")) {
-      return;
-    }
-    try {
-      setState(() {
-        exporting = true;
-      });
-      final path = await attachExportPath();
-      for (var value in widget.idList) {
-        var ab = await methods.downloadById(value);
-        setState(() {
-          exportMessage = "正在导出 : " + (ab?.album?.name ?? "");
-        });
-        String? rename;
-        if (currentExportRename()) {
-          rename = await displayTextInputDialog(context,
-              title: "导出重命名", src: ab?.album?.name ?? "");
-        }
-        await methods.export_jm_jpegs_zip_single(
-          value,
-          path,
-          rename,
-          deleteExport,
-        );
-      }
-      exported = true;
-    } catch (err) {
-      e = err;
-      exportFail = true;
-    } finally {
-      setState(() {
-        exporting = false;
-      });
-    }
+  Future<void> _exportZips() {
+    return _runSingleExport(
+      confirmContent: context.l10n.tr(
+        '将您所选的漫画分别导出ZIP',
+        en: 'Export selected comics as ZIP',
+      ),
+      allowRename: true,
+      exporter: (id, path, rename) => methods.export_jm_zip_single(
+        id,
+        path,
+        rename,
+        deleteExport,
+      ),
+    );
   }
 
-  _exportEpubs() async {
-    if (!isPro) {
-      defaultToast(context, "请先发电鸭");
-      return;
-    }
-    if (Platform.isMacOS) {
-      await chooseEx(context);
-    }
-    if (!await confirmDialog(
-        context, "导出确认", "将您所选的漫画分别导出EPUB${showExportPath()}")) {
-      return;
-    }
-    try {
-      setState(() {
-        exporting = true;
-      });
-      final path = await attachExportPath();
-      for (var value in widget.idList) {
-        var ab = await methods.downloadById(value);
-        setState(() {
-          exportMessage = "正在导出 : " + (ab?.album?.name ?? "");
-        });
-        String? rename;
-        if (currentExportRename()) {
-          rename = await displayTextInputDialog(context,
-              title: "导出重命名", src: ab?.album?.name ?? "");
-        }
-        await methods.export_jm_epub_single(
-          value,
-          path,
-          rename,
-          deleteExport,
-        );
-      }
-      exported = true;
-    } catch (err) {
-      e = err;
-      exportFail = true;
-    } finally {
-      setState(() {
-        exporting = false;
-      });
-    }
+  Future<void> _exportJpegZips() {
+    return _runSingleExport(
+      confirmContent: context.l10n.tr(
+        '将您所选的漫画分别导出JPEGS.ZIP',
+        en: 'Export selected comics as JPEGS.ZIP',
+      ),
+      allowRename: true,
+      exporter: (id, path, rename) => methods.export_jm_jpegs_zip_single(
+        id,
+        path,
+        rename,
+        deleteExport,
+      ),
+    );
+  }
+
+  Future<void> _exportEpubs() {
+    return _runSingleExport(
+      confirmContent: context.l10n.tr(
+        '将您所选的漫画分别导出EPUB',
+        en: 'Export selected comics as EPUB',
+      ),
+      allowRename: true,
+      exporter: (id, path, rename) => methods.export_jm_epub_single(
+        id,
+        path,
+        rename,
+        deleteExport,
+      ),
+    );
   }
 
   @override
@@ -419,13 +294,16 @@ class _DownloadsExportingScreenState extends State<DownloadsExportingScreen> {
     return WillPopScope(
       child: Scaffold(
         appBar: AppBar(
-          title: const Text("批量导出"),
+          title: Text(context.l10n.tr('批量导出', en: 'Batch export')),
         ),
         body: _body(),
       ),
       onWillPop: () async {
         if (exporting) {
-          defaultToast(context, "导出中, 请稍后");
+          defaultToast(
+            context,
+            context.l10n.tr('导出中, 请稍后', en: 'Exporting, please wait'),
+          );
           return false;
         }
         return true;

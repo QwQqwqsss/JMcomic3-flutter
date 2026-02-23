@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:jmcomic3/basic/commons.dart';
 import 'package:jmcomic3/basic/log.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -51,7 +51,8 @@ class JM3x4ImageProvider extends ImageProvider<JM3x4ImageProvider> {
     DecoderBufferCallback decode,
   ) async {
     assert(key == this);
-    final bytes = await File(await methods.jm3x4Cover(comicId)).readAsBytes();
+    final bytes =
+        await File(await _cachedJm3x4CoverPath(comicId)).readAsBytes();
     final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
     return decode(buffer);
   }
@@ -61,7 +62,8 @@ class JM3x4ImageProvider extends ImageProvider<JM3x4ImageProvider> {
     ImageDecoderCallback decode,
   ) async {
     assert(key == this);
-    final bytes = await File(await methods.jm3x4Cover(comicId)).readAsBytes();
+    final bytes =
+        await File(await _cachedJm3x4CoverPath(comicId)).readAsBytes();
     final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
     return decode(buffer);
   }
@@ -124,7 +126,7 @@ class PageImageProvider extends ImageProvider<PageImageProvider> {
   ) async {
     assert(key == this);
     final bytes =
-        await File(await methods.jmPageImage(id, imageName)).readAsBytes();
+        await File(await _cachedPageImagePath(id, imageName)).readAsBytes();
     final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
     return decode(buffer);
   }
@@ -135,7 +137,7 @@ class PageImageProvider extends ImageProvider<PageImageProvider> {
   ) async {
     assert(key == this);
     final bytes =
-        await File(await methods.jmPageImage(id, imageName)).readAsBytes();
+        await File(await _cachedPageImagePath(id, imageName)).readAsBytes();
     final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
     return decode(buffer);
   }
@@ -160,10 +162,88 @@ class PageImageProvider extends ImageProvider<PageImageProvider> {
       ')';
 }
 
+const _pageImagePathCacheLimit = 800;
+const _pageImageTrueSizeCacheLimit = 800;
+const _coverPathCacheLimit = 400;
+const _photoPathCacheLimit = 400;
+
+final Map<int, Future<String>> _jm3x4CoverPathFutureCache = {};
+final Map<int, Future<String>> _jmSquareCoverPathFutureCache = {};
+final Map<String, Future<String>> _photoPathFutureCache = {};
 final Map<String, Future<String>> _pageImagePathFutureCache = {};
 final Map<String, Size> _pageImageTrueSizeCache = {};
 
 String _pageImageCacheKey(int id, String imageName) => "$id/$imageName";
+
+T _putCacheWithLimit<K, T>(
+  Map<K, T> cache,
+  K key,
+  T value,
+  int limit,
+) {
+  if (!cache.containsKey(key) && cache.length >= limit) {
+    cache.remove(cache.keys.first);
+  }
+  cache[key] = value;
+  return value;
+}
+
+Future<String> _cachedJm3x4CoverPath(
+  int comicId, {
+  bool forceRefresh = false,
+}) {
+  if (forceRefresh) {
+    _jm3x4CoverPathFutureCache.remove(comicId);
+  }
+  final cached = _jm3x4CoverPathFutureCache[comicId];
+  if (cached != null) {
+    return cached;
+  }
+  return _putCacheWithLimit(
+    _jm3x4CoverPathFutureCache,
+    comicId,
+    methods.jm3x4Cover(comicId),
+    _coverPathCacheLimit,
+  );
+}
+
+Future<String> _cachedJmSquareCoverPath(
+  int comicId, {
+  bool forceRefresh = false,
+}) {
+  if (forceRefresh) {
+    _jmSquareCoverPathFutureCache.remove(comicId);
+  }
+  final cached = _jmSquareCoverPathFutureCache[comicId];
+  if (cached != null) {
+    return cached;
+  }
+  return _putCacheWithLimit(
+    _jmSquareCoverPathFutureCache,
+    comicId,
+    methods.jmSquareCover(comicId),
+    _coverPathCacheLimit,
+  );
+}
+
+Future<String> _cachedPhotoPath(
+  String photoName, {
+  bool forceRefresh = false,
+}) {
+  if (forceRefresh) {
+    _photoPathFutureCache.remove(photoName);
+  }
+  final cached = _photoPathFutureCache[photoName];
+  if (cached != null) {
+    return cached;
+  }
+  return _putCacheWithLimit(
+    _photoPathFutureCache,
+    photoName,
+    methods.jmPhotoImage(photoName),
+    _photoPathCacheLimit,
+  );
+}
 
 Future<String> _cachedPageImagePath(
   int id,
@@ -174,9 +254,15 @@ Future<String> _cachedPageImagePath(
   if (forceRefresh) {
     _pageImagePathFutureCache.remove(key);
   }
-  return _pageImagePathFutureCache.putIfAbsent(
+  final cached = _pageImagePathFutureCache[key];
+  if (cached != null) {
+    return cached;
+  }
+  return _putCacheWithLimit(
+    _pageImagePathFutureCache,
     key,
-    () => methods.jmPageImage(id, imageName),
+    methods.jmPageImage(id, imageName),
+    _pageImagePathCacheLimit,
   );
 }
 
@@ -196,7 +282,12 @@ Future<Size> _cachedPageImageTrueSize(
   }
   final imageSize = await methods.imageSize(path);
   final size = Size(imageSize.w.toDouble(), imageSize.h.toDouble());
-  _pageImageTrueSizeCache[key] = size;
+  _putCacheWithLimit(
+    _pageImageTrueSizeCache,
+    key,
+    size,
+    _pageImageTrueSizeCacheLimit,
+  );
   return size;
 }
 
@@ -232,8 +323,16 @@ class _JM3x4CoverState extends State<JM3x4Cover> {
 
   @override
   void initState() {
-    _future = methods.jm3x4Cover(widget.comicId);
     super.initState();
+    _future = _cachedJm3x4CoverPath(widget.comicId);
+  }
+
+  @override
+  void didUpdateWidget(covariant JM3x4Cover oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.comicId != widget.comicId) {
+      _future = _cachedJm3x4CoverPath(widget.comicId);
+    }
   }
 
   @override
@@ -275,8 +374,16 @@ class _JMSquareCoverState extends State<JMSquareCover> {
 
   @override
   void initState() {
-    _future = methods.jmSquareCover(widget.comicId);
     super.initState();
+    _future = _cachedJmSquareCoverPath(widget.comicId);
+  }
+
+  @override
+  void didUpdateWidget(covariant JMSquareCover oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.comicId != widget.comicId) {
+      _future = _cachedJmSquareCoverPath(widget.comicId);
+    }
   }
 
   @override
@@ -316,8 +423,16 @@ class _JMPhotoImageState extends State<JMPhotoImage> {
 
   @override
   void initState() {
-    _future = methods.jmPhotoImage(widget.photoName);
     super.initState();
+    _future = _cachedPhotoPath(widget.photoName);
+  }
+
+  @override
+  void didUpdateWidget(covariant JMPhotoImage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.photoName != widget.photoName) {
+      _future = _cachedPhotoPath(widget.photoName);
+    }
   }
 
   @override
@@ -349,8 +464,7 @@ class JMPageImage extends StatefulWidget {
 }
 
 class _JMPageImageState extends State<JMPageImage> {
-  Future<String>? _future;
-  Key _futureKey = UniqueKey();
+  late Future<String> _future;
 
   @override
   void initState() {
@@ -358,13 +472,26 @@ class _JMPageImageState extends State<JMPageImage> {
     _future = _init();
   }
 
-  Future<String> _init() async {
-    final _path = await _cachedPageImagePath(widget.id, widget.imageName);
+  @override
+  void didUpdateWidget(covariant JMPageImage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.id != widget.id || oldWidget.imageName != widget.imageName) {
+      _future = _init();
+    }
+  }
+
+  Future<String> _init({bool forceRefresh = false}) async {
+    final _path = await _cachedPageImagePath(
+      widget.id,
+      widget.imageName,
+      forceRefresh: forceRefresh,
+    );
     if (widget.onTrueSize != null) {
       final size = await _cachedPageImageTrueSize(
         widget.id,
         widget.imageName,
         _path,
+        forceRefresh: forceRefresh,
       );
       widget.onTrueSize!(size);
     }
@@ -373,39 +500,22 @@ class _JMPageImageState extends State<JMPageImage> {
 
   void _reload() {
     _evictPageImageCache(widget.id, widget.imageName);
-    if (mounted) {
-      // 先清除旧的 Future，然后创建新的
-      setState(() {
-        _future = null;
-        _futureKey = UniqueKey();
-      });
-      // 在下一帧创建新的 Future，确保 FutureBuilder 完全重建
-      Future.microtask(() {
-        if (mounted) {
-          setState(() {
-            _future = _init();
-          });
-        }
-      });
+    if (!mounted) {
+      return;
     }
+    setState(() {
+      _future = _init(forceRefresh: true);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    // 如果 future 为 null，显示加载状态
-    if (_future == null) {
-      return buildLoading(
-        context,
-        widget.width,
-        widget.height,
-      );
-    }
+    // 按 future 状态渲染图片
     return pathFutureImage(
       context,
-      _future!,
+      _future,
       widget.width,
       widget.height,
-      key: _futureKey,
       onReload: _reload,
     );
   }
@@ -415,14 +525,11 @@ Widget pathFutureImage(
     BuildContext context, Future<String> future, double? width, double? height,
     {BoxFit fit = BoxFit.cover,
     List<LongPressMenuItem>? longPressMenuItems,
-    Key? key,
     VoidCallback? onReload}) {
-  // 使用 key 来确保 FutureBuilder 完全重建
+  // 使用 FutureBuilder 渲染加载/错误/成功状态
   return FutureBuilder<String>(
-      key: key,
       future: future,
       builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-        // 检查是否有错误
         if (snapshot.hasError) {
           debugPrient("${snapshot.error}");
           debugPrient("${snapshot.stackTrace}");
@@ -445,7 +552,7 @@ Widget pathFutureImage(
             longPressMenuItems: longPressMenuItems,
           );
         }
-        // 其他状态（waiting, active, none）都显示加载状态
+        // 其他状态（waiting/active/none）显示加载状态
         return buildLoading(
           context,
           width,
@@ -459,10 +566,10 @@ Widget pathFutureImage(
 
 Widget buildSvg(String source, double? width, double? height,
     {Color? color, double? margin}) {
-  var widget = Container(
+  final widget = Container(
     width: width,
     height: height,
-    padding: margin != null ? EdgeInsets.all(10) : null,
+    padding: margin != null ? const EdgeInsets.all(10) : null,
     child: Center(
       child: SvgPicture.asset(
         source,
@@ -476,10 +583,10 @@ Widget buildSvg(String source, double? width, double? height,
 }
 
 Widget buildMock(double? width, double? height) {
-  var widget = Container(
+  final widget = Container(
     width: width,
     height: height,
-    padding: EdgeInsets.all(10),
+    padding: const EdgeInsets.all(10),
     child: Center(
       child: SvgPicture.asset(
         'lib/assets/unknown.svg',
@@ -498,7 +605,7 @@ Widget buildError(BuildContext context, double? width, double? height,
   if (width != null && height != null) {
     size = width < height ? width : height;
   }
-  var error = SizedBox(
+  final error = SizedBox(
     width: width,
     height: height,
     child: Center(
@@ -514,9 +621,10 @@ Widget buildError(BuildContext context, double? width, double? height,
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onLongPress: () async {
+        final reloadText = context.l10n.tr('重新加载', en: 'Reload');
         List<String> menuItems = [];
         if (onReload != null) {
-          menuItems.add('重新加载');
+          menuItems.add(reloadText);
         }
         if (longPressMenuItems != null && longPressMenuItems.isNotEmpty) {
           menuItems.addAll(longPressMenuItems.map((e) => e.title));
@@ -525,10 +633,10 @@ Widget buildError(BuildContext context, double? width, double? height,
 
         String? choose = await chooseListDialog(
           context,
-          title: '请选择',
+          title: context.l10n.choose,
           values: menuItems,
         );
-        if (choose == '重新加载' && onReload != null) {
+        if (choose == reloadText && onReload != null) {
           onReload();
         } else {
           for (var item in longPressMenuItems ?? []) {
@@ -551,7 +659,7 @@ Widget buildLoading(BuildContext context, double? width, double? height,
   if (width != null && height != null) {
     size = width < height ? width : height;
   }
-  var loading = SizedBox(
+  final loading = SizedBox(
     width: width,
     height: height,
     child: Center(
@@ -567,7 +675,7 @@ Widget buildLoading(BuildContext context, double? width, double? height,
       onLongPress: () async {
         String? choose = await chooseListDialog(
           context,
-          title: '请选择',
+          title: context.l10n.choose,
           values: longPressMenuItems.map((e) => e.title).toList(),
         );
         for (var item in longPressMenuItems) {
@@ -583,11 +691,26 @@ Widget buildLoading(BuildContext context, double? width, double? height,
   return loading;
 }
 
+int? _cacheExtent(double? logicalExtent, double devicePixelRatio) {
+  if (logicalExtent == null || logicalExtent <= 0) {
+    return null;
+  }
+  final value = (logicalExtent * devicePixelRatio).round();
+  return value > 0 ? value : null;
+}
+
 Widget buildFile(
     BuildContext context, String file, double? width, double? height,
     {BoxFit fit = BoxFit.cover, List<LongPressMenuItem>? longPressMenuItems}) {
-  var image = Image(
-    image: FileImage(File(file)),
+  final devicePixelRatio = MediaQuery.maybeDevicePixelRatioOf(context) ?? 1.0;
+  final cacheWidth = _cacheExtent(width, devicePixelRatio);
+  final cacheHeight = _cacheExtent(height, devicePixelRatio);
+  final image = Image(
+    image: ResizeImage.resizeIfNeeded(
+      cacheWidth,
+      cacheHeight,
+      FileImage(File(file)),
+    ),
     width: width,
     height: height,
     errorBuilder: (a, b, c) {
@@ -599,44 +722,44 @@ Widget buildFile(
   );
   return GestureDetector(
     onLongPress: () async {
+      final previewText = context.l10n.tr('预览图片', en: 'Preview image');
+      final saveToGalleryText =
+          context.l10n.tr('保存图片到相册', en: 'Save image to gallery');
+      final saveToFileText =
+          context.l10n.tr('保存图片到文件', en: 'Save image to file');
       String? choose = await chooseListDialog(
         context,
-        title: '请选择',
+        title: context.l10n.choose,
         values: [
-          '预览图片',
+          previewText,
           ...Platform.isAndroid || Platform.isIOS
               ? [
-                  '保存图片到相册',
+                  saveToGalleryText,
                 ]
               : [],
           ...!Platform.isIOS
               ? [
-                  '保存图片到文件',
+                  saveToFileText,
                 ]
               : [],
           ...longPressMenuItems?.map((e) => e.title) ?? [],
         ],
       );
-      switch (choose) {
-        case '预览图片':
-          Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => FilePhotoViewScreen(file),
-          ));
-          break;
-        case '保存图片到相册':
-          saveImageFileToGallery(context, file);
-          break;
-        case '保存图片到文件':
-          saveImageFileToFile(context, file);
-          break;
-        default:
-          for (var item in longPressMenuItems ?? []) {
-            if (item.title == choose) {
-              item.onChoose();
-              break;
-            }
+      if (choose == previewText) {
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => FilePhotoViewScreen(file),
+        ));
+      } else if (choose == saveToGalleryText) {
+        saveImageFileToGallery(context, file);
+      } else if (choose == saveToFileText) {
+        saveImageFileToFile(context, file);
+      } else {
+        for (var item in longPressMenuItems ?? []) {
+          if (item.title == choose) {
+            item.onChoose();
+            break;
           }
-          break;
+        }
       }
     },
     child: image,

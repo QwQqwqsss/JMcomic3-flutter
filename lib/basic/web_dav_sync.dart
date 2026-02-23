@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jmcomic3/basic/log.dart';
 import 'package:jmcomic3/basic/methods.dart';
 import 'package:jmcomic3/configs/web_dav_url.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
 import '../configs/is_pro.dart';
 import '../configs/web_dav_password.dart';
@@ -17,10 +18,14 @@ Future webDavSync(BuildContext context) async {
       "password": currentWebDavPassword,
       "direction": "Merge",
     });
-    defaultToast(context, "WebDav 同步成功");
+    defaultToast(
+        context, context.l10n.tr("WebDav 同步成功", en: "WebDav sync succeeded"));
   } catch (e, s) {
     debugPrient("$e\n$s");
-    defaultToast(context, "WebDav 同步失败: $e");
+    defaultToast(
+      context,
+      context.l10n.tr("WebDav 同步失败", en: "WebDav sync failed") + ": $e",
+    );
   }
 }
 
@@ -32,10 +37,17 @@ Future webDavSyncUpload(BuildContext context) async {
       "password": currentWebDavPassword,
       "direction": "Upload",
     });
-    defaultToast(context, "WebDav 覆盖上传成功");
+    defaultToast(
+      context,
+      context.l10n.tr("WebDav 覆盖上传成功", en: "WebDav overwrite upload succeeded"),
+    );
   } catch (e, s) {
     debugPrient("$e\n$s");
-    defaultToast(context, "WebDav 覆盖上传失败: $e");
+    defaultToast(
+      context,
+      context.l10n.tr("WebDav 覆盖上传失败", en: "WebDav overwrite upload failed") +
+          ": $e",
+    );
   }
 }
 
@@ -47,15 +59,23 @@ Future webDavSyncDownload(BuildContext context) async {
       "password": currentWebDavPassword,
       "direction": "Download",
     });
-    defaultToast(context, "WebDav 覆盖下载成功");
+    defaultToast(
+      context,
+      context.l10n
+          .tr("WebDav 覆盖下载成功", en: "WebDav overwrite download succeeded"),
+    );
   } catch (e, s) {
     debugPrient("$e\n$s");
-    defaultToast(context, "WebDav 覆盖下载失败: $e");
+    defaultToast(
+      context,
+      context.l10n.tr("WebDav 覆盖下载失败", en: "WebDav overwrite download failed") +
+          ": $e",
+    );
   }
 }
 
 Future webDavSyncAuto(BuildContext context) async {
-  if (currentWebDavSyncSwitch() && isPro) {
+  if (currentWebDavSyncSwitch() && hasProAccess) {
     await webDavSync(context);
   }
 }
@@ -64,7 +84,7 @@ var syncing = false;
 
 Widget webDavSyncClick(BuildContext context) {
   return ListTile(
-    title: const Text("立即同步"),
+    title: Text(context.l10n.tr("立即同步", en: "Sync now")),
     onTap: () async {
       if (syncing) return;
       syncing = true;
@@ -79,7 +99,7 @@ Widget webDavSyncClick(BuildContext context) {
 
 Widget webDavSyncUploadClick(BuildContext context) {
   return ListTile(
-    title: const Text("单向覆盖上传"),
+    title: Text(context.l10n.tr("单向覆盖上传", en: "One-way overwrite upload")),
     onTap: () async {
       if (syncing) return;
       syncing = true;
@@ -94,7 +114,7 @@ Widget webDavSyncUploadClick(BuildContext context) {
 
 Widget webDavSyncDownloadClick(BuildContext context) {
   return ListTile(
-    title: const Text("单向覆盖下载"),
+    title: Text(context.l10n.tr("单向覆盖下载", en: "One-way overwrite download")),
     onTap: () async {
       if (syncing) return;
       syncing = true;

@@ -1,10 +1,8 @@
 /// 自动全屏
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
-import '../basic/commons.dart';
 import '../basic/methods.dart';
 
 const _propertyName = "ignoreVewLog";
@@ -28,7 +26,12 @@ Widget ignoreVewLogSetting() {
           _ignoreVewLog = value;
           setState(() {});
         },
-        title: const Text("详情页不记录浏览记录"),
+        title: Text(
+          context.l10n.tr(
+            "详情页不记录浏览记录",
+            en: "Do not record view history on detail page",
+          ),
+        ),
       );
     },
   );

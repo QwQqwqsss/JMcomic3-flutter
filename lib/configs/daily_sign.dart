@@ -4,6 +4,7 @@ import 'package:jmcomic3/basic/commons.dart';
 import 'package:jmcomic3/basic/log.dart';
 import 'package:jmcomic3/basic/methods.dart';
 import 'package:jmcomic3/configs/login.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
 enum DailySignStatus {
   unchecked,
@@ -21,17 +22,16 @@ void _setDailySignStatus(DailySignStatus status) {
   dailySignEvent.broadcast();
 }
 
-String dailySignStatusLabel() {
+String dailySignStatusLabel(BuildContext context) {
   switch (dailySignStatus) {
     case DailySignStatus.checking:
-      return "检测中...";
+      return context.l10n.tr("检测中...", en: "Checking...");
     case DailySignStatus.signed:
-      return "已签到";
+      return context.l10n.tr("已签到", en: "Signed in");
     case DailySignStatus.error:
-      return "签到失败";
+      return context.l10n.tr("签到失败", en: "Sign-in failed");
     case DailySignStatus.unchecked:
-    default:
-      return "未检测签到";
+      return context.l10n.tr("未检测签到", en: "Not checked");
   }
 }
 
@@ -45,7 +45,10 @@ Future<void> checkDailySignStatus(BuildContext context,
   try {
     final msg = await methods.daily(selfInfo.uid);
     if (toast) {
-      defaultToast(context, msg.isNotEmpty ? msg : "已签到");
+      defaultToast(
+        context,
+        msg.isNotEmpty ? msg : context.l10n.tr("已签到", en: "Signed in"),
+      );
     }
     _setDailySignStatus(DailySignStatus.signed);
   } catch (e, st) {

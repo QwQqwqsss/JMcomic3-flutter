@@ -3,8 +3,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
-import '../basic/commons.dart';
 import '../basic/methods.dart';
 
 const _propertyName = "usingRightClickPop";
@@ -31,7 +31,12 @@ Widget usingRightClickPopSetting() {
           _usingRightClickPop = value;
           setState(() {});
         },
-        title: const Text("鼠标右键返回上一页"),
+        title: Text(
+          context.l10n.tr(
+            "鼠标右键返回上一页",
+            en: "Right-click to go back",
+          ),
+        ),
       );
     },
   );

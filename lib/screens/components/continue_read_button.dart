@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jmcomic3/basic/entities.dart';
 import 'package:jmcomic3/basic/methods.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 import 'package:jmcomic3/screens/components/my_flat_button.dart';
 
 // 继续阅读按钮
@@ -30,7 +31,7 @@ class _ContinueReadButtonState extends State<ContinueReadButton> {
         late String text;
         if (snapshot.connectionState != ConnectionState.done) {
           onPressed = () {};
-          text = '加载中';
+          text = context.l10n.loading;
         } else {
           ViewLog? viewLog = snapshot.data;
           if (viewLog == null || viewLog.lastViewChapterId == 0) {
@@ -47,7 +48,7 @@ class _ContinueReadButtonState extends State<ContinueReadButton> {
                 widget.onChoose(widget.album.series[0].id, 0);
               }
             };
-            text = '从头开始';
+            text = context.l10n.tr('从头开始', en: 'Start from beginning');
           } else {
             onPressed = () {
               widget.onChoose(
@@ -55,7 +56,7 @@ class _ContinueReadButtonState extends State<ContinueReadButton> {
                 viewLog.lastViewPage,
               );
             };
-            text = '继续阅读'; // todo names and pages
+            text = context.l10n.tr('继续阅读', en: 'Continue reading');
             if (widget.album.series.isNotEmpty) {
               for (var i = 0; i < widget.album.series.length; i++) {
                 if (widget.album.series[i].id == viewLog.lastViewChapterId) {

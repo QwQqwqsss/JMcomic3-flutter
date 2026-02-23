@@ -3,6 +3,7 @@ import 'package:jmcomic3/basic/commons.dart';
 import 'package:jmcomic3/basic/log.dart';
 import 'package:jmcomic3/basic/methods.dart';
 import 'package:jmcomic3/configs/login.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 import 'package:jmcomic3/screens/components/comic_pager.dart';
 
 import 'components/right_click_pop.dart';
@@ -19,14 +20,15 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   bool _isLoading = true;
 
   final Map<int, String> _folderMap = {
-    0: "全部",
+    0: "",
   };
 
   _chooseFolder() async {
+    _folderMap[0] = context.l10n.all;
     int? f = await chooseMapDialog(
       context,
       values: _folderMap.map((key, value) => MapEntry(value, key)),
-      title: "选择文件夹",
+      title: context.l10n.chooseFolder,
     );
     if (f != null) {
       setState(() {
@@ -35,17 +37,21 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     }
   }
 
-  final _sortNameMap = {
-    "mr": "收藏时间",
-    "mp": "更新时间",
-  };
   String _sort = "mr";
 
+  Map<String, String> _sortNameMap(BuildContext context) {
+    return {
+      "mr": context.l10n.sortByFavoriteTime,
+      "mp": context.l10n.sortByUpdateTime,
+    };
+  }
+
   _chooseSort() async {
+    final nameMap = _sortNameMap(context);
     String? f = await chooseMapDialog(
       context,
-      values: _sortNameMap.map((key, value) => MapEntry(value, key)),
-      title: "选择排序",
+      values: nameMap.map((key, value) => MapEntry(value, key)),
+      title: context.l10n.chooseSort,
     );
     if (f != null) {
       setState(() {
@@ -58,7 +64,11 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   @override
   void initState() {
     Future.delayed(Duration.zero, () async {
-      if (!await ensureJwtAccess(context, feature: "收藏夹") && mounted) {
+      if (!await ensureJwtAccess(
+            context,
+            feature: context.l10n.featureFavoritesFolder,
+          ) &&
+          mounted) {
         Navigator.of(context).pop();
       }
     });
@@ -77,7 +87,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   Future<void> _loadSort() async {
     try {
       final sort = await methods.loadProperty("favorites_sort");
-      if (sort.isNotEmpty && _sortNameMap.containsKey(sort)) {
+      if (sort.isNotEmpty && _sortNameMap(context).containsKey(sort)) {
         setState(() {
           _sort = sort;
           _isLoading = false;
@@ -101,9 +111,11 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   }
 
   Widget buildScreen(BuildContext context) {
+    _folderMap[0] = context.l10n.all;
+    final sortNameMap = _sortNameMap(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text("收藏夹"),
+        title: Text(context.l10n.favorites),
         actions: [
           MaterialButton(
             onPressed: _chooseSort,
@@ -111,7 +123,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
               children: [
                 const Icon(Icons.sort, size: 15),
                 Container(width: 8),
-                Text(_sortNameMap[_sort] ?? ""),
+                Text(sortNameMap[_sort] ?? ""),
               ],
             ),
           ),
@@ -121,7 +133,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
               children: [
                 const Icon(Icons.folder_copy_outlined, size: 15),
                 Container(width: 8),
-                Text(_folderMap[_folderId] ?? ""),
+                Text(_folderMap[_folderId] ?? context.l10n.all),
               ],
             ),
           ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jmcomic3/basic/methods.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 import 'package:jmcomic3/screens/components/item_builder.dart';
 
 import 'components/comic_info_card.dart';
@@ -21,7 +22,7 @@ class _ComicDownloadScreenState extends State<ComicDownloadScreen> {
 
   Future _init() async {
     var task = await methods.downloadById(widget.album.id);
-    task?.chapters.map((e) => e.id)?.forEach(_taskedEps.add);
+    task?.chapters.map((e) => e.id).forEach(_taskedEps.add);
   }
 
   @override
@@ -38,7 +39,9 @@ class _ComicDownloadScreenState extends State<ComicDownloadScreen> {
   Widget buildScreen(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("下载 - ${widget.album.name}"),
+        title: Text(
+          "${context.l10n.tr("下载", en: "Download")} - ${widget.album.name}",
+        ),
       ),
       body: ListView(
         children: [
@@ -107,7 +110,7 @@ class _ComicDownloadScreenState extends State<ComicDownloadScreen> {
                 });
               });
             },
-            child: const Text('全选'),
+            child: Text(context.l10n.tr('全选', en: 'Select all')),
           ),
           MaterialButton(
             color: theme.colorScheme.secondary,
@@ -140,7 +143,7 @@ class _ComicDownloadScreenState extends State<ComicDownloadScreen> {
               await methods.createDownload(carte);
               Navigator.pop(context);
             },
-            child: const Text('确定下载'),
+            child: Text(context.l10n.tr('确定下载', en: 'Download selected')),
           ),
         ],
       ),

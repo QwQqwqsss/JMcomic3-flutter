@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
 import '../basic/commons.dart';
 import '../basic/methods.dart';
@@ -16,10 +17,13 @@ bool currentWebDavSyncSwitch() {
 }
 
 Future<void> _chooseWebDavSyncSwitch(BuildContext context) async {
+  final l10n = context.l10n;
   String? result = await chooseListDialog<String>(context,
-      title: "开开启时自动同步历史记录到WebDAV", values: ["是", "否"]);
+      title: l10n.tr("开启时自动同步历史记录到 WebDAV",
+          en: "Auto-sync history to WebDAV on launch"),
+      values: [l10n.yes, l10n.no]);
   if (result != null) {
-    var target = result == "是";
+    var target = result == l10n.yes;
     await methods.saveProperty(_propertyName, "$target");
     _webDavSyncSwitch = target;
   }
@@ -30,19 +34,20 @@ Widget webDavSyncSwitchSetting() {
     builder: (BuildContext context, void Function(void Function()) setState) {
       return ListTile(
         title: Text(
-          "开启时自动同步历史记录到WebDAV",
+          context.l10n.tr("开启时自动同步历史记录到 WebDAV",
+              en: "Auto-sync history to WebDAV on launch"),
           style: TextStyle(
-            color: !isPro ? Colors.grey : null,
+            color: !hasProAccess ? Colors.grey : null,
           ),
         ),
         subtitle: Text(
-          _webDavSyncSwitch ? "是" : "否",
+          context.l10n.boolLabel(_webDavSyncSwitch),
           style: TextStyle(
-            color: !isPro ? Colors.grey : null,
+            color: !hasProAccess ? Colors.grey : null,
           ),
         ),
         onTap: () async {
-          if (!isPro) {
+          if (!hasProAccess) {
             return;
           }
           await _chooseWebDavSyncSwitch(context);

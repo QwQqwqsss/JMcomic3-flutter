@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
 import '../basic/commons.dart';
 import '../basic/methods.dart';
 import 'is_pro.dart';
 
-const _propertyName = "exportRename";
+const _propertyName = 'exportRename';
 late bool _exportRename;
 
 Future<void> initExportRename() async {
-  _exportRename = (await methods.loadProperty(_propertyName)) == "true";
+  _exportRename = (await methods.loadProperty(_propertyName)) == 'true';
 }
 
 bool currentExportRename() {
@@ -16,11 +17,15 @@ bool currentExportRename() {
 }
 
 Future<void> _chooseExportRename(BuildContext context) async {
-  String? result = await chooseListDialog<String>(context,
-      title: "导出的时候重新命名", values: ["是", "否"]);
+  final l10n = context.l10n;
+  String? result = await chooseListDialog<String>(
+    context,
+    title: l10n.tr('导出时重命名', en: 'Rename on export'),
+    values: [l10n.yes, l10n.no],
+  );
   if (result != null) {
-    var target = result == "是";
-    await methods.saveProperty(_propertyName, "$target");
+    var target = result == l10n.yes;
+    await methods.saveProperty(_propertyName, '$target');
     _exportRename = target;
   }
 }
@@ -30,19 +35,19 @@ Widget exportRenameSetting() {
     builder: (BuildContext context, void Function(void Function()) setState) {
       return ListTile(
         title: Text(
-          "导出的时候重新命名",
+          context.l10n.tr('导出时重命名', en: 'Rename on export'),
           style: TextStyle(
-            color: !isPro ? Colors.grey : null,
+            color: !hasProAccess ? Colors.grey : null,
           ),
         ),
         subtitle: Text(
-          _exportRename ? "是" : "否",
+          context.l10n.boolLabel(_exportRename),
           style: TextStyle(
-            color: !isPro ? Colors.grey : null,
+            color: !hasProAccess ? Colors.grey : null,
           ),
         ),
         onTap: () async {
-          if (!isPro) {
+          if (!hasProAccess) {
             return;
           }
           await _chooseExportRename(context);

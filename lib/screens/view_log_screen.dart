@@ -3,10 +3,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:jmcomic3/basic/commons.dart';
 import 'package:jmcomic3/basic/methods.dart';
-import 'package:jmcomic3/screens/components/floating_search_bar.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
 import 'components/browser_bottom_sheet.dart';
-import 'components/comic_list.dart';
 import 'components/comic_pager.dart';
 import 'components/right_click_pop.dart';
 import 'components/types.dart';
@@ -28,18 +27,19 @@ class _ViewLogScreenState extends State<ViewLogScreen> {
   }
 
   Widget buildScreen(BuildContext context) {
+    final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(
-        title: const Text("浏览记录"),
+        title: Text(l10n.viewHistory),
         actions: [
           IconButton(
             onPressed: () async {
               String? choose = await chooseListDialog(
                 context,
-                values: ["是", "否"],
-                title: "清除所有历史记录?",
+                values: [l10n.yes, l10n.no],
+                title: l10n.clearAllHistory,
               );
-              if ("是" == choose) {
+              if (l10n.yes == choose) {
                 await methods.clearViewLog();
                 Navigator.of(context).pushReplacement(MaterialPageRoute(
                   builder: (BuildContext context) {
@@ -64,9 +64,9 @@ class _ViewLogScreenState extends State<ViewLogScreen> {
         },
         longPressMenuItems: [
           ComicLongPressMenuItem(
-            "删除浏览记录",
+            l10n.deleteViewHistory,
             (ComicBasic comic) async {
-              defaultToast(context, "删除${comic.name}");
+              defaultToast(context, l10n.deletingComic(comic.name));
               await methods.deleteViewLogByComicId(comic.id);
               setState(() {
                 key = "HISTORY::" + Random().nextInt(100000).toString();

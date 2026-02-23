@@ -3,7 +3,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
 import '../basic/commons.dart';
 import '../basic/methods.dart';
@@ -32,9 +32,12 @@ Future<String?> initExportPath() async {
   return null;
 }
 
-String showExportPath() {
+String showExportPath(BuildContext context) {
   if (Platform.isIOS) {
-    return "\n\n随后可在文件管理中找到导出的内容";
+    return context.l10n.tr(
+      "\n\n随后可在文件管理中找到导出的内容",
+      en: "\n\nThen you can find exported files in the Files app",
+    );
   }
   return "\n\n$_currentExportPath";
 }
@@ -47,13 +50,19 @@ Future _setExportPath(String folder) async {
 Widget displayExportPathInfo() {
   return StatefulBuilder(
     builder: (BuildContext context, void Function(void Function()) setState) {
+      final l10n = context.l10n;
       if (Platform.isIOS) {
         return Container(
           margin: const EdgeInsets.all(15),
           padding: const EdgeInsets.all(15),
           color: (Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black)
               .withOpacity(.01),
-          child: const Text("您正在使用iOS设备:\n导出到文件的内容请打开系统自带文件管理进行浏览"),
+          child: Text(
+            l10n.tr(
+              "您正在使用iOS设备:\n导出到文件的内容请打开系统自带文件管理进行浏览",
+              en: "You are using iOS:\nOpen the system Files app to browse exported files",
+            ),
+          ),
         );
       }
       return Column(children: [
@@ -63,7 +72,8 @@ Widget displayExportPathInfo() {
               await chooseEx(context);
               setState(() {});
             },
-            title: const Text("导出路径 (点击可修改)"),
+            title:
+                Text(l10n.tr("导出路径 (点击可修改)", en: "Export path (tap to edit)")),
             subtitle: Text(_currentExportPath),
           ),
         ...Platform.isAndroid
@@ -75,8 +85,11 @@ Widget displayExportPathInfo() {
                   color: (Theme.of(context).textTheme.bodyMedium?.color ??
                           Colors.black)
                       .withOpacity(.01),
-                  child: const Text(
-                    "您正在使用安卓设备:\n如果不能成功导出并且提示权限不足, 可以尝试在Download或Document下建立子目录进行导出",
+                  child: Text(
+                    l10n.tr(
+                      "您正在使用安卓设备:\n如果不能成功导出并且提示权限不足, 可以尝试在Download或Document下建立子目录进行导出",
+                      en: "You are using Android:\nIf export fails due to insufficient permissions, try creating a subfolder under Download or Document",
+                    ),
                   ),
                 ),
               ]
@@ -86,13 +99,13 @@ Widget displayExportPathInfo() {
   );
 }
 
-Future<String> attachExportPath() async {
+Future<String> attachExportPath(BuildContext context) async {
   late String path;
   if (Platform.isIOS) {
     path = await methods.iosGetDocumentDir();
   } else {
     if (!await androidMangeStorageRequest()) {
-      throw Exception("申请权限被拒绝");
+      throw Exception(context.l10n.tr("申请权限被拒绝", en: "Permission denied"));
     }
     path = _currentExportPath;
   }

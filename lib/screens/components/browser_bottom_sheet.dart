@@ -8,6 +8,7 @@ import 'package:jmcomic3/configs/pager_column_number.dart';
 import 'package:jmcomic3/configs/pager_controller_mode.dart';
 import 'package:jmcomic3/configs/pager_cover_rate.dart';
 import 'package:jmcomic3/configs/pager_view_mode.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class BrowserBottomSheetAction extends StatelessWidget {
@@ -74,7 +75,7 @@ class _BrowserBottomSheetState extends State<_BrowserBottomSheet> {
     setState(() {
       _manualCleaning = true;
     });
-    defaultToast(context, '开始清理缓存');
+    defaultToast(context, context.l10n.tr('开始清理缓存', en: 'Start cleaning cache'));
     final result = await cleanCache();
     if (!mounted) {
       return;
@@ -83,11 +84,20 @@ class _BrowserBottomSheetState extends State<_BrowserBottomSheet> {
       _manualCleaning = false;
     });
     if (result.success) {
-      defaultToast(context, '清理完成 (${result.duration.inMilliseconds}ms)');
+      defaultToast(
+        context,
+        context.l10n.tr(
+          '清理完成 (${result.duration.inMilliseconds}ms)',
+          en: 'Cleanup complete (${result.duration.inMilliseconds}ms)',
+        ),
+      );
       return;
     }
     debugPrient('clean cache failed: ${result.error}');
-    defaultToast(context, '清理失败，请稍后重试');
+    defaultToast(
+      context,
+      context.l10n.tr('清理失败，请稍后重试', en: 'Cleanup failed, please try again later'),
+    );
   }
 
   @override
@@ -99,7 +109,7 @@ class _BrowserBottomSheetState extends State<_BrowserBottomSheet> {
             Expanded(child: Container()),
             _bottomIcon(
               icon: Icons.view_quilt,
-              title: currentPagerViewModeName,
+              title: currentPagerViewModeName(context),
               onPressed: () async {
                 await choosePagerViewMode(context);
                 setState(() {});
@@ -108,7 +118,7 @@ class _BrowserBottomSheetState extends State<_BrowserBottomSheet> {
             Expanded(child: Container()),
             _bottomIcon(
               icon: Icons.view_day_outlined,
-              title: currentPagerControllerModeName,
+              title: currentPagerControllerModeName(context),
               onPressed: () async {
                 await choosePagerControllerMode(context);
                 setState(() {});
@@ -117,7 +127,7 @@ class _BrowserBottomSheetState extends State<_BrowserBottomSheet> {
             Expanded(child: Container()),
             _bottomIcon(
               icon: Icons.grid_on_sharp,
-              title: pagerCoverRateName(currentPagerCoverRate),
+              title: pagerCoverRateName(currentPagerCoverRate, context),
               onPressed: () async {
                 await choosePagerCoverRate(context);
                 setState(() {});
@@ -126,7 +136,7 @@ class _BrowserBottomSheetState extends State<_BrowserBottomSheet> {
             Expanded(child: Container()),
             _bottomIcon(
               icon: Icons.view_column_sharp,
-              title: '$pagerColumnNumber 列',
+              title: context.l10n.tr('$pagerColumnNumber 列', en: '$pagerColumnNumber cols'),
               onPressed: () async {
                 await choosePagerColumnCount(context);
                 setState(() {});
@@ -142,7 +152,9 @@ class _BrowserBottomSheetState extends State<_BrowserBottomSheet> {
               icon: _cleaning
                   ? Icons.cleaning_services_outlined
                   : Icons.cleaning_services_rounded,
-              title: _cleaning ? '清理中...' : '清理',
+              title: _cleaning
+                  ? context.l10n.tr('清理中...', en: 'Cleaning...')
+                  : context.l10n.tr('清理', en: 'Clean'),
               onPressed: _cleaning
                   ? null
                   : () {
@@ -152,7 +164,7 @@ class _BrowserBottomSheetState extends State<_BrowserBottomSheet> {
             Expanded(child: Container()),
             _bottomIcon(
               icon: Icons.auto_delete_outlined,
-              title: autoCleanName(),
+              title: autoCleanNameOf(context),
               onPressed: () async {
                 await chooseAutoClean(context);
                 setState(() {});

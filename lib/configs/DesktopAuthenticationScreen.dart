@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jmcomic3/basic/methods.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
 const _key = "desktopAuthPassword";
 
@@ -27,7 +28,9 @@ class _VerifyPasswordState extends State<VerifyPassword> {
             children: [
               Expanded(child: Container()),
               TextField(
-                decoration: const InputDecoration(labelText: "当前密码"),
+                decoration: InputDecoration(
+                  labelText: context.l10n.tr("当前密码", en: "Current password"),
+                ),
                 onChanged: (value) {
                   _password = value;
                 },
@@ -39,11 +42,16 @@ class _VerifyPasswordState extends State<VerifyPassword> {
                   if (_password == savedPassword) {
                     Navigator.of(context).pop(true);
                   } else {
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(const SnackBar(content: Text("密码错误")));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          context.l10n.tr("密码错误", en: "Wrong password"),
+                        ),
+                      ),
+                    );
                   }
                 },
-                child: const Text("确定"),
+                child: Text(context.l10n.confirm),
               ),
               Expanded(child: Container()),
             ],
@@ -73,8 +81,8 @@ class _SetPasswordState extends State<SetPassword> {
           padding: const EdgeInsets.all(30),
           child: Column(
             children: [
-              const Text(
-                "密码初始化",
+              Text(
+                context.l10n.tr("密码初始化", en: "Initialize password"),
                 style: TextStyle(
                   height: 18,
                 ),
@@ -83,7 +91,9 @@ class _SetPasswordState extends State<SetPassword> {
                 height: 10,
               ),
               TextField(
-                decoration: const InputDecoration(labelText: "密码"),
+                decoration: InputDecoration(
+                  labelText: context.l10n.password,
+                ),
                 onChanged: (value) {
                   _password = value;
                 },
@@ -92,7 +102,9 @@ class _SetPasswordState extends State<SetPassword> {
                 height: 10,
               ),
               TextField(
-                decoration: const InputDecoration(labelText: "再次输入密码"),
+                decoration: InputDecoration(
+                  labelText: context.l10n.tr("再次输入密码", en: "Enter password again"),
+                ),
                 onChanged: (value) {
                   _password2 = value;
                 },
@@ -106,7 +118,7 @@ class _SetPasswordState extends State<SetPassword> {
                     onPressed: () async {
                       Navigator.of(context).pop(false);
                     },
-                    child: const Text("取消"),
+                    child: Text(context.l10n.tr("取消", en: "Cancel")),
                   ),
                   Container(width: 10),
                   Expanded(
@@ -114,13 +126,23 @@ class _SetPasswordState extends State<SetPassword> {
                       onPressed: () async {
                         if (_password != _password2) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text("两次输入的密码不一致")));
+                            SnackBar(
+                              content: Text(
+                                context.l10n.tr(
+                                  "两次输入的密码不一致",
+                                  en: "The two passwords do not match",
+                                ),
+                              ),
+                            ),
+                          );
                           return;
                         }
                         await methods.saveProperty(_key, _password);
                         Navigator.of(context).pop(true);
                       },
-                      child: const Text("设置密码"),
+                      child: Text(
+                        context.l10n.tr("设置密码", en: "Set password"),
+                      ),
                     ),
                   ),
                 ],

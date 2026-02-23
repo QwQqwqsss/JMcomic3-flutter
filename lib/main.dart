@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:jmcomic3/configs/app_locale.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 import 'package:jmcomic3/screens/components/mouse_and_touch_scroll_behavior.dart';
 import 'package:jmcomic3/screens/init_screen.dart';
 import 'basic/desktop.dart';
@@ -21,6 +24,7 @@ class _JennyState extends State<Jenny> {
   void initState() {
     onDesktopStart();
     themeEvent.subscribe(_setState);
+    appLocaleEvent.subscribe(_setState);
     super.initState();
   }
 
@@ -28,6 +32,7 @@ class _JennyState extends State<Jenny> {
   void dispose() {
     onDesktopStop();
     themeEvent.unsubscribe(_setState);
+    appLocaleEvent.unsubscribe(_setState);
     super.dispose();
   }
 
@@ -42,6 +47,14 @@ class _JennyState extends State<Jenny> {
       debugShowCheckedModeBanner: false,
       theme: lightTheme,
       darkTheme: darkTheme,
+      locale: currentAppLocale,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
       navigatorObservers: [routeObserver],
       home: const InitScreen(),
     );

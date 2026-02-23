@@ -2,6 +2,7 @@ import 'package:event/event.dart';
 import 'package:flutter/material.dart';
 import 'package:jmcomic3/basic/commons.dart';
 import 'package:jmcomic3/basic/methods.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 
 enum PagerCoverRate {
   rate3x4,
@@ -27,7 +28,7 @@ PagerCoverRate _fromString(String valueForm) {
   return PagerCoverRate.values.first;
 }
 
-String pagerCoverRateName(PagerCoverRate type) {
+String pagerCoverRateName(PagerCoverRate type, BuildContext context) {
   switch (type) {
     case PagerCoverRate.rate3x4:
       return "3X4";
@@ -39,11 +40,11 @@ String pagerCoverRateName(PagerCoverRate type) {
 Future choosePagerCoverRate(BuildContext context) async {
   final Map<String, PagerCoverRate> map = {};
   for (var element in PagerCoverRate.values) {
-    map[pagerCoverRateName(element)] = element;
+    map[pagerCoverRateName(element, context)] = element;
   }
   final newPagerCoverRate = await chooseMapDialog(
     context,
-    title: "请选择封面比例",
+    title: context.l10n.tr("请选择封面比例", en: "Choose cover ratio"),
     values: map,
   );
   if (newPagerCoverRate != null) {

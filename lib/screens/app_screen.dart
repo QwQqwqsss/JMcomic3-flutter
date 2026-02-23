@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jmcomic3/configs/daily_sign.dart';
 import 'package:jmcomic3/configs/versions.dart';
+import 'package:jmcomic3/l10n/app_localizations.dart';
 import 'package:jmcomic3/screens/browser_screen.dart';
 import 'package:jmcomic3/screens/comic_search_screen.dart';
 import 'package:jmcomic3/screens/components/badge.dart';
@@ -19,20 +20,23 @@ class AppScreen extends StatefulWidget {
 class _AppScreenState extends State<AppScreen> {
   final _searchBarController = FloatingSearchBarController();
 
-  late final List<AppScreenData> _screens = [
-    AppScreenData(
-      BrowserScreenWrapper(searchBarController: _searchBarController),
-      '浏览',
-      const Icon(Icons.menu_book_outlined),
-      const Icon(Icons.menu_book),
-    ),
-    const AppScreenData(
-      UserScreen(),
-      '书架',
-      VersionBadged(child: Icon(Icons.image_outlined)),
-      VersionBadged(child: Icon(Icons.image)),
-    ),
-  ];
+  List<AppScreenData> _screens(BuildContext context) {
+    final l10n = context.l10n;
+    return [
+      AppScreenData(
+        BrowserScreenWrapper(searchBarController: _searchBarController),
+        l10n.navBrowse,
+        const Icon(Icons.menu_book_outlined),
+        const Icon(Icons.menu_book),
+      ),
+      AppScreenData(
+        const UserScreen(),
+        l10n.navLibrary,
+        const VersionBadged(child: Icon(Icons.image_outlined)),
+        const VersionBadged(child: Icon(Icons.image)),
+      ),
+    ];
+  }
 
   @override
   void initState() {
@@ -69,6 +73,7 @@ class _AppScreenState extends State<AppScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screens = _screens(context);
     return ComicFloatingSearchBarScreen(
       onQuery: (value) {
         Navigator.of(context).push(MaterialPageRoute(builder: (_) {
@@ -86,7 +91,7 @@ class _AppScreenState extends State<AppScreen> {
               _selectedIndex = index;
             });
           },
-          children: _screens.map((e) => e.screen).toList(),
+          children: screens.map((e) => e.screen).toList(),
         ),
         bottomNavigationBar: _buildBottomNavigationBar(context),
       ),
@@ -145,7 +150,7 @@ class _AppScreenState extends State<AppScreen> {
             child: NavigationBar(
               selectedIndex: _selectedIndex,
               onDestinationSelected: _onItemTapped,
-              destinations: _screens
+              destinations: _screens(context)
                   .map((e) => NavigationDestination(
                         icon: e.icon,
                         selectedIcon: e.activeIcon,
