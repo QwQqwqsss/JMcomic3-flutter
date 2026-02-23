@@ -7,7 +7,7 @@ late String _currentWebDavUrl;
 const _propertyName = "WebDavUrl";
 
 Future<String?> initWebDavUrl() async {
-  _currentWebDavUrl  = await methods.loadProperty(_propertyName);
+  _currentWebDavUrl = await methods.loadProperty(_propertyName);
   if (_currentWebDavUrl == "") {
     _currentWebDavUrl = "http://server/.jmtt2mic.history";
   }

@@ -11,8 +11,7 @@ const _propertyName = "usingRightClickPop";
 bool _usingRightClickPop = false;
 
 Future<void> initUsingRightClickPop() async {
-  _usingRightClickPop =
-      (await methods.loadProperty(_propertyName)) == "true";
+  _usingRightClickPop = (await methods.loadProperty(_propertyName)) == "true";
 }
 
 bool currentUsingRightClickPop() {

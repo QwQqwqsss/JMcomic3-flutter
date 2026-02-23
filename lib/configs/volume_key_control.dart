@@ -11,8 +11,7 @@ const _propertyName = "volumeKeyControl";
 late bool _volumeKeyControl;
 
 Future<void> initVolumeKeyControl() async {
-  _volumeKeyControl =
-      (await methods.loadProperty(_propertyName)) == "true";
+  _volumeKeyControl = (await methods.loadProperty(_propertyName)) == "true";
 }
 
 bool currentVolumeKeyControl() {

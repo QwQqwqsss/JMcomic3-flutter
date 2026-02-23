@@ -8,9 +8,9 @@ ProInfoAf? _proInfoAf;
 ProInfoPat? _proInfoPat;
 
 ProInfoAf get proInfoAf =>
-    _proInfoAf ??
-    ProInfoAf.fromJson({"is_pro": true, "expire": 4102444800});
-ProInfoPat get proInfoPat => _proInfoPat ??
+    _proInfoAf ?? ProInfoAf.fromJson({"is_pro": true, "expire": 4102444800});
+ProInfoPat get proInfoPat =>
+    _proInfoPat ??
     ProInfoPat.fromJson({
       "is_pro": false,
       "pat_id": "",

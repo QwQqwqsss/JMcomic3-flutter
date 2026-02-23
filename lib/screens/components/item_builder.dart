@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jasmine/basic/log.dart';
+import 'package:jmcomic3/basic/log.dart';
 
 // 非全屏FutureBuilder封装
 class ItemBuilder<T> extends StatelessWidget {

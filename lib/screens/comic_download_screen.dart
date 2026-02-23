@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:jasmine/basic/methods.dart';
-import 'package:jasmine/screens/components/item_builder.dart';
+import 'package:jmcomic3/basic/methods.dart';
+import 'package:jmcomic3/screens/components/item_builder.dart';
 
 import 'components/comic_info_card.dart';
 import 'components/right_click_pop.dart';
@@ -221,7 +221,7 @@ class _ComicDownloadScreenState extends State<ComicDownloadScreen> {
       return Colors.black;
     }
     if (_selectedEps.contains(id)) {
-      return  Theme.of(context).colorScheme.brightness == Brightness.light
+      return Theme.of(context).colorScheme.brightness == Brightness.light
           ? Colors.black
           : Colors.black;
     }

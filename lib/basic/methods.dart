@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
-import 'package:jasmine/basic/log.dart';
+import 'package:jmcomic3/basic/log.dart';
 
 import 'entities.dart';
 

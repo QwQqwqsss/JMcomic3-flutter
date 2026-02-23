@@ -11,8 +11,7 @@ const _propertyName = "ignoreVewLog";
 late bool _ignoreVewLog;
 
 Future<void> initIgnoreVewLog() async {
-  _ignoreVewLog =
-      (await methods.loadProperty(_propertyName)) == "true";
+  _ignoreVewLog = (await methods.loadProperty(_propertyName)) == "true";
 }
 
 bool currentIgnoreVewLog() {

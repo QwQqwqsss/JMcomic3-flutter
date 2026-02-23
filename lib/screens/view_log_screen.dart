@@ -1,9 +1,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:jasmine/basic/commons.dart';
-import 'package:jasmine/basic/methods.dart';
-import 'package:jasmine/screens/components/floating_search_bar.dart';
+import 'package:jmcomic3/basic/commons.dart';
+import 'package:jmcomic3/basic/methods.dart';
+import 'package:jmcomic3/screens/components/floating_search_bar.dart';
 
 import 'components/browser_bottom_sheet.dart';
 import 'components/comic_list.dart';

@@ -65,16 +65,15 @@ class ContentBodyState extends State<ContentBody> {
                   Expanded(
                     child: Container(
                       child: MaterialButton(
-                        padding:
-                        EdgeInsets.all(32),
+                        padding: EdgeInsets.all(32),
                         color: Colors.grey,
                         splashColor: Colors.white,
                         onPressed: () {
                           btnclick('重置');
                         },
                         child: const Text('AC',
-                            style: TextStyle(
-                                color: Colors.black, fontSize: 20)),
+                            style:
+                                TextStyle(color: Colors.black, fontSize: 20)),
                         shape: const CircleBorder(
                           side: BorderSide(color: Colors.grey),
                         ),
@@ -86,16 +85,15 @@ class ContentBodyState extends State<ContentBody> {
                   Expanded(
                     child: Container(
                       child: MaterialButton(
-                        padding:
-                        EdgeInsets.all(32),
+                        padding: EdgeInsets.all(32),
                         color: Colors.grey,
                         splashColor: Colors.white,
                         onPressed: () {
                           btnclick('加/减');
                         },
                         child: const Text('+/-',
-                            style: TextStyle(
-                                color: Colors.black, fontSize: 20)),
+                            style:
+                                TextStyle(color: Colors.black, fontSize: 20)),
                         shape: const CircleBorder(
                             side: BorderSide(color: Colors.grey)),
                       ),
@@ -106,16 +104,15 @@ class ContentBodyState extends State<ContentBody> {
                   Expanded(
                     child: Container(
                       child: MaterialButton(
-                        padding:
-                        EdgeInsets.all(32),
+                        padding: EdgeInsets.all(32),
                         color: Colors.grey,
                         splashColor: Colors.white,
                         onPressed: () {
                           btnclick('百分号');
                         },
                         child: const Text('%',
-                            style: TextStyle(
-                                color: Colors.black, fontSize: 25)),
+                            style:
+                                TextStyle(color: Colors.black, fontSize: 25)),
                         shape: const CircleBorder(
                             side: BorderSide(color: Colors.grey)),
                       ),
@@ -126,8 +123,7 @@ class ContentBodyState extends State<ContentBody> {
                   Expanded(
                     child: Container(
                       child: MaterialButton(
-                        padding:
-                        EdgeInsets.all(24),
+                        padding: EdgeInsets.all(24),
                         color: Color(int.parse(list[0]['bgc'])),
                         splashColor: Color(int.parse(list[0]['bgc'])),
                         onPressed: () {
@@ -135,13 +131,11 @@ class ContentBodyState extends State<ContentBody> {
                         },
                         child: Text('÷',
                             style: TextStyle(
-                                color:
-                                Color(int.parse(list[0]['color'])),
+                                color: Color(int.parse(list[0]['color'])),
                                 fontSize: 30)),
                         shape: CircleBorder(
                             side: BorderSide(
-                                color:
-                                Color(int.parse(list[0]['bgc'])))),
+                                color: Color(int.parse(list[0]['bgc'])))),
                       ),
                       alignment: Alignment.center,
                     ),
@@ -157,16 +151,15 @@ class ContentBodyState extends State<ContentBody> {
                   Expanded(
                     child: Container(
                       child: MaterialButton(
-                        padding:
-                        EdgeInsets.all(29),
+                        padding: EdgeInsets.all(29),
                         color: const Color(0xFF3B3B3B),
                         splashColor: Colors.grey,
                         onPressed: () {
                           numClick('7');
                         },
                         child: const Text('7',
-                            style: TextStyle(
-                                color: Colors.white, fontSize: 30)),
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 30)),
                         shape: const CircleBorder(
                             side: BorderSide(color: Color(0xFF3B3B3B))),
                       ),
@@ -177,16 +170,15 @@ class ContentBodyState extends State<ContentBody> {
                   Expanded(
                     child: Container(
                       child: MaterialButton(
-                        padding:
-                        EdgeInsets.all(29),
+                        padding: EdgeInsets.all(29),
                         color: const Color(0xFF3B3B3B),
                         splashColor: Colors.grey,
                         onPressed: () {
                           numClick('8');
                         },
                         child: const Text('8',
-                            style: TextStyle(
-                                color: Colors.white, fontSize: 30)),
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 30)),
                         shape: const CircleBorder(
                             side: BorderSide(color: Color(0xFF3B3B3B))),
                       ),
@@ -197,16 +189,15 @@ class ContentBodyState extends State<ContentBody> {
                   Expanded(
                     child: Container(
                       child: MaterialButton(
-                        padding:
-                        EdgeInsets.all(29),
+                        padding: EdgeInsets.all(29),
                         color: const Color(0xFF3B3B3B),
                         splashColor: Colors.grey,
                         onPressed: () {
                           numClick('9');
                         },
                         child: const Text('9',
-                            style: TextStyle(
-                                color: Colors.white, fontSize: 30)),
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 30)),
                         shape: const CircleBorder(
                             side: BorderSide(color: Color(0xFF3B3B3B))),
                       ),
@@ -217,8 +208,7 @@ class ContentBodyState extends State<ContentBody> {
                   Expanded(
                     child: Container(
                       child: MaterialButton(
-                        padding:
-                        EdgeInsets.all(24),
+                        padding: EdgeInsets.all(24),
                         color: Color(int.parse(list[1]['bgc'])),
                         splashColor: Color(int.parse(list[1]['bgc'])),
                         onPressed: () {
@@ -226,13 +216,11 @@ class ContentBodyState extends State<ContentBody> {
                         },
                         child: Text('×',
                             style: TextStyle(
-                                color:
-                                Color(int.parse(list[1]['color'])),
+                                color: Color(int.parse(list[1]['color'])),
                                 fontSize: 30)),
                         shape: CircleBorder(
                             side: BorderSide(
-                                color:
-                                Color(int.parse(list[1]['bgc'])))),
+                                color: Color(int.parse(list[1]['bgc'])))),
                       ),
                       alignment: Alignment.center,
                     ),
@@ -248,16 +236,15 @@ class ContentBodyState extends State<ContentBody> {
                   Expanded(
                     child: Container(
                       child: MaterialButton(
-                        padding:
-                        EdgeInsets.all(29),
+                        padding: EdgeInsets.all(29),
                         color: const Color(0xFF3B3B3B),
                         splashColor: Colors.grey,
                         onPressed: () {
                           numClick('4');
                         },
                         child: const Text('4',
-                            style: TextStyle(
-                                color: Colors.white, fontSize: 30)),
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 30)),
                         shape: const CircleBorder(
                             side: BorderSide(color: Color(0xFF3B3B3B))),
                       ),
@@ -268,16 +255,15 @@ class ContentBodyState extends State<ContentBody> {
                   Expanded(
                     child: Container(
                       child: MaterialButton(
-                        padding:
-                        EdgeInsets.all(29),
+                        padding: EdgeInsets.all(29),
                         color: const Color(0xFF3B3B3B),
                         splashColor: Colors.grey,
                         onPressed: () {
                           numClick('5');
                         },
                         child: const Text('5',
-                            style: TextStyle(
-                                color: Colors.white, fontSize: 30)),
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 30)),
                         shape: const CircleBorder(
                             side: BorderSide(color: Color(0xFF3B3B3B))),
                       ),
@@ -288,16 +274,15 @@ class ContentBodyState extends State<ContentBody> {
                   Expanded(
                     child: Container(
                       child: MaterialButton(
-                        padding:
-                        EdgeInsets.all(30),
+                        padding: EdgeInsets.all(30),
                         color: const Color(0xFF3B3B3B),
                         splashColor: Colors.grey,
                         onPressed: () {
                           numClick('6');
                         },
                         child: const Text('6',
-                            style: TextStyle(
-                                color: Colors.white, fontSize: 30)),
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 30)),
                         shape: const CircleBorder(
                             side: BorderSide(color: Color(0xFF3B3B3B))),
                       ),
@@ -308,8 +293,7 @@ class ContentBodyState extends State<ContentBody> {
                   Expanded(
                     child: Container(
                       child: MaterialButton(
-                        padding:
-                        EdgeInsets.all(24),
+                        padding: EdgeInsets.all(24),
                         color: Color(int.parse(list[2]['bgc'])),
                         splashColor: Color(int.parse(list[2]['bgc'])),
                         onPressed: () {
@@ -317,13 +301,11 @@ class ContentBodyState extends State<ContentBody> {
                         },
                         child: Text('—',
                             style: TextStyle(
-                                color:
-                                Color(int.parse(list[2]['color'])),
+                                color: Color(int.parse(list[2]['color'])),
                                 fontSize: 30)),
                         shape: CircleBorder(
                             side: BorderSide(
-                                color:
-                                Color(int.parse(list[2]['bgc'])))),
+                                color: Color(int.parse(list[2]['bgc'])))),
                       ),
                       alignment: Alignment.center,
                     ),
@@ -339,16 +321,15 @@ class ContentBodyState extends State<ContentBody> {
                   Expanded(
                     child: Container(
                       child: MaterialButton(
-                        padding:
-                        EdgeInsets.all(29),
+                        padding: EdgeInsets.all(29),
                         color: const Color(0xFF3B3B3B),
                         splashColor: Colors.grey,
                         onPressed: () {
                           numClick('1');
                         },
                         child: const Text('1',
-                            style: TextStyle(
-                                color: Colors.white, fontSize: 30)),
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 30)),
                         shape: const CircleBorder(
                             side: BorderSide(color: Color(0xFF3B3B3B))),
                       ),
@@ -359,16 +340,15 @@ class ContentBodyState extends State<ContentBody> {
                   Expanded(
                     child: Container(
                       child: MaterialButton(
-                        padding:
-                        EdgeInsets.all(29),
+                        padding: EdgeInsets.all(29),
                         color: const Color(0xFF3B3B3B),
                         splashColor: Colors.grey,
                         onPressed: () {
                           numClick('2');
                         },
                         child: const Text('2',
-                            style: TextStyle(
-                                color: Colors.white, fontSize: 30)),
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 30)),
                         shape: const CircleBorder(
                             side: BorderSide(color: Color(0xFF3B3B3B))),
                       ),
@@ -379,16 +359,15 @@ class ContentBodyState extends State<ContentBody> {
                   Expanded(
                     child: Container(
                       child: MaterialButton(
-                        padding:
-                        EdgeInsets.all(29),
+                        padding: EdgeInsets.all(29),
                         color: const Color(0xFF3B3B3B),
                         splashColor: Colors.grey,
                         onPressed: () {
                           numClick('3');
                         },
                         child: const Text('3',
-                            style: TextStyle(
-                                color: Colors.white, fontSize: 30)),
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 30)),
                         shape: const CircleBorder(
                             side: BorderSide(color: Color(0xFF3B3B3B))),
                       ),
@@ -399,8 +378,7 @@ class ContentBodyState extends State<ContentBody> {
                   Expanded(
                     child: Container(
                       child: MaterialButton(
-                        padding:
-                        EdgeInsets.all(24),
+                        padding: EdgeInsets.all(24),
                         color: Color(int.parse(list[3]['bgc'])),
                         splashColor: Color(int.parse(list[3]['bgc'])),
                         onPressed: () {
@@ -408,13 +386,11 @@ class ContentBodyState extends State<ContentBody> {
                         },
                         child: Text('+',
                             style: TextStyle(
-                                color:
-                                Color(int.parse(list[3]['color'])),
+                                color: Color(int.parse(list[3]['color'])),
                                 fontSize: 30)),
                         shape: CircleBorder(
                             side: BorderSide(
-                                color:
-                                Color(int.parse(list[3]['bgc'])))),
+                                color: Color(int.parse(list[3]['bgc'])))),
                       ),
                       alignment: Alignment.center,
                     ),
@@ -430,18 +406,14 @@ class ContentBodyState extends State<ContentBody> {
                   Container(
                     child: MaterialButton(
                       padding: const EdgeInsets.only(
-                          left: 70.0,
-                          top: 20.0,
-                          bottom: 20.0,
-                          right: 76.0),
+                          left: 70.0, top: 20.0, bottom: 20.0, right: 76.0),
                       color: const Color(0xFF3B3B3B),
                       splashColor: Colors.grey,
                       onPressed: () {
                         numClick('0');
                       },
                       child: const Text('0',
-                          style: TextStyle(
-                              color: Colors.white, fontSize: 30)),
+                          style: TextStyle(color: Colors.white, fontSize: 30)),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(40)),
                     ),
@@ -450,16 +422,14 @@ class ContentBodyState extends State<ContentBody> {
                   ),
                   Container(
                     child: MaterialButton(
-                      padding:
-                      EdgeInsets.all(29),
+                      padding: EdgeInsets.all(29),
                       color: const Color(0xFF3B3B3B),
                       splashColor: Colors.grey,
                       onPressed: () {
                         numClick('.');
                       },
                       child: const Text('.',
-                          style: TextStyle(
-                              color: Colors.white, fontSize: 30)),
+                          style: TextStyle(color: Colors.white, fontSize: 30)),
                       shape: const CircleBorder(
                           side: BorderSide(color: Color(0xFF3B3B3B))),
                     ),
@@ -467,16 +437,14 @@ class ContentBodyState extends State<ContentBody> {
                   ),
                   Container(
                     child: MaterialButton(
-                      padding:
-                      EdgeInsets.all(24),
+                      padding: EdgeInsets.all(24),
                       color: Colors.orange,
                       splashColor: Colors.orange,
                       onPressed: () {
                         btnclick('等于');
                       },
                       child: const Text('=',
-                          style: TextStyle(
-                              color: Colors.white, fontSize: 30)),
+                          style: TextStyle(color: Colors.white, fontSize: 30)),
                       shape: const CircleBorder(
                           side: BorderSide(color: Colors.orange)),
                     ),

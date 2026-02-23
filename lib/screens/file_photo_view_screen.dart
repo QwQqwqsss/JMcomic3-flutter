@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:jasmine/basic/commons.dart';
+import 'package:jmcomic3/basic/commons.dart';
 import 'package:photo_view/photo_view.dart';
 
 import 'components/right_click_pop.dart';
@@ -28,8 +28,8 @@ class FilePhotoViewScreen extends StatelessWidget {
                   values: [
                     ...Platform.isAndroid || Platform.isIOS
                         ? [
-                      '保存图片到相册',
-                    ]
+                            '保存图片到相册',
+                          ]
                         : [],
                     '保存图片到文件',
                   ],

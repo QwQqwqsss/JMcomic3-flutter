@@ -4,10 +4,10 @@ import 'dart:convert';
 import 'package:event/event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:jasmine/basic/commons.dart';
-import 'package:jasmine/basic/http_client.dart';
-import 'package:jasmine/basic/log.dart';
-import 'package:jasmine/basic/methods.dart';
+import 'package:jmcomic3/basic/commons.dart';
+import 'package:jmcomic3/basic/http_client.dart';
+import 'package:jmcomic3/basic/log.dart';
+import 'package:jmcomic3/basic/methods.dart';
 
 import 'ignore_upgrade_pop.dart';
 

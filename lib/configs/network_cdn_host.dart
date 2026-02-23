@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:jasmine/basic/methods.dart';
+import 'package:jmcomic3/basic/methods.dart';
 
 late String _cdnHost;
 
@@ -9,6 +9,7 @@ String _truncateLabel(String value, {int max = 21}) {
   if (value.length <= max) return value;
   return value.substring(0, max) + "...";
 }
+
 String get currentCdnHostName => _cdnHost;
 
 const _base64List = [
@@ -63,39 +64,38 @@ Future<T?> chooseCdnDialog<T>(BuildContext buildContext) async {
       return SimpleDialog(
         title: const Text("图片分流"),
         children: [
-          ..._cdnList
-            .map(
-              (e) => SimpleDialogOption(
-            child: SizedBox(
-              width: dialogWidth,
-              child: CdnOptionRow(
-                e,
-                key: Key("CDN:${e}"),
-              ),
-            ),
-            onPressed: () {
-              Navigator.of(context).pop(e);
-            },
-          ),
-        ),
-            SimpleDialogOption(
+          ..._cdnList.map(
+            (e) => SimpleDialogOption(
               child: SizedBox(
                 width: dialogWidth,
-                child: const Text("手动输入"),
-              ),
-              onPressed: () async {
-                Navigator.of(context).pop(await _manualInputApiHost(context));
-              },
-            ),
-            SimpleDialogOption(
-              child: SizedBox(
-                width: dialogWidth,
-                child: const Text("取消"),
+                child: CdnOptionRow(
+                  e,
+                  key: Key("CDN:${e}"),
+                ),
               ),
               onPressed: () {
-                Navigator.of(context).pop(null);
+                Navigator.of(context).pop(e);
               },
             ),
+          ),
+          SimpleDialogOption(
+            child: SizedBox(
+              width: dialogWidth,
+              child: const Text("手动输入"),
+            ),
+            onPressed: () async {
+              Navigator.of(context).pop(await _manualInputApiHost(context));
+            },
+          ),
+          SimpleDialogOption(
+            child: SizedBox(
+              width: dialogWidth,
+              child: const Text("取消"),
+            ),
+            onPressed: () {
+              Navigator.of(context).pop(null);
+            },
+          ),
         ],
       );
     },
@@ -233,4 +233,3 @@ class PingStatus extends StatelessWidget {
     );
   }
 }
-

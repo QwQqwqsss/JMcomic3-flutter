@@ -1,9 +1,9 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
-import 'package:jasmine/basic/commons.dart';
-import 'package:jasmine/screens/components/comic_pager.dart';
-import 'package:jasmine/screens/components/content_builder.dart';
+import 'package:jmcomic3/basic/commons.dart';
+import 'package:jmcomic3/screens/components/comic_pager.dart';
+import 'package:jmcomic3/screens/components/content_builder.dart';
 
 import '../basic/methods.dart';
 

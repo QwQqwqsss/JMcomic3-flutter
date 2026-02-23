@@ -1,7 +1,7 @@
 import 'package:event/event.dart';
 import 'package:flutter/material.dart';
-import 'package:jasmine/basic/commons.dart';
-import 'package:jasmine/basic/methods.dart';
+import 'package:jmcomic3/basic/commons.dart';
+import 'package:jmcomic3/basic/methods.dart';
 
 const _propertyKey = "pager_controller_mode";
 late PagerControllerMode _value;

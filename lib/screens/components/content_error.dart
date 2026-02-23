@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jasmine/basic/log.dart';
+import 'package:jmcomic3/basic/log.dart';
 import 'error_types.dart';
 
 class ContentError extends StatelessWidget {

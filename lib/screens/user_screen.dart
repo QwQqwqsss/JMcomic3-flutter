@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:jasmine/configs/login.dart';
-import 'package:jasmine/screens/about_screen.dart';
-import 'package:jasmine/screens/comments_screen.dart';
-import 'package:jasmine/screens/components/avatar.dart';
-import 'package:jasmine/screens/pro_oh_screen.dart';
-import 'package:jasmine/screens/pro_screen.dart';
-import 'package:jasmine/screens/components/recommend_links_panel.dart';
-import 'package:jasmine/screens/settings_screen.dart';
-import 'package:jasmine/screens/view_log_screen.dart';
+import 'package:jmcomic3/configs/login.dart';
+import 'package:jmcomic3/screens/about_screen.dart';
+import 'package:jmcomic3/screens/comments_screen.dart';
+import 'package:jmcomic3/screens/components/avatar.dart';
+import 'package:jmcomic3/screens/pro_oh_screen.dart';
+import 'package:jmcomic3/screens/pro_screen.dart';
+import 'package:jmcomic3/screens/components/recommend_links_panel.dart';
+import 'package:jmcomic3/screens/settings_screen.dart';
+import 'package:jmcomic3/screens/view_log_screen.dart';
 
 import '../basic/platform.dart';
 import '../configs/daily_sign.dart';

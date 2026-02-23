@@ -41,7 +41,6 @@ Widget downloadAndExportToSetting() {
           subtitle: Text(_currentDownloadAndExportTo),
           value: _currentDownloadAndExportTo.isNotEmpty,
           onChanged: (e) async {
-
             var root =
                 e ? ((await methods.iosGetDocumentDir()) + "/exports") : "";
             await methods.setDownloadAndExportTo(root);
@@ -62,7 +61,7 @@ Widget downloadAndExportToSetting() {
               values: ["选择新位置", "清除设置"], title: "下载的时候同时导出");
           if (result != null) {
             if ("选择新位置" == result) {
-              if(!await androidMangeStorageRequest()) {
+              if (!await androidMangeStorageRequest()) {
                 throw Exception("申请权限被拒绝");
               }
               String? root = await chooseFolder(context);

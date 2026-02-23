@@ -1,13 +1,13 @@
-import 'package:jasmine/basic/commons.dart';
-import 'package:jasmine/basic/log.dart';
-import 'package:jasmine/basic/methods.dart';
-import 'package:jasmine/configs/auto_clean.dart';
-import 'package:jasmine/configs/network_api_host.dart';
-import 'package:jasmine/configs/network_cdn_host.dart';
-import 'package:jasmine/configs/pager_column_number.dart';
-import 'package:jasmine/configs/pager_controller_mode.dart';
-import 'package:jasmine/configs/pager_cover_rate.dart';
-import 'package:jasmine/configs/pager_view_mode.dart';
+import 'package:jmcomic3/basic/commons.dart';
+import 'package:jmcomic3/basic/log.dart';
+import 'package:jmcomic3/basic/methods.dart';
+import 'package:jmcomic3/configs/auto_clean.dart';
+import 'package:jmcomic3/configs/network_api_host.dart';
+import 'package:jmcomic3/configs/network_cdn_host.dart';
+import 'package:jmcomic3/configs/pager_column_number.dart';
+import 'package:jmcomic3/configs/pager_controller_mode.dart';
+import 'package:jmcomic3/configs/pager_cover_rate.dart';
+import 'package:jmcomic3/configs/pager_view_mode.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 

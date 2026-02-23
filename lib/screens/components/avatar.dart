@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jasmine/screens/components/images.dart';
+import 'package:jmcomic3/screens/components/images.dart';
 
 const double _avatarMargin = 5;
 const double _avatarBorderSize = 1.5;

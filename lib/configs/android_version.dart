@@ -1,4 +1,4 @@
-import 'package:jasmine/basic/methods.dart';
+import 'package:jmcomic3/basic/methods.dart';
 
 int _androidVersion = 0;
 

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:jasmine/basic/commons.dart';
-import 'package:jasmine/basic/methods.dart';
-import 'package:jasmine/basic/navigator.dart';
-import 'package:jasmine/configs/login.dart';
-import 'package:jasmine/screens/comic_search_screen.dart';
-import 'package:jasmine/screens/components/comic_info_card.dart';
-import 'package:jasmine/screens/components/comic_list.dart';
-import 'package:jasmine/screens/components/item_builder.dart';
+import 'package:jmcomic3/basic/commons.dart';
+import 'package:jmcomic3/basic/methods.dart';
+import 'package:jmcomic3/basic/navigator.dart';
+import 'package:jmcomic3/configs/login.dart';
+import 'package:jmcomic3/screens/comic_search_screen.dart';
+import 'package:jmcomic3/screens/components/comic_info_card.dart';
+import 'package:jmcomic3/screens/components/comic_list.dart';
+import 'package:jmcomic3/screens/components/item_builder.dart';
 
 import '../configs/ignore_view_log.dart';
 import 'comic_download_screen.dart';
@@ -382,7 +382,9 @@ class _ComicSerialsState extends State<_ComicSerials> {
                 ? Colors.white
                 : Theme.of(context)
                     .textTheme
-                    .bodyMedium?.color?.withOpacity(.17),
+                    .bodyMedium
+                    ?.color
+                    ?.withOpacity(.17),
             child: Text(
               e.sort + (e.name == "" ? "" : (" - ${e.name}")),
             ),
@@ -410,7 +412,9 @@ class _ComicSerialsState extends State<_ComicSerials> {
                 ? Colors.white
                 : Theme.of(context)
                     .textTheme
-                    .bodyMedium?.color?.withOpacity(.17),
+                    .bodyMedium
+                    ?.color
+                    ?.withOpacity(.17),
             child: Text(
               e.sort + (e.name == "" ? "" : (" - ${e.name}")),
             ),

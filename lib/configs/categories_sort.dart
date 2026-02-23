@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:event/event.dart';
 import 'package:flutter/material.dart';
-import 'package:jasmine/screens/components/content_error.dart';
+import 'package:jmcomic3/screens/components/content_error.dart';
 
 import '../basic/methods.dart';
 

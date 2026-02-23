@@ -1,7 +1,7 @@
-﻿import 'package:flutter/material.dart';
-import 'package:jasmine/basic/log.dart';
-import 'package:jasmine/basic/methods.dart';
-import 'package:jasmine/configs/web_dav_url.dart';
+import 'package:flutter/material.dart';
+import 'package:jmcomic3/basic/log.dart';
+import 'package:jmcomic3/basic/methods.dart';
+import 'package:jmcomic3/configs/web_dav_url.dart';
 
 import '../configs/is_pro.dart';
 import '../configs/web_dav_password.dart';
@@ -106,6 +106,3 @@ Widget webDavSyncDownloadClick(BuildContext context) {
     },
   );
 }
-
-
-

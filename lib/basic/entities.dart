@@ -757,7 +757,7 @@ class Favorite extends CountPage<ComicSimple> {
     return _data;
   }
 
-  Favorite(): super() {
+  Favorite() : super() {
     list = [];
     folderList = [];
   }
@@ -803,9 +803,9 @@ class FavoritesResponse extends CountPage<ComicSimple> {
 }
 
 class WeekFilterResponse extends Page<ComicSimple> {
-    WeekFilterResponse.fromJson(Map<String, dynamic> json) {
-      list = List.from(json['list']).map((e) => ComicSimple.fromJson(e)).toList();
-      total = json['total'];
+  WeekFilterResponse.fromJson(Map<String, dynamic> json) {
+    list = List.from(json['list']).map((e) => ComicSimple.fromJson(e)).toList();
+    total = json['total'];
   }
 }
 
@@ -1329,7 +1329,9 @@ class WeekData {
   late List<WeekType> types;
 
   WeekData.fromJson(Map<String, dynamic> json) {
-    categories = List.from(json['categories']).map((e) => WeekCategory.fromJson(e)).toList();
+    categories = List.from(json['categories'])
+        .map((e) => WeekCategory.fromJson(e))
+        .toList();
     types = List.from(json['type']).map((e) => WeekType.fromJson(e)).toList();
   }
 }

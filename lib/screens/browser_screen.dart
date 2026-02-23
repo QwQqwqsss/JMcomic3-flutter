@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:jasmine/basic/methods.dart';
-import 'package:jasmine/screens/components/comic_pager.dart';
-import 'package:jasmine/screens/components/content_builder.dart';
-import 'package:jasmine/screens/components/floating_search_bar.dart';
+import 'package:jmcomic3/basic/methods.dart';
+import 'package:jmcomic3/screens/components/comic_pager.dart';
+import 'package:jmcomic3/screens/components/content_builder.dart';
+import 'package:jmcomic3/screens/components/floating_search_bar.dart';
 
 import '../configs/categories_sort.dart';
 import '../configs/login.dart';

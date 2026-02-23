@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:jasmine/configs/daily_sign.dart';
-import 'package:jasmine/configs/versions.dart';
-import 'package:jasmine/screens/browser_screen.dart';
-import 'package:jasmine/screens/comic_search_screen.dart';
-import 'package:jasmine/screens/components/badge.dart';
-import 'package:jasmine/screens/components/floating_search_bar.dart';
-import 'package:jasmine/screens/user_screen.dart';
+import 'package:jmcomic3/configs/daily_sign.dart';
+import 'package:jmcomic3/configs/versions.dart';
+import 'package:jmcomic3/screens/browser_screen.dart';
+import 'package:jmcomic3/screens/comic_search_screen.dart';
+import 'package:jmcomic3/screens/components/badge.dart';
+import 'package:jmcomic3/screens/components/floating_search_bar.dart';
+import 'package:jmcomic3/screens/user_screen.dart';
 
 import 'components/comic_floating_search_bar.dart';
 

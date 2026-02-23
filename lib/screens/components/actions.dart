@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:jasmine/basic/commons.dart';
-import 'package:jasmine/basic/entities.dart';
+import 'package:jmcomic3/basic/commons.dart';
+import 'package:jmcomic3/basic/entities.dart';
 
 Widget buildOrderSwitch(
   BuildContext context,

@@ -2,13 +2,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:jasmine/basic/commons.dart';
-import 'package:jasmine/basic/log.dart';
+import 'package:jmcomic3/basic/commons.dart';
+import 'package:jmcomic3/basic/log.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 
-import 'package:jasmine/basic/methods.dart';
-import 'package:jasmine/screens/components/types.dart';
+import 'package:jmcomic3/basic/methods.dart';
+import 'package:jmcomic3/screens/components/types.dart';
 
 import '../file_photo_view_screen.dart';
 

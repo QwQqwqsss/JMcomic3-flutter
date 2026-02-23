@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jasmine/configs/app_font_size.dart';
+import 'package:jmcomic3/configs/app_font_size.dart';
 
 class TextPreviewScreen extends StatefulWidget {
   final String text;
@@ -48,4 +48,4 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
       ),
     );
   }
-} 
+}

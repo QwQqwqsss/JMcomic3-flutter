@@ -67,11 +67,11 @@ class _RecommendLinksPanelState extends State<RecommendLinksPanel> {
         children: [
           const SizedBox(height: 6),
           ...filteredLinks.map((entry) {
-              return ListTile(
-                onTap: () => openUrl(entry.value),
-                title: Text(entry.key),
-              );
-            }),
+            return ListTile(
+              onTap: () => openUrl(entry.value),
+              title: Text(entry.key),
+            );
+          }),
         ],
       ),
     );

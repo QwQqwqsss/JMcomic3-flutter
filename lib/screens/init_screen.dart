@@ -1,12 +1,12 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:jasmine/basic/commons.dart';
-import 'package:jasmine/basic/log.dart';
-import 'package:jasmine/basic/methods.dart';
-import 'package:jasmine/configs/Authentication.dart';
-import 'package:jasmine/configs/configs.dart';
-import 'package:jasmine/configs/login.dart';
+import 'package:jmcomic3/basic/commons.dart';
+import 'package:jmcomic3/basic/log.dart';
+import 'package:jmcomic3/basic/methods.dart';
+import 'package:jmcomic3/configs/Authentication.dart';
+import 'package:jmcomic3/configs/configs.dart';
+import 'package:jmcomic3/configs/login.dart';
 
 import '../basic/web_dav_sync.dart';
 import '../configs/passed.dart';
@@ -137,6 +137,3 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 }
-
-
-

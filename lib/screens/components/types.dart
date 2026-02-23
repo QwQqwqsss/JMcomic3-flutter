@@ -1,4 +1,3 @@
-
 import '../../basic/entities.dart';
 
 class LongPressMenuItem {

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
-project(jasmine LANGUAGES CXX)
+project(jmcomic3 LANGUAGES CXX)
 
-set(BINARY_NAME "jasmine")
+set(BINARY_NAME "jmcomic3")
 
 cmake_policy(SET CMP0063 NEW)
 

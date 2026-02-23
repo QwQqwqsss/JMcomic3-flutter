@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:jasmine/basic/entities.dart';
-import 'package:jasmine/configs/pager_column_number.dart';
-import 'package:jasmine/configs/pager_cover_rate.dart';
-import 'package:jasmine/configs/pager_view_mode.dart';
-import 'package:jasmine/screens/comic_info_screen.dart';
-import 'package:jasmine/screens/components/types.dart';
+import 'package:jmcomic3/basic/entities.dart';
+import 'package:jmcomic3/configs/pager_column_number.dart';
+import 'package:jmcomic3/configs/pager_cover_rate.dart';
+import 'package:jmcomic3/configs/pager_view_mode.dart';
+import 'package:jmcomic3/screens/comic_info_screen.dart';
+import 'package:jmcomic3/screens/components/types.dart';
 
 import '../../basic/commons.dart';
 import 'comic_info_card.dart';

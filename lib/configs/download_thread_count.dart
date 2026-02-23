@@ -1,7 +1,7 @@
 /// 多线程下载并发数
 
 import 'package:flutter/material.dart';
-import 'package:jasmine/basic/methods.dart';
+import 'package:jmcomic3/basic/methods.dart';
 
 import '../basic/commons.dart';
 import 'is_pro.dart';
@@ -39,7 +39,11 @@ Future chooseDownloadThread(BuildContext context) async {
     defaultToast(context, "先发电才能使用多线程嗷");
     return;
   }
-  int? value = await chooseListDialog(context,title: "选择下载线程数",  values:_values,);
+  int? value = await chooseListDialog(
+    context,
+    title: "选择下载线程数",
+    values: _values,
+  );
   if (value != null) {
     await methods.set_download_thread(value);
     _downloadThreadCount = value;

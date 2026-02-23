@@ -1,11 +1,11 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:jasmine/basic/commons.dart';
-import 'package:jasmine/basic/log.dart';
-import 'package:jasmine/basic/methods.dart';
-import 'package:jasmine/configs/app_font_size.dart';
-import 'package:jasmine/configs/login.dart';
-import 'package:jasmine/screens/components/item_builder.dart';
+import 'package:jmcomic3/basic/commons.dart';
+import 'package:jmcomic3/basic/log.dart';
+import 'package:jmcomic3/basic/methods.dart';
+import 'package:jmcomic3/configs/app_font_size.dart';
+import 'package:jmcomic3/configs/login.dart';
+import 'package:jmcomic3/screens/components/item_builder.dart';
 
 import '../comic_info_screen.dart';
 import 'avatar.dart';

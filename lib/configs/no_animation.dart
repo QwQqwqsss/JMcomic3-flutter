@@ -11,8 +11,7 @@ const _propertyName = "noAnimation";
 late bool _noAnimation;
 
 Future<void> initNoAnimation() async {
-  _noAnimation =
-      (await methods.loadProperty(_propertyName)) == "true";
+  _noAnimation = (await methods.loadProperty(_propertyName)) == "true";
 }
 
 bool currentNoAnimation() {

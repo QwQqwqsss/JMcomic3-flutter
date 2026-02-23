@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:jasmine/basic/commons.dart';
-import 'package:jasmine/basic/methods.dart';
+import 'package:jmcomic3/basic/commons.dart';
+import 'package:jmcomic3/basic/methods.dart';
 
 enum ReaderSliderPosition {
   bottom,

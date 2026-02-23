@@ -9,7 +9,7 @@ class AppHttpClient {
     ..connectionTimeout = const Duration(seconds: 10)
     ..idleTimeout = const Duration(seconds: 20)
     ..maxConnectionsPerHost = 6
-    ..userAgent = "Jasmine/Flutter";
+    ..userAgent = "JMcomic3/Flutter";
 
   static Future<String> getText(
     String url, {

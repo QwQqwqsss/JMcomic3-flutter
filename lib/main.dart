@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:jasmine/screens/components/mouse_and_touch_scroll_behavior.dart';
-import 'package:jasmine/screens/init_screen.dart';
+import 'package:jmcomic3/screens/components/mouse_and_touch_scroll_behavior.dart';
+import 'package:jmcomic3/screens/init_screen.dart';
 import 'basic/desktop.dart';
 import 'basic/navigator.dart';
 import 'configs/theme.dart';
@@ -17,7 +17,6 @@ class Jenny extends StatefulWidget {
 }
 
 class _JennyState extends State<Jenny> {
-
   @override
   void initState() {
     onDesktopStart();
@@ -35,6 +34,7 @@ class _JennyState extends State<Jenny> {
   _setState(_) {
     setState(() => {});
   }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

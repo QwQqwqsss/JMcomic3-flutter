@@ -1,7 +1,7 @@
 import 'package:event/event.dart';
 import 'package:flutter/material.dart';
-import 'package:jasmine/basic/entities.dart';
-import 'package:jasmine/basic/methods.dart';
+import 'package:jmcomic3/basic/entities.dart';
+import 'package:jmcomic3/basic/methods.dart';
 
 import '../../basic/commons.dart';
 import 'floating_search_bar.dart';

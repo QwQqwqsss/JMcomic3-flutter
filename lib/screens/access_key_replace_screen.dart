@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:jasmine/basic/log.dart';
+import 'package:jmcomic3/basic/log.dart';
 import '../basic/commons.dart';
 import '../basic/methods.dart';
 import '../configs/is_pro.dart';
@@ -88,7 +88,7 @@ class _AccessKeyReplaceScreenState extends State<AccessKeyReplaceScreen> {
           ),
           const Divider(),
           ListTile(
-            title: const Text("绑定的Jasmine账号"),
+            title: const Text("绑定的JMcomic3账号"),
             subtitle: Text(_bindUid.isEmpty ? "未绑定" : _bindUid),
           ),
           const Divider(),

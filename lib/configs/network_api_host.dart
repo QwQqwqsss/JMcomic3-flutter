@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:jasmine/basic/http_client.dart';
-import 'package:jasmine/basic/methods.dart';
+import 'package:jmcomic3/basic/http_client.dart';
+import 'package:jmcomic3/basic/methods.dart';
 import 'package:crypto/crypto.dart';
 import 'package:pointycastle/export.dart' as pc;
 

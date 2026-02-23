@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jasmine/configs/versions.dart';
+import 'package:jmcomic3/configs/versions.dart';
 
 // 提示信息, 组件右上角的小红点
 class Badged extends StatelessWidget {

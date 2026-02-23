@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:jasmine/basic/commons.dart';
-import 'package:jasmine/basic/methods.dart';
-import 'package:jasmine/configs/download_thread_count.dart';
-import 'package:jasmine/screens/components/content_builder.dart';
-import 'package:jasmine/screens/components/content_loading.dart';
-import 'package:jasmine/screens/download_import_screen.dart';
+import 'package:jmcomic3/basic/commons.dart';
+import 'package:jmcomic3/basic/methods.dart';
+import 'package:jmcomic3/configs/download_thread_count.dart';
+import 'package:jmcomic3/screens/components/content_builder.dart';
+import 'package:jmcomic3/screens/components/content_loading.dart';
+import 'package:jmcomic3/screens/download_import_screen.dart';
 
 import 'components/comic_download_card.dart';
 import 'components/right_click_pop.dart';
@@ -71,7 +71,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
     );
   }
 
-  Widget _body(){
+  Widget _body() {
     if (_loading && _downloads.isEmpty) {
       return const ContentLoading(label: "加载中");
     }
@@ -79,30 +79,31 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
     return _listView();
   }
 
-  Widget _listView(){
-     return ListView(
-      children: _downloads.map((e) => GestureDetector(
-        key: Key("DOWNLOAD:${e.id}"),
-        onTap: () {
-          if (e.dlStatus == 3) {
-            return;
-          }
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (BuildContext context) {
-              return DownloadAlbumScreen(e);
-            }),
-          );
-        },
-        onLongPress: () async {
-          String? action = await chooseListDialog(context,
-              values: ["删除"], title: "请选择");
-          if (action != null && action == "删除") {
-            await methods.deleteDownload(e.id);
-            _load();
-          }
-        },
-        child: ComicDownloadCard(e),
-      ))
+  Widget _listView() {
+    return ListView(
+      children: _downloads
+          .map((e) => GestureDetector(
+                key: Key("DOWNLOAD:${e.id}"),
+                onTap: () {
+                  if (e.dlStatus == 3) {
+                    return;
+                  }
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (BuildContext context) {
+                      return DownloadAlbumScreen(e);
+                    }),
+                  );
+                },
+                onLongPress: () async {
+                  String? action = await chooseListDialog(context,
+                      values: ["删除"], title: "请选择");
+                  if (action != null && action == "删除") {
+                    await methods.deleteDownload(e.id);
+                    _load();
+                  }
+                },
+                child: ComicDownloadCard(e),
+              ))
           .toList(),
     );
   }

@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:jasmine/basic/methods.dart';
+import 'package:jmcomic3/basic/methods.dart';
 import 'package:window_manager/window_manager.dart';
 
 onDesktopStart() {

@@ -1,9 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:jasmine/basic/methods.dart';
-import 'package:jasmine/screens/components/content_builder.dart';
-import 'package:jasmine/screens/downloads_exporting_screen2.dart';
+import 'package:jmcomic3/basic/methods.dart';
+import 'package:jmcomic3/screens/components/content_builder.dart';
+import 'package:jmcomic3/screens/downloads_exporting_screen2.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../basic/commons.dart';
 import 'components/comic_download_card.dart';
@@ -155,7 +155,7 @@ class _DownloadsExportScreen2State extends State<DownloadsExportScreen2> {
             defaultToast(context, "请选择导出的内容");
             return;
           }
-          if(!await androidMangeStorageRequest()) {
+          if (!await androidMangeStorageRequest()) {
             throw Exception("申请权限被拒绝");
           }
           final exported = await Navigator.of(context).push(

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import '../basic/commons.dart';
@@ -10,7 +9,7 @@ const _propertyName = "WebDavUserName";
 String get currentWebUserName => _currentWebDavUserName;
 
 Future<String?> initWebDavUserName() async {
-  _currentWebDavUserName  = await methods.loadProperty(_propertyName);
+  _currentWebDavUserName = await methods.loadProperty(_propertyName);
   return null;
 }
 
