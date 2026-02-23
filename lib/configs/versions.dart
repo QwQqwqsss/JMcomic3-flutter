@@ -11,7 +11,7 @@ import 'package:jmcomic3/basic/methods.dart';
 
 import 'ignore_upgrade_pop.dart';
 
-const _repoOwner = "QwQqwqsss";
+const _repoOwner = "MrYu-JMComic";
 const _repoName = "JMcomic3-flutter";
 const _releaseLatestUrl =
     "https://api.github.com/repos/$_repoOwner/$_repoName/releases/latest";
@@ -37,6 +37,8 @@ String? _latestVersionInfo;
 const _propertyName = "checkVersionPeriod";
 const _latestNameCacheKey = "latestVersionNameCache";
 const _latestInfoCacheKey = "latestVersionInfoCache";
+const _latestRepoCacheKey = "latestVersionRepoCache";
+const _repoToken = "$_repoOwner/$_repoName";
 late int _period = -1;
 
 Future initVersion() async {
@@ -52,6 +54,15 @@ Future initVersion() async {
   _latestVersionInfo = await methods.loadProperty(_latestInfoCacheKey);
   if (_latestVersionInfo == "") {
     _latestVersionInfo = null;
+  }
+  final latestRepoCache = await methods.loadProperty(_latestRepoCacheKey);
+  if (latestRepoCache != _repoToken) {
+    // Repo source changed: drop stale cached latest-version content.
+    _latestVersionName = null;
+    _latestVersionInfo = null;
+    await methods.saveProperty(_latestNameCacheKey, "");
+    await methods.saveProperty(_latestInfoCacheKey, "");
+    await methods.saveProperty(_latestRepoCacheKey, _repoToken);
   }
   if (_latestVersionName == null && _versionExp.hasMatch(_version)) {
     _latestVersionName = _version;
@@ -112,21 +123,20 @@ Future _versionCheck() async {
   if (_versionExp.hasMatch(_version)) {
     try {
       final json = await _fetchLatestReleaseJson();
-      final latest = json["name"] ?? json["tag_name"];
-      if (latest != null) {
-        final latestVersion = latest.toString().trim();
+      final latestTag = json["tag_name"]?.toString().trim() ?? "";
+      final latestName = json["name"]?.toString().trim() ?? "";
+      final latestVersion = _pickLatestVersion(latestTag, latestName);
+      if (latestVersion.isNotEmpty) {
         final body = json["body"]?.toString() ?? "";
-        if (latestVersion.isNotEmpty) {
-          _latestVersionName = latestVersion;
-          _latestVersionInfo = body;
-          _latestVersion = latestVersion != _version ? latestVersion : null;
-          await methods.saveProperty(_latestNameCacheKey, latestVersion);
-          await methods.saveProperty(_latestInfoCacheKey, body);
-        } else {
-          _latestVersion = null;
-          _latestVersionName = null;
-          _latestVersionInfo = null;
-        }
+        _latestVersionName = latestVersion;
+        _latestVersionInfo = body;
+        _latestVersion = latestVersion != _version ? latestVersion : null;
+        await methods.saveProperty(_latestNameCacheKey, latestVersion);
+        await methods.saveProperty(_latestInfoCacheKey, body);
+      } else {
+        _latestVersion = null;
+        _latestVersionName = null;
+        _latestVersionInfo = null;
       }
     } catch (e) {
       // keep cached values when network fetch fails
@@ -141,6 +151,19 @@ Future _versionCheck() async {
   }
   versionEvent.broadcast();
   debugPrient("$_latestVersion");
+}
+
+String _pickLatestVersion(String tagName, String releaseName) {
+  if (_versionExp.hasMatch(tagName)) {
+    return tagName;
+  }
+  if (_versionExp.hasMatch(releaseName)) {
+    return releaseName;
+  }
+  if (tagName.isNotEmpty) {
+    return tagName;
+  }
+  return releaseName;
 }
 
 Future<Map<String, dynamic>> _fetchLatestReleaseJson() async {

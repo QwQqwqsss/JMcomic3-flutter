@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:jmcomic3/basic/platform.dart';
 import 'package:jmcomic3/configs/Authentication.dart';
@@ -60,6 +62,8 @@ Future initConfigs(BuildContext context) async {
   await initPagerColumnCount();
   await initPagerCoverRate();
   await initAutoClean();
+  // Run periodic cache cleanup in background to avoid slowing startup.
+  unawaited(runAutoCleanIfNeeded());
   await initTheme();
   await reloadIsPro();
   await initDisableRecommendContent();

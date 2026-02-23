@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:jmcomic3/basic/commons.dart';
@@ -89,14 +90,13 @@ class _WeekScreenState extends State<WeekScreen> {
     if (selectedCategoryId == null) {
       return const SizedBox.shrink();
     }
+    final textStyle = _categorySelectorTextStyle(context);
+    final selectorWidth = _calcCategorySelectorWidth(context, textStyle);
     return Padding(
       padding: const EdgeInsets.only(right: 8),
       child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minWidth: 110,
-            maxWidth: 150,
-          ),
+        child: SizedBox(
+          width: selectorWidth,
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: Theme.of(context)
@@ -113,13 +113,34 @@ class _WeekScreenState extends State<WeekScreen> {
                   isDense: true,
                   isExpanded: true,
                   iconSize: 18,
+                  style: textStyle,
                   borderRadius: BorderRadius.circular(12),
+                  menuMaxHeight: 420,
+                  selectedItemBuilder: (context) {
+                    return _categories
+                        .map(
+                          (e) => Align(
+                            alignment: Alignment.centerLeft,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                e.time,
+                                maxLines: 1,
+                                style: textStyle,
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(growable: false);
+                  },
                   items: _categories
                       .map(
                         (e) => DropdownMenuItem(
                           value: e.id,
                           child: Text(
                             e.time,
+                            style: textStyle,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -142,6 +163,33 @@ class _WeekScreenState extends State<WeekScreen> {
         ),
       ),
     );
+  }
+
+  TextStyle _categorySelectorTextStyle(BuildContext context) {
+    final base = Theme.of(context).textTheme.bodyMedium ?? const TextStyle();
+    return base.copyWith(
+      fontSize: 12.5,
+      fontWeight: FontWeight.w500,
+      height: 1.1,
+    );
+  }
+
+  double _calcCategorySelectorWidth(BuildContext context, TextStyle textStyle) {
+    final textDirection = Directionality.of(context);
+    var longestWidth = 0.0;
+    for (final category in _categories) {
+      final painter = TextPainter(
+        text: TextSpan(text: category.time, style: textStyle),
+        maxLines: 1,
+        textDirection: textDirection,
+      )..layout();
+      longestWidth = math.max(longestWidth, painter.width);
+    }
+    // 文字宽度 + 左右内边距 + 下拉图标空间。
+    final preferredWidth = longestWidth + 46;
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final maxWidth = screenWidth * .52;
+    return preferredWidth.clamp(126.0, maxWidth).toDouble();
   }
 
   void _syncAppBarState(List<WeekCategory> categories, String? selectedId) {

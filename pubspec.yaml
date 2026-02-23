@@ -3,7 +3,7 @@ description: jmcomic3 comic browser
 
 publish_to: 'none'
 
-version: 1.7.20+48
+version: 1.7.21+49
 
 environment:
   sdk: ">=3.0.0 <4.0.0"

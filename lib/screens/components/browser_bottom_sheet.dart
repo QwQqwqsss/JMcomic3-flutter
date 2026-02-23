@@ -1,6 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:jmcomic3/basic/commons.dart';
 import 'package:jmcomic3/basic/log.dart';
-import 'package:jmcomic3/basic/methods.dart';
 import 'package:jmcomic3/configs/auto_clean.dart';
 import 'package:jmcomic3/configs/network_api_host.dart';
 import 'package:jmcomic3/configs/network_cdn_host.dart';
@@ -9,10 +9,9 @@ import 'package:jmcomic3/configs/pager_controller_mode.dart';
 import 'package:jmcomic3/configs/pager_cover_rate.dart';
 import 'package:jmcomic3/configs/pager_view_mode.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:flutter/material.dart';
 
 class BrowserBottomSheetAction extends StatelessWidget {
-  const BrowserBottomSheetAction({Key? key}) : super(key: key);
+  const BrowserBottomSheetAction({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -25,25 +24,31 @@ class BrowserBottomSheetAction extends StatelessWidget {
   }
 }
 
-Future _displayBrowserBottomSheet(BuildContext context) async {
+Future<void> _displayBrowserBottomSheet(BuildContext context) async {
   await showMaterialModalBottomSheet(
     context: context,
     backgroundColor: const Color(0xAA000000),
     builder: (context) {
       return SizedBox(
-        height: MediaQuery.of(context).size.height * (.45),
-        child: _BrowserBottomSheet(),
+        height: MediaQuery.of(context).size.height * .45,
+        child: const _BrowserBottomSheet(),
       );
     },
   );
 }
 
 class _BrowserBottomSheet extends StatefulWidget {
+  const _BrowserBottomSheet();
+
   @override
   State<StatefulWidget> createState() => _BrowserBottomSheetState();
 }
 
 class _BrowserBottomSheetState extends State<_BrowserBottomSheet> {
+  bool _manualCleaning = false;
+
+  bool get _cleaning => _manualCleaning || cacheCleaningInProgress;
+
   @override
   void initState() {
     currentPagerControllerModeEvent.subscribe(_setState);
@@ -58,8 +63,31 @@ class _BrowserBottomSheetState extends State<_BrowserBottomSheet> {
     super.dispose();
   }
 
-  _setState(_) {
+  void _setState(_) {
     setState(() {});
+  }
+
+  Future<void> _runManualClean() async {
+    if (_cleaning) {
+      return;
+    }
+    setState(() {
+      _manualCleaning = true;
+    });
+    defaultToast(context, '开始清理缓存');
+    final result = await cleanCache();
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _manualCleaning = false;
+    });
+    if (result.success) {
+      defaultToast(context, '清理完成 (${result.duration.inMilliseconds}ms)');
+      return;
+    }
+    debugPrient('clean cache failed: ${result.error}');
+    defaultToast(context, '清理失败，请稍后重试');
   }
 
   @override
@@ -98,7 +126,7 @@ class _BrowserBottomSheetState extends State<_BrowserBottomSheet> {
             Expanded(child: Container()),
             _bottomIcon(
               icon: Icons.view_column_sharp,
-              title: "$pagerColumnNumber 列",
+              title: '$pagerColumnNumber 列',
               onPressed: () async {
                 await choosePagerColumnCount(context);
                 setState(() {});
@@ -111,19 +139,15 @@ class _BrowserBottomSheetState extends State<_BrowserBottomSheet> {
           children: [
             Expanded(child: Container()),
             _bottomIcon(
-              icon: Icons.cleaning_services_rounded,
-              title: "清理",
-              onPressed: () async {
-                defaultToast(context, "清理中");
-                try {
-                  await methods.cleanAllCache();
-                  defaultToast(context, "清理成功");
-                } catch (e) {
-                  debugPrient("$e");
-                  defaultToast(context, "清理失败");
-                }
-                setState(() {});
-              },
+              icon: _cleaning
+                  ? Icons.cleaning_services_outlined
+                  : Icons.cleaning_services_rounded,
+              title: _cleaning ? '清理中...' : '清理',
+              onPressed: _cleaning
+                  ? null
+                  : () {
+                      _runManualClean();
+                    },
             ),
             Expanded(child: Container()),
             _bottomIcon(
@@ -162,8 +186,10 @@ class _BrowserBottomSheetState extends State<_BrowserBottomSheet> {
   Widget _bottomIcon({
     required IconData icon,
     required String title,
-    required void Function() onPressed,
+    required VoidCallback? onPressed,
   }) {
+    final disabled = onPressed == null;
+    final color = disabled ? Colors.white54 : Colors.white;
     return Expanded(
       child: Center(
         child: Column(
@@ -172,24 +198,24 @@ class _BrowserBottomSheetState extends State<_BrowserBottomSheet> {
               iconSize: 55,
               icon: Column(
                 children: [
-                  Container(height: 3),
+                  const SizedBox(height: 3),
                   Icon(
                     icon,
                     size: 25,
-                    color: Colors.white,
+                    color: color,
                   ),
-                  Container(height: 3),
+                  const SizedBox(height: 3),
                   Text(
                     title,
-                    style: TextStyle(color: Colors.white, fontSize: 10),
+                    style: TextStyle(color: color, fontSize: 10),
                     maxLines: 1,
                     textAlign: TextAlign.center,
                   ),
-                  Container(height: 3),
+                  const SizedBox(height: 3),
                 ],
               ),
               onPressed: onPressed,
-            )
+            ),
           ],
         ),
       ),
