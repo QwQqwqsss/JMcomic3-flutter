@@ -1263,6 +1263,7 @@ class _ComicReaderGalleryState extends _ComicReaderState {
       // Clear image cache for this page.
       final oldProvider =
           PageImageProvider(widget.chapter.id, widget.chapter.images[index]);
+      evictPageImageMemoryCache(widget.chapter.id, widget.chapter.images[index]);
       imageCache.evict(oldProvider);
       debugPrient("evict ${widget.chapter.images[index]}");
       setState(() {
@@ -1912,6 +1913,7 @@ class _TwoPageGalleryReaderState extends _ComicReaderState {
       setState(() {
         _imageProviderKeys[index] = (_imageProviderKeys[index] ?? 0) + 1;
         // Clear image cache for this page.
+        evictPageImageMemoryCache(widget.chapter.id, widget.chapter.images[index]);
         imageCache.evict(ips[index]);
         ips[index] =
             PageImageProvider(widget.chapter.id, widget.chapter.images[index]);

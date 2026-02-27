@@ -3,6 +3,7 @@ import 'package:jmcomic3/basic/commons.dart';
 import 'package:jmcomic3/basic/log.dart';
 import 'package:jmcomic3/basic/methods.dart';
 import 'package:jmcomic3/l10n/app_localizations.dart';
+import 'package:jmcomic3/screens/components/images.dart';
 
 const _propertyName = 'auto_clean';
 const _lastCleanPropertyName = 'auto_clean_last_clean_ts';
@@ -155,6 +156,7 @@ Future<CacheCleanResult> cleanCache() async {
   final sw = Stopwatch()..start();
   try {
     await methods.cleanAllCache();
+    clearAllImageMemoryCaches();
     await _saveLastCleanTs(_nowSeconds());
     return CacheCleanResult(success: true, duration: sw.elapsed);
   } catch (e, st) {

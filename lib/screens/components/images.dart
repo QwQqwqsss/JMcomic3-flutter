@@ -297,6 +297,20 @@ void _evictPageImageCache(int id, String imageName) {
   _pageImageTrueSizeCache.remove(key);
 }
 
+/// Evict one page image's in-memory path and size cache.
+void evictPageImageMemoryCache(int id, String imageName) {
+  _evictPageImageCache(id, imageName);
+}
+
+/// Clear all in-memory image path and size caches.
+void clearAllImageMemoryCaches() {
+  _jm3x4CoverPathFutureCache.clear();
+  _jmSquareCoverPathFutureCache.clear();
+  _photoPathFutureCache.clear();
+  _pageImagePathFutureCache.clear();
+  _pageImageTrueSizeCache.clear();
+}
+
 // 远端图片
 class JM3x4Cover extends StatefulWidget {
   final int comicId;
@@ -550,6 +564,7 @@ Widget pathFutureImage(
             height,
             fit: fit,
             longPressMenuItems: longPressMenuItems,
+            onReload: onReload,
           );
         }
         // 其他状态（waiting/active/none）显示加载状态
@@ -701,7 +716,9 @@ int? _cacheExtent(double? logicalExtent, double devicePixelRatio) {
 
 Widget buildFile(
     BuildContext context, String file, double? width, double? height,
-    {BoxFit fit = BoxFit.cover, List<LongPressMenuItem>? longPressMenuItems}) {
+    {BoxFit fit = BoxFit.cover,
+    List<LongPressMenuItem>? longPressMenuItems,
+    VoidCallback? onReload}) {
   final devicePixelRatio = MediaQuery.maybeDevicePixelRatioOf(context) ?? 1.0;
   final cacheWidth = _cacheExtent(width, devicePixelRatio);
   final cacheHeight = _cacheExtent(height, devicePixelRatio);
@@ -716,7 +733,13 @@ Widget buildFile(
     errorBuilder: (a, b, c) {
       debugPrient("$b");
       debugPrient("$c");
-      return buildError(context, width, height);
+      return buildError(
+        context,
+        width,
+        height,
+        longPressMenuItems: longPressMenuItems,
+        onReload: onReload,
+      );
     },
     fit: fit,
   );

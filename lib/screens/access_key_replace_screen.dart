@@ -1,7 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:jmcomic3/basic/log.dart';
-import 'package:jmcomic3/l10n/app_localizations.dart';
-
 import '../basic/commons.dart';
 import '../basic/methods.dart';
 import '../configs/is_pro.dart';
@@ -23,6 +22,7 @@ class _AccessKeyReplaceScreenState extends State<AccessKeyReplaceScreen> {
   String _patId = "";
   String _bindUid = "";
   bool _isPro = false;
+  int _requestDelete = 0;
   int _reBind = 0;
 
   @override
@@ -31,203 +31,131 @@ class _AccessKeyReplaceScreenState extends State<AccessKeyReplaceScreen> {
     super.initState();
   }
 
-  Future<void> _load() async {
+  Future _load() async {
     try {
-      if (mounted) {
-        setState(() {
-          _loading = true;
-        });
-      }
-
-      _username = await methods.loadLastLoginUsername();
-      final check = await checkPatAccessKey(widget.accessKey);
-
-      final reBind = check["re_bind"];
-      final fd = check["fd"];
-
-      if (!mounted) {
-        return;
-      }
       setState(() {
-        _patId = "${check["email"] ?? ""}";
-        _bindUid = "${check["bind_user"] ?? ""}";
-        _isPro = fd == true || "$fd" == "true" || "$fd" == "1";
-        _reBind = reBind is int ? reBind : int.tryParse("$reBind") ?? 0;
+        _loading = true;
+      });
+      _username = await methods.loadLastLoginUsername();
+      final checkResult = await methods.checkPat(widget.accessKey);
+      final check = jsonDecode(checkResult);
+      setState(() {
+        _patId = check["email"] ?? "";
+        _bindUid = check["bind_user"] ?? "";
+        _isPro = check["fd"] ?? false;
+        _requestDelete = check["request_delete"] ?? 0;
+        _reBind = check["re_bind"] ?? 0;
         _loading = false;
       });
     } catch (e, s) {
       debugPrient("$e\n$s");
-      if (!mounted) {
-        return;
-      }
-      defaultToast(
-        context,
-        "${context.l10n.tr("Verification failed", en: "Verification failed")}: $e",
-      );
+      defaultToast(context, "验证失败: $e");
       Navigator.of(context).pop();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return rightClickPop(child: _buildScreen(context), context: context);
+    return rightClickPop(child: buildScreen(context), context: context);
   }
 
-  Widget _buildScreen(BuildContext context) {
-    final l10n = context.l10n;
+  Widget buildScreen(BuildContext context) {
     if (_loading) {
       return Scaffold(
-        appBar: AppBar(
-          title: Text(l10n.tr("Verify PAT key", en: "Verify PAT key")),
-        ),
+        appBar: AppBar(title: const Text("验证PAT密钥")),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.tr("Verify PAT key", en: "Verify PAT key")),
-      ),
+      appBar: AppBar(title: const Text("验证PAT密钥")),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          Text(
-            l10n.tr("Key verified successfully",
-                en: "Key verified successfully"),
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          const Text(
+            "密钥验证成功",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 20),
-          if (useLocalProDefault)
-            Text(
-              l10n.tr(
-                "Local Pro mode is active. PAT verification uses local cache.",
-                en: "Local Pro mode is active. PAT verification uses local cache.",
-              ),
-              style: TextStyle(color: Colors.orange.shade700),
-            ),
-          if (useLocalProDefault) const SizedBox(height: 10),
           ListTile(
-            title: Text(l10n.tr("PAT account", en: "PAT account")),
-            subtitle: Text(
-              _patId.isEmpty ? l10n.tr("Unknown", en: "Unknown") : _patId,
-            ),
+            title: const Text("PAT账号"),
+            subtitle: Text(_patId.isEmpty ? "未知" : _patId),
           ),
           const Divider(),
           ListTile(
-            title: Text(l10n.tr("Pro status", en: "Pro status")),
-            subtitle: Text(
-              _isPro
-                  ? l10n.tr("Pro active", en: "Pro active")
-                  : l10n.tr("Not Pro", en: "Not Pro"),
-            ),
+            title: const Text("发电状态"),
+            subtitle: Text(_isPro ? "已发电" : "未发电"),
           ),
           const Divider(),
           ListTile(
-            title: Text(
-              l10n.tr("Bound JMcomic3 account", en: "Bound JMcomic3 account"),
-            ),
-            subtitle: Text(
-              _bindUid.isEmpty
-                  ? l10n.tr("Not bound", en: "Not bound")
-                  : _bindUid,
-            ),
+            title: const Text("绑定的Jasmine账号"),
+            subtitle: Text(_bindUid.isEmpty ? "未绑定" : _bindUid),
           ),
           const Divider(),
           ListTile(
-            title: Text(
-              l10n.tr("Current login account", en: "Current login account"),
-            ),
-            subtitle: Text(
-              _username.isEmpty
-                  ? l10n.tr("Not logged in", en: "Not logged in")
-                  : _username,
-            ),
+            title: const Text("当前登录账号"),
+            subtitle: Text(_username.isEmpty ? "未登录" : _username),
           ),
           const Divider(),
           const SizedBox(height: 20),
           if (_bindUid.isEmpty)
             ElevatedButton(
               onPressed: _bind,
-              child: Text(
-                l10n.tr("Bind to current account",
-                    en: "Bind to current account"),
-              ),
+              child: const Text("绑定到当前账号"),
             )
           else if (_bindUid != _username)
             Column(
               children: [
-                Text(
-                  l10n.tr(
-                    "This key is bound to another account. Unbind first or wait until rebinding is available.",
-                    en: "This key is bound to another account. Unbind first or wait until rebinding is available.",
-                  ),
-                  style: const TextStyle(color: Colors.orange),
+                const Text(
+                  "该密钥已绑定到其他账号，如需重新绑定，请先解绑或等待重新绑定时间到期",
+                  style: TextStyle(color: Colors.orange),
                 ),
                 const SizedBox(height: 10),
                 if (_reBind > 0)
                   Text(
-                    "${l10n.tr("Rebind available at", en: "Rebind available at")}: ${DateTime.fromMillisecondsSinceEpoch(_reBind * 1000)}",
+                    "可重新绑定时间: ${DateTime.fromMillisecondsSinceEpoch(_reBind * 1000)}",
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                 const SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: _bind,
-                  child: Text(
-                    l10n.tr("Force bind to current account",
-                        en: "Force bind to current account"),
-                  ),
+                  child: const Text("强制绑定到当前账号"),
                 ),
               ],
             )
           else
             ElevatedButton(
               onPressed: _save,
-              child: Text(l10n.tr("Save key", en: "Save key")),
+              child: const Text("保存密钥"),
             ),
         ],
       ),
     );
   }
 
-  Future<void> _bind() async {
+  Future _bind() async {
     try {
-      defaultToast(context, context.l10n.tr("Binding...", en: "Binding..."));
-      await bindPatAccount(widget.accessKey, _username);
-      defaultToast(
-        context,
-        context.l10n.tr("Bind succeeded", en: "Bind succeeded"),
-      );
+      defaultToast(context, "绑定中...");
+      await methods.bindPatAccount(widget.accessKey, _username);
+      defaultToast(context, "绑定成功");
       await reloadIsPro();
-      if (mounted) {
-        Navigator.of(context).pop();
-      }
+      Navigator.of(context).pop();
     } catch (e, s) {
       debugPrient("$e\n$s");
-      defaultToast(
-        context,
-        "${context.l10n.tr("Bind failed", en: "Bind failed")}: $e",
-      );
+      defaultToast(context, "绑定失败: $e");
     }
   }
 
-  Future<void> _save() async {
+  Future _save() async {
     try {
-      defaultToast(context, context.l10n.tr("Saving...", en: "Saving..."));
-      await bindPatAccount(widget.accessKey, _username);
-      defaultToast(
-        context,
-        context.l10n.tr("Saved successfully", en: "Saved successfully"),
-      );
+      defaultToast(context, "保存中...");
+      await methods.bindPatAccount(widget.accessKey, _username);
+      defaultToast(context, "保存成功");
       await reloadIsPro();
-      if (mounted) {
-        Navigator.of(context).pop();
-      }
+      Navigator.of(context).pop();
     } catch (e, s) {
       debugPrient("$e\n$s");
-      defaultToast(
-        context,
-        "${context.l10n.tr("Save failed", en: "Save failed")}: $e",
-      );
+      defaultToast(context, "保存失败: $e");
     }
   }
 }

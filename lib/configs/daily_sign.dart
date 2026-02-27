@@ -14,6 +14,9 @@ enum DailySignStatus {
 }
 
 DailySignStatus dailySignStatus = DailySignStatus.unchecked;
+const _dailySignCheckCooldown = Duration(minutes: 5);
+DateTime? _lastDailySignCheckAt;
+int? _lastDailySignCheckUid;
 
 final dailySignEvent = Event();
 
@@ -38,12 +41,24 @@ String dailySignStatusLabel(BuildContext context) {
 Future<void> checkDailySignStatus(BuildContext context,
     {bool toast = false}) async {
   if (loginStatus != LoginStatus.loginSuccess) {
+    _lastDailySignCheckAt = null;
+    _lastDailySignCheckUid = null;
     _setDailySignStatus(DailySignStatus.unchecked);
+    return;
+  }
+  if (!toast &&
+      _lastDailySignCheckUid == selfInfo.uid &&
+      _lastDailySignCheckAt != null &&
+      DateTime.now().difference(_lastDailySignCheckAt!) <
+          _dailySignCheckCooldown &&
+      dailySignStatus != DailySignStatus.unchecked) {
     return;
   }
   _setDailySignStatus(DailySignStatus.checking);
   try {
     final msg = await methods.daily(selfInfo.uid);
+    _lastDailySignCheckUid = selfInfo.uid;
+    _lastDailySignCheckAt = DateTime.now();
     if (toast) {
       defaultToast(
         context,
@@ -53,6 +68,8 @@ Future<void> checkDailySignStatus(BuildContext context,
     _setDailySignStatus(DailySignStatus.signed);
   } catch (e, st) {
     debugPrient("$e\n$st");
+    _lastDailySignCheckUid = selfInfo.uid;
+    _lastDailySignCheckAt = DateTime.now();
     if (toast) {
       defaultToast(context, "$e");
     }

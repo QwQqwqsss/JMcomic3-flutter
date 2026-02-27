@@ -40,7 +40,9 @@ bool _isProRequiredMessage(String message) {
     return false;
   }
   final lower = message.toLowerCase();
-  return lower.contains('发电') ||
+  return message.contains('发电') ||
+      message.contains('發電') ||
+      lower.contains('发电') ||
       lower.contains('pro is required') ||
       lower.contains('activate pro') ||
       lower.contains('need pro') ||

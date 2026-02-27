@@ -16,6 +16,21 @@ class Methods {
   static const _channel = MethodChannel("methods");
   static HttpClient httpClient = HttpClient();
 
+  bool _isLikelyProGateError(String method, String errorMessage) {
+    final lower = errorMessage.toLowerCase();
+    if (method == "get_pro_server_name" || method == "set_pro_server_name") {
+      return false;
+    }
+    if (lower.contains("no flat")) {
+      return false;
+    }
+    return errorMessage.contains("发电") ||
+        lower.contains("please activate pro") ||
+        lower.contains("pro is required") ||
+        lower.contains("need pro") ||
+        lower.contains("vip");
+  }
+
   Future<String> _invokeRaw(String method, dynamic params) async {
     late String resp;
     // if (Platform.isLinux) {
@@ -43,6 +58,11 @@ class Methods {
     final response = _Response.fromJson(jsonDecode(resp));
 
     if (response.errorMessage.isNotEmpty) {
+      if (_isLikelyProGateError(method, response.errorMessage)) {
+        debugPrient(
+          "backend-pro-gate method=$method params=$params error=${response.errorMessage}",
+        );
+      }
       throw StateError(response.errorMessage);
     }
     return response.responseData;
@@ -301,23 +321,27 @@ class Methods {
         .toList()
         .cast<SearchHistory>();
   }
-  /// Download list`r`n  Future<List<DownloadAlbum>> allDownloads() async {
+  /// Download list
+  Future<List<DownloadAlbum>> allDownloads() async {
     return List.of(jsonDecode(await _invoke("all_downloads", "")))
         .map((e) => DownloadAlbum.fromJson(e))
         .toList()
         .cast<DownloadAlbum>();
   }
-  /// Find download item`r`n  Future<DownloadCreate?> downloadById(int id) async {
+  /// Find download item
+  Future<DownloadCreate?> downloadById(int id) async {
     var map = jsonDecode(await _invoke("download_by_id", "$id"));
     if (map == null) {
       return map;
     }
     return DownloadCreate.fromJson(map);
   }
-  /// Create download task`r`n  Future<dynamic> createDownload(DownloadCreate create) async {
+  /// Create download task
+  Future<dynamic> createDownload(DownloadCreate create) async {
     return _invoke("create_download", create);
   }
-  /// Download image list`r`n  Future<List<DlImage>> dlImageByChapterId(int id) async {
+  /// Download image list
+  Future<List<DlImage>> dlImageByChapterId(int id) async {
     return List.of(jsonDecode(await _invoke("dl_image_by_chapter_id", "$id")))
         .map((e) => DlImage.fromJson(e))
         .toList()
@@ -331,16 +355,19 @@ class Methods {
   Future<dynamic> renewAllDownloads() async {
     return _invoke("renew_all_downloads", "");
   }
-  /// Get Android refresh modes`r`n  Future<List<String>> loadAndroidModes() async {
+  /// Get Android refresh modes
+  Future<List<String>> loadAndroidModes() async {
     return List.of(await _channel.invokeMethod("androidGetModes"))
         .map((e) => "$e")
         .toList();
   }
-  /// Set Android refresh mode`r`n  Future setAndroidMode(String androidDisplayMode) {
+  /// Set Android refresh mode
+  Future setAndroidMode(String androidDisplayMode) {
     return _channel
         .invokeMethod("androidSetMode", {"mode": androidDisplayMode});
   }
-  /// Get Android SDK version`r`n  Future<int> androidGetVersion() async {
+  /// Get Android SDK version
+  Future<int> androidGetVersion() async {
     if (Platform.isAndroid) {
       return await _channel.invokeMethod("androidGetVersion", {});
     }
@@ -578,11 +605,24 @@ class Methods {
   }
 
   Future<String> getProServerName() async {
-    return await _invoke("get_pro_server_name", "");
+    try {
+      final name = await _invoke("get_pro_server_name", "");
+      if (name == "HK" || name == "US") {
+        return name;
+      }
+    } catch (e, s) {
+      debugPrient("get_pro_server_name fallback HK: $e\n$s");
+    }
+    return "HK";
   }
 
   Future setProServerName(String serverName) async {
-    return await _invoke("set_pro_server_name", serverName);
+    try {
+      return await _invoke("set_pro_server_name", serverName);
+    } catch (e, s) {
+      debugPrient("set_pro_server_name ignored: $e\n$s");
+      return "";
+    }
   }
 
   Future<bool> verifyAuthentication() async {

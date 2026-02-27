@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:jmcomic3/basic/log.dart';
-import 'package:jmcomic3/l10n/app_localizations.dart';
 
 import '../basic/commons.dart';
+import 'package:jmcomic3/basic/log.dart';
 import '../basic/methods.dart';
 import '../configs/is_pro.dart';
 import 'access_key_replace_screen.dart';
@@ -21,9 +20,6 @@ class _ProScreenState extends State<ProScreen> {
   @override
   void initState() {
     methods.loadLastLoginUsername().then((value) {
-      if (!mounted) {
-        return;
-      }
       setState(() {
         _username = value;
       });
@@ -39,25 +35,20 @@ class _ProScreenState extends State<ProScreen> {
   }
 
   void _setState(_) {
-    if (!mounted) {
-      return;
-    }
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    return rightClickPop(child: _buildScreen(context), context: context);
+    return rightClickPop(child: buildScreen(context), context: context);
   }
 
-  Widget _buildScreen(BuildContext context) {
-    final l10n = context.l10n;
-    final size = MediaQuery.of(context).size;
-    final min = size.width < size.height ? size.width : size.height;
-
+  Widget buildScreen(BuildContext context) {
+    var size = MediaQuery.of(context).size;
+    var min = size.width < size.height ? size.width : size.height;
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.tr("Pro Center", en: "Pro Center")),
+        title: const Text("发电中心"),
       ),
       body: ListView(
         children: [
@@ -66,7 +57,7 @@ class _ProScreenState extends State<ProScreen> {
             height: min / 2,
             child: Center(
               child: Icon(
-                hasProAccess ? Icons.offline_bolt : Icons.offline_bolt_outlined,
+                isPro ? Icons.offline_bolt : Icons.offline_bolt_outlined,
                 size: min / 3,
                 color: Colors.grey.shade500,
               ),
@@ -74,33 +65,15 @@ class _ProScreenState extends State<ProScreen> {
           ),
           Center(child: Text(_username)),
           Container(height: 20),
-          if (useLocalProDefault)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              child: Text(
-                l10n.tr(
-                  "Local Pro mode is active. Backend validation sync is disabled.",
-                  en: "Local Pro mode is active. Backend validation sync is disabled.",
-                ),
-                style: TextStyle(color: Colors.orange.shade700),
-              ),
-            ),
           const Divider(),
-          Padding(
-            padding: const EdgeInsets.all(20),
+          const Padding(
+            padding: EdgeInsets.all(20),
             child: Text(
-              l10n.tr(
-                "Login to verify Pro status.\n"
-                "Tap \"I used to support\" to refresh status.\n"
-                "Tap \"I just supported\" to redeem your code.\n"
-                "Use PAT settings below to bind or clear PAT info.\n"
-                "If status updates fail, try switching Power mode.",
-                en: "Login to verify Pro status.\n"
-                    "Tap \"I used to support\" to refresh status.\n"
-                    "Tap \"I just supported\" to redeem your code.\n"
-                    "Use PAT settings below to bind or clear PAT info.\n"
-                    "If status updates fail, try switching Power mode.",
-              ),
+              "登录账号才能确认发电状态\n"
+              "点击\"我曾经发过电\"进同步发电状态\n"
+              "点击\"我刚才发了电\"兑换作者给您的礼物卡\n"
+              "更换\"发电方式\"可能解决FAIL问题\n"
+              "去\"关于\"界面找到维护地址用爱发电",
             ),
           ),
           const Divider(),
@@ -108,30 +81,22 @@ class _ProScreenState extends State<ProScreen> {
             children: [
               Expanded(
                 child: ListTile(
-                  title: Text(l10n.tr("Login redeem", en: "Login redeem")),
+                  title: const Text("登录兑换"),
                   subtitle: Text(
                     proInfoAf.isPro
-                        ? "${l10n.tr("Pro active", en: "Pro active")} (${DateTime.fromMillisecondsSinceEpoch(1000 * proInfoAf.expire)})"
-                        : l10n.tr("Not Pro", en: "Not Pro"),
+                        ? "发电中 (${DateTime.fromMillisecondsSinceEpoch(1000 * proInfoAf.expire).toString()})"
+                        : "未发电",
                   ),
                 ),
               ),
               Expanded(
                 child: ListTile(
-                  title: Text(l10n.tr("PAT membership", en: "PAT membership")),
+                  title: const Text("PAT会员"),
                   subtitle: Text(
-                    proInfoPat.isPro
-                        ? l10n.tr("Pro active", en: "Pro active")
-                        : l10n.tr("Not Pro", en: "Not Pro"),
+                    proInfoPat.isPro ? "发电中" : "未发电",
                   ),
                   onTap: () {
-                    defaultToast(
-                      context,
-                      l10n.tr(
-                        "Tap PAT membership below to configure.",
-                        en: "Tap PAT membership below to configure.",
-                      ),
-                    );
+                    defaultToast(context, "点击下方PAT会员进行设置");
                   },
                 ),
               ),
@@ -139,238 +104,185 @@ class _ProScreenState extends State<ProScreen> {
           ),
           const Divider(),
           ListTile(
-            title: Text(
-              l10n.tr("I used to support", en: "I used to support"),
-            ),
+            title: const Text("我曾经发过电"),
             onTap: () async {
               try {
-                await refreshProStatus();
-                defaultToast(context, l10n.tr("SUCCESS", en: "SUCCESS"));
+                await methods.reloadPro();
+                defaultToast(context, "SUCCESS");
               } catch (e, s) {
                 debugPrient("$e\n$s");
-                defaultToast(context, l10n.tr("FAIL", en: "FAIL"));
+                defaultToast(context, "FAIL");
               }
               await reloadIsPro();
-              if (mounted) {
-                setState(() {});
-              }
+              setState(() {});
             },
           ),
           const Divider(),
           ListTile(
-            title: Text(
-              l10n.tr("I just supported", en: "I just supported"),
-            ),
+            title: const Text("我刚才发了电"),
             onTap: () async {
-              final code = await displayTextInputDialog(
-                context,
-                title: l10n.tr("Enter code", en: "Enter code"),
-              );
+              final code = await displayTextInputDialog(context, title: "输入代码");
               if (code != null && code.isNotEmpty) {
                 try {
-                  await redeemCdKey(code);
-                  defaultToast(context, l10n.tr("SUCCESS", en: "SUCCESS"));
+                  await methods.inputCdKey(code);
+                  defaultToast(context, "SUCCESS");
                 } catch (e, s) {
                   debugPrient("$e\n$s");
-                  defaultToast(context, l10n.tr("FAIL", en: "FAIL"));
+                  defaultToast(context, "FAIL");
                 }
               }
               await reloadIsPro();
-              if (mounted) {
-                setState(() {});
-              }
+              setState(() {});
             },
           ),
           const Divider(),
           const ProServerNameWidget(),
           const Divider(),
-          ..._patProWidgets(),
+          ...patProWidgets(),
           const Divider(),
         ],
       ),
     );
   }
 
-  List<Widget> _patProWidgets() {
-    final l10n = context.l10n;
-    final widgets = <Widget>[];
-
+  List<Widget> patProWidgets() {
+    List<Widget> widgets = [];
     if (proInfoPat.accessKey.isNotEmpty) {
-      var text = l10n.tr("Key recorded", en: "Key recorded");
+      var text = "已记录密钥";
       if (proInfoPat.patId.isNotEmpty) {
-        text +=
-            "\n${l10n.tr("PAT account", en: "PAT account")}: ${proInfoPat.patId}";
+        text += "\nPAT账号: ${proInfoPat.patId}";
       }
       if (proInfoPat.bindUid.isNotEmpty) {
-        text +=
-            "\n${l10n.tr("Bound account", en: "Bound account")}: ${proInfoPat.bindUid}";
+        text += "\n绑定账号: ${proInfoPat.bindUid}";
       }
       if (proInfoPat.requestDelete > 0) {
-        final dateTime = DateTime.fromMillisecondsSinceEpoch(
+        DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(
           proInfoPat.requestDelete * 1000,
           isUtc: true,
         );
-        text +=
-            "\n${l10n.tr("Unbind time", en: "Unbind time")}: ${dateTime.toLocal()}";
+        text += "\n解绑时间: ${dateTime.toLocal()}";
       }
       if (proInfoPat.reBind > 0) {
-        final dateTime = DateTime.fromMillisecondsSinceEpoch(
+        DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(
           proInfoPat.reBind * 1000,
           isUtc: true,
         );
-        text +=
-            "\n${l10n.tr("Rebind available at", en: "Rebind available at")}: ${dateTime.toLocal()}";
+        text += "\n可重绑时间: ${dateTime.toLocal()}";
       }
 
-      final append = <TextSpan>[];
-      if (proInfoPat.bindUid.isEmpty) {
-        append.add(
-          TextSpan(
-            text:
-                "\n${l10n.tr("(Tap to bind to current account)", en: "(Tap to bind to current account)")}",
-            style: const TextStyle(color: Colors.blue),
-          ),
-        );
+      List<TextSpan> append = [];
+      if (proInfoPat.bindUid == "") {
+        append.add(const TextSpan(
+          text: "\n(点击绑定到当前账号)",
+          style: TextStyle(color: Colors.blue),
+        ));
       } else if (proInfoPat.bindUid != _username) {
-        append.add(
-          TextSpan(
-            text:
-                "\n${l10n.tr("(Bound to another account, tap to rebind)", en: "(Bound to another account, tap to rebind)")}",
-            style: const TextStyle(color: Colors.red),
-          ),
-        );
-      } else if (!proInfoPat.isPro) {
-        append.add(
-          TextSpan(
-            text:
-                "\n${l10n.tr("(Pro status not detected)", en: "(Pro status not detected)")}",
-            style: const TextStyle(color: Colors.orange),
-          ),
-        );
+        append.add(const TextSpan(
+          text: "\n(已绑定到其他账号，点击重新绑定)",
+          style: TextStyle(color: Colors.red),
+        ));
+      } else if (proInfoPat.isPro == false) {
+        append.add(const TextSpan(
+          text: "\n(未检测到发电状态)",
+          style: TextStyle(color: Colors.orange),
+        ));
       } else {
-        append.add(
-          TextSpan(
-            text: "\n${l10n.tr("(Normal)", en: "(Normal)")}",
-            style: const TextStyle(color: Colors.green),
-          ),
-        );
+        append.add(const TextSpan(
+          text: "\n(正常)",
+          style: TextStyle(color: Colors.green),
+        ));
       }
 
-      widgets.add(
-        ListTile(
-          onTap: () async {
-            final choose = await chooseMapDialog<int>(
-              context,
-              title: l10n.tr("Choose action", en: "Choose action"),
-              values: {
-                l10n.tr("Refresh PAT status", en: "Refresh PAT status"): 2,
-                l10n.tr("Bind to current account",
-                    en: "Bind to current account"): 3,
-                l10n.tr("Replace PAT key", en: "Replace PAT key"): 1,
-                l10n.tr("Clear PAT info", en: "Clear PAT info"): 4,
-              },
-            );
-            switch (choose) {
-              case 1:
-                _addPatAccount();
-                break;
-              case 2:
-                _refreshPatAccount();
-                break;
-              case 3:
-                _bindThisAccount();
-                break;
-              case 4:
-                _clearPatInfo();
-                break;
-            }
-          },
-          title: Text(l10n.tr("PAT membership", en: "PAT membership")),
-          subtitle: Text.rich(
-            TextSpan(
-              children: [
-                TextSpan(text: text),
-                ...append,
-              ],
-            ),
-          ),
-        ),
-      );
+      widgets.add(ListTile(
+        onTap: () async {
+          var choose = await chooseMapDialog<int>(
+            context,
+            title: "选择操作",
+            values: {
+              "更新PAT状态": 2,
+              "绑定到当前账号": 3,
+              "更换PAT密钥": 1,
+              "清除PAT信息": 4,
+            },
+          );
+          switch (choose) {
+            case 1:
+              addPatAccount();
+              break;
+            case 2:
+              reloadPatAccount();
+              break;
+            case 3:
+              bindThisAccount();
+              break;
+            case 4:
+              clearPatInfo();
+              break;
+          }
+        },
+        title: const Text("PAT会员"),
+        subtitle: Text.rich(TextSpan(children: [
+          TextSpan(text: text),
+          ...append,
+        ])),
+      ));
     } else {
-      widgets.add(
-        ListTile(
-          onTap: _addPatAccount,
-          title: Text(l10n.tr("PAT membership", en: "PAT membership")),
-          subtitle: Text(
-            l10n.tr("Tap to bind PAT membership",
-                en: "Tap to bind PAT membership"),
-          ),
-        ),
-      );
+      widgets.add(ListTile(
+        onTap: () {
+          addPatAccount();
+        },
+        title: const Text("PAT会员"),
+        subtitle: const Text("点击绑定PAT会员"),
+      ));
     }
     return widgets;
   }
 
-  void _addPatAccount() async {
-    final key = await displayTextInputDialog(
-      context,
-      title: context.l10n.tr("Enter PAT token", en: "Enter PAT token"),
-    );
-    if (key == null || key.isEmpty) {
-      return;
+  void addPatAccount() async {
+    String? key = await displayTextInputDialog(context, title: "输入PAT授权码");
+    if (key != null && key.isNotEmpty) {
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (BuildContext context) {
+            return AccessKeyReplaceScreen(accessKey: key);
+          },
+        ),
+      );
+      await reloadIsPro();
+      setState(() {});
     }
+  }
 
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (BuildContext context) {
-          return AccessKeyReplaceScreen(accessKey: key);
-        },
-      ),
-    );
+  void reloadPatAccount() async {
+    defaultToast(context, "请稍候");
+    try {
+      await methods.reloadPatAccount();
+      await reloadIsPro();
+      defaultToast(context, "SUCCESS");
+    } catch (e) {
+      defaultToast(context, "FAIL : $e");
+    }
+    setState(() {});
+  }
+
+  void bindThisAccount() async {
+    defaultToast(context, "请稍候");
+    try {
+      await methods.bindPatAccount(proInfoPat.accessKey, _username);
+      await methods.reloadPatAccount();
+      await reloadIsPro();
+      defaultToast(context, "SUCCESS");
+    } catch (e) {
+      defaultToast(context, "FAIL : $e");
+    }
+    setState(() {});
+  }
+
+  void clearPatInfo() async {
+    await methods.clearPat();
     await reloadIsPro();
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
-  void _refreshPatAccount() async {
-    defaultToast(context, context.l10n.tr("Please wait", en: "Please wait"));
-    try {
-      await reloadPatAccount();
-      defaultToast(context, context.l10n.tr("SUCCESS", en: "SUCCESS"));
-    } catch (e) {
-      defaultToast(
-        context,
-        "${context.l10n.tr("FAIL", en: "FAIL")} : $e",
-      );
-    }
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
-  void _bindThisAccount() async {
-    defaultToast(context, context.l10n.tr("Please wait", en: "Please wait"));
-    try {
-      await bindPatAccount(proInfoPat.accessKey, _username);
-      defaultToast(context, context.l10n.tr("SUCCESS", en: "SUCCESS"));
-    } catch (e) {
-      defaultToast(
-        context,
-        "${context.l10n.tr("FAIL", en: "FAIL")} : $e",
-      );
-    }
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
-  void _clearPatInfo() async {
-    await clearPat();
-    defaultToast(context, context.l10n.tr("Cleared", en: "Cleared"));
-    if (mounted) {
-      setState(() {});
-    }
+    defaultToast(context, "已清除");
+    setState(() {});
   }
 }
 
@@ -386,72 +298,44 @@ class _ProServerNameWidgetState extends State<ProServerNameWidget> {
 
   @override
   void initState() {
-    super.initState();
-    _loadServerNameFromBackend();
-  }
-
-  Future<void> _loadServerNameFromBackend() async {
-    try {
-      final value = await methods.getProServerName();
-      if (!mounted) {
-        return;
-      }
+    methods.getProServerName().then((value) {
       setState(() {
         _serverName = value;
       });
-    } catch (e) {
-      debugPrient("getProServerName unsupported: $e");
-    }
+    });
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text(context.l10n.tr("Power mode", en: "Power mode")),
-      subtitle: Text(_loadServerName(context)),
+      title: const Text("发电方式"),
+      subtitle: Text(_loadServerName()),
       onTap: () async {
-        final serverName = await chooseMapDialog<String>(
+        final serverName = await chooseMapDialog(
           context,
-          title: context.l10n.tr("Choose power mode", en: "Choose power mode"),
+          title: "选择发电方式",
           values: {
-            context.l10n.tr("Wind power", en: "Wind power"): "HK",
-            context.l10n.tr("Hydro power", en: "Hydro power"): "US",
+            "风力发电": "HK",
+            "水力发电": "US",
           },
         );
-        if (serverName == null || serverName.isEmpty) {
-          return;
-        }
-        try {
+        if (serverName != null && serverName.isNotEmpty) {
           await methods.setProServerName(serverName);
-          if (!mounted) {
-            return;
-          }
           setState(() {
             _serverName = serverName;
           });
-        } catch (e) {
-          debugPrient("setProServerName unsupported: $e");
-          if (!mounted) {
-            return;
-          }
-          defaultToast(
-            context,
-            context.l10n.tr(
-              "Power mode is not supported by the current backend",
-              en: "Power mode is not supported by the current backend",
-            ),
-          );
         }
       },
     );
   }
 
-  String _loadServerName(BuildContext context) {
+  String _loadServerName() {
     switch (_serverName) {
       case "HK":
-        return context.l10n.tr("Wind power", en: "Wind power");
+        return "风力发电";
       case "US":
-        return context.l10n.tr("Hydro power", en: "Hydro power");
+        return "水力发电";
       default:
         return "";
     }
